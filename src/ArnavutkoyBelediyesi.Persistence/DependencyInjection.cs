@@ -25,8 +25,11 @@ public static class DependencyInjection
         var connectionString = configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("'Default' bağlantı dizesi yapılandırılmamış.");
 
-        services.AddSingleton<AuditableEntitySaveChangesInterceptor>();
-        services.AddSingleton<DispatchDomainEventsInterceptor>();
+        // Scoped kayıt: AuditableEntitySaveChangesInterceptor, istek başına (scoped) olan
+        // ICurrentUserService'e bağımlıdır; bir singleton'ın scoped bir servisi tüketmesi
+        // (captive dependency) DI konteyneri tarafından reddedilir.
+        services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+        services.AddScoped<DispatchDomainEventsInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
@@ -43,6 +46,12 @@ public static class DependencyInjection
                 options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = false;
                 options.SignIn.RequireConfirmedAccount = false;
+
+                // Kaba kuvvet (brute-force) girişimlerine karşı hesap kilitleme; referans projede
+                // bu koruma bulunmuyordu (bkz. ASSUMPTIONS.md).
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
