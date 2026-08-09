@@ -1,0 +1,6 @@
+@ArnavutkoyBelediyesi.Api_HostAddress = http://localhost:5234
+
+GET {{ArnavutkoyBelediyesi.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

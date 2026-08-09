@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ArnavutkoyBelediyesi.Api/ArnavutkoyBelediyesi.Api.csproj" />
+    <Project Path="src/ArnavutkoyBelediyesi.Application/ArnavutkoyBelediyesi.Application.csproj" />
+    <Project Path="src/ArnavutkoyBelediyesi.Domain/ArnavutkoyBelediyesi.Domain.csproj" />
+    <Project Path="src/ArnavutkoyBelediyesi.Infrastructure/ArnavutkoyBelediyesi.Infrastructure.csproj" />
+    <Project Path="src/ArnavutkoyBelediyesi.Persistence/ArnavutkoyBelediyesi.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ArnavutkoyBelediyesi.Api.IntegrationTests/ArnavutkoyBelediyesi.Api.IntegrationTests.csproj" />
+    <Project Path="tests/ArnavutkoyBelediyesi.Application.Tests/ArnavutkoyBelediyesi.Application.Tests.csproj" />
+    <Project Path="tests/ArnavutkoyBelediyesi.Domain.Tests/ArnavutkoyBelediyesi.Domain.Tests.csproj" />
+    <Project Path="tests/ArnavutkoyBelediyesi.Infrastructure.Tests/ArnavutkoyBelediyesi.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
