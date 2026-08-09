@@ -1,0 +1,51 @@
+using ArnavutkoyBelediyesi.Application.Common.Interfaces;
+using ArnavutkoyBelediyesi.Application.Common.Models;
+using ArnavutkoyBelediyesi.Domain.CitizenRequests;
+using ArnavutkoyBelediyesi.Domain.Exceptions;
+using FluentValidation;
+using MediatR;
+
+namespace ArnavutkoyBelediyesi.Application.Features.CitizenRequests.Commands;
+
+/// <summary>
+/// Bir talebi kapatır; kapatıldıktan sonra herhangi bir durum değişikliği veya mesaj eklenemez.
+/// Officer/Administrator rolü gerektirir.
+/// </summary>
+public sealed record CloseRequestCommand(Guid RequestId) : IRequest<Result>;
+
+public sealed class CloseRequestCommandValidator : AbstractValidator<CloseRequestCommand>
+{
+    public CloseRequestCommandValidator()
+    {
+        RuleFor(x => x.RequestId).NotEmpty();
+    }
+}
+
+public sealed class CloseRequestCommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<CloseRequestCommand, Result>
+{
+    public async Task<Result> Handle(CloseRequestCommand request, CancellationToken cancellationToken)
+    {
+        var repository = unitOfWork.Repository<CitizenRequest>();
+        var citizenRequest = await repository.GetByIdAsync(request.RequestId, cancellationToken).ConfigureAwait(false);
+
+        if (citizenRequest is null)
+        {
+            return Result.Failure($"'{request.RequestId}' kimlikli talep bulunamadı.");
+        }
+
+        try
+        {
+            citizenRequest.Close();
+        }
+        catch (InvalidRequestStatusTransitionException ex)
+        {
+            return Result.Failure(ex.Message);
+        }
+
+        repository.Update(citizenRequest);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return Result.Success();
+    }
+}
