@@ -26,7 +26,26 @@ public class Repository<T>(ApplicationDbContext context) : IRepository<T> where 
     public virtual async Task AddAsync(T entity, CancellationToken cancellationToken = default) =>
         await Context.Set<T>().AddAsync(entity, cancellationToken).ConfigureAwait(false);
 
-    public virtual void Update(T entity) => Context.Set<T>().Update(entity);
+    /// <summary>
+    /// Entity zaten izleniyorsa (tracked) hiçbir şey yapmaz; EF Core değişiklik izleyicisi
+    /// property ve koleksiyon değişikliklerini zaten yakalar. Yalnızca detached entity'ler için
+    /// <see cref="DbSet{TEntity}.Update"/> çağrılır.
+    /// <para>
+    /// Bu ayrım kritiktir: <c>Update()</c> grafikteki tüm entity'leri (yeni eklenen çocuklar
+    /// dahil) <see cref="EntityState.Modified"/> olarak işaretler. Domain entity'lerimizin
+    /// kimlikleri <c>Guid.NewGuid()</c> ile üretildiği için yeni çocuklar "var olan kayıt"
+    /// sanılır; ardından veritabanında bulunamayan satır için
+    /// <c>DbUpdateConcurrencyException</c> fırlatılır.
+    /// </para>
+    /// </summary>
+    public virtual void Update(T entity)
+    {
+        var entry = Context.Entry(entity);
+        if (entry.State == EntityState.Detached)
+        {
+            Context.Set<T>().Update(entity);
+        }
+    }
 
     public virtual void Remove(T entity) => Context.Set<T>().Remove(entity);
 }
