@@ -38,6 +38,25 @@ Referans projede sayfa her açıldığında borç cezası yeniden hesaplanıp ve
 
 Redis, `IDistributedCache` arkasında soyutlanmış opsiyonel bir bağımlılık olarak `docker-compose.yml`'e eklenmiştir ancak Faz 1'deki 5 modülde henüz aktif bir cache senaryosu (örn. sık okunan `Geography` referans verisi) haricinde yoğun kullanılmamıştır — bu, gerçek düşük trafikli bir belediye API'si için makul bir mühendislik kararıdır (erken optimizasyondan kaçınma).
 
+## A10 — Identity Entity'lerinin Persistence Katmanında Tutulması
+
+Proje talimatında Infrastructure katmanına "Identity implementasyonu", Persistence katmanına ise
+"Migrations, Configuration, Seed data" atanmıştı. Ancak `IdentityDbContext<TUser, TRole, TKey>`
+jenerik tipi, `ApplicationUser`/`ApplicationRole` sınıflarına derleme zamanında bağımlıdır; bu
+sınıfları Infrastructure'da tutmak, Persistence'ın (DbContext'i barındıran) Infrastructure'a
+bağımlı olmasını gerektirirdi — bu da zaten kurulmuş olan `Infrastructure → Persistence` referans
+yönüyle döngüsel bağımlılık (circular dependency) oluşturur. Bu nedenle:
+
+- `ApplicationUser`, `ApplicationRole`, `RefreshToken` ve `ApplicationDbContext` **Persistence**
+  katmanında tutulur (DbContext'e sıkı bağımlı oldukları için).
+- **Infrastructure** katmanı yalnızca bu tiplere UserManager/RoleManager üzerinden erişen
+  *servisleri* içerir (`IIdentityService`, `IJwtTokenGenerator` implementasyonları, `ICurrentUserService`).
+
+Bu, mimarinin dışarıdan-içeriye bağımlılık yönünü bozmaz; yalnızca "Identity verisi = kalıcılık
+detayı" kabulüyle Persistence'ın sorumluluk alanını netleştirir. Yaygın Clean Architecture
+şablonlarında (ör. Jason Taylor .NET template) da Identity entity'leri DbContext ile aynı projede
+tutulur.
+
 ## A9 — Gerçek Coğrafi Veri Kaynağı
 
 Seed verisinde Arnavutköy'ün kamuya açık bazı mahalle adları örnek olarak kullanılmıştır (bu bilgi resmi olmayan, herkese açık coğrafi bilgidir). Muhtar adı/telefonu gibi kişisel alanlar **tamamen kurgusaldır**, gerçek bir kişiyle eşleşmesi amaçlanmamıştır.
