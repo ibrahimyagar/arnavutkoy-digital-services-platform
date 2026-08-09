@@ -60,3 +60,31 @@ tutulur.
 ## A9 — Gerçek Coğrafi Veri Kaynağı
 
 Seed verisinde Arnavutköy'ün kamuya açık bazı mahalle adları örnek olarak kullanılmıştır (bu bilgi resmi olmayan, herkese açık coğrafi bilgidir). Muhtar adı/telefonu gibi kişisel alanlar **tamamen kurgusaldır**, gerçek bir kişiyle eşleşmesi amaçlanmamıştır.
+
+## A11 — Faz 5'te Yetkilendirmenin Ertelenmesi ("mine" Uç Noktaları)
+
+Faz 5 kapsamı yalnızca API katmanıdır; kimlik doğrulama/JWT (Faz 6) henüz uygulanmamıştır. Bu nedenle
+`GET /citizen-requests/mine` ve `GET /debts/mine` gibi "geçerli kullanıcıya özel" uç noktalar, şu an
+için `citizenUserId` / `debtorUserId` değerini bir sorgu parametresi olarak alır. `ICurrentUserService`
+arayüzü zaten Application katmanında tanımlıdır ve Faz 6'da JWT claim'lerinden okuyan bir implementasyon
+Infrastructure katmanına eklenecek; bu noktada söz konusu uç noktalar sorgu parametresini kaldırıp
+`ICurrentUserService.UserId` kullanacak şekilde güncellenecektir. Bu ara durum, Faz 5 sonunda
+Swagger üzerinden tüm akışların (kategori listeleme, talep oluşturma, mesajlaşma, borç görüntüleme/ödeme)
+uçtan uca test edilebilir olmasını sağlamak için bilinçli bir tercihtir.
+
+## A12 — Swagger'ın Üretim Ortamında Varsayılan Olarak Açık Bırakılması
+
+Bu proje bir portföy/demo çalışması olduğundan, canlıya alınan sürümün de Swagger üzerinden
+gösterilebilir olması hedeflenmiştir. Bu nedenle `Swagger:Enabled` yapılandırma anahtarı
+varsayılan olarak `true`'dur (yalnızca `appsettings.Development.json` ile sınırlı değildir).
+Gerçek bir kurumsal üretim senaryosunda bu anahtarın ortam değişkeniyle `false` yapılması,
+ya da IP/temel kimlik doğrulama ile korunması önerilir; bu proje için bilinçli bir görünürlük
+tercihi olarak işaretlenmiştir.
+
+## A13 — API Sürüm Stratejisi
+
+`Asp.Versioning` ile URL segment tabanlı sürümleme (`/api/v1/...`) seçilmiştir; header veya query
+string tabanlı sürümleme yerine URL segmenti seçilmesinin nedeni, Swagger UI'da sürümler arası
+gezinmenin ve dokümantasyonun daha açık/anlaşılır olmasıdır. Şu an tek sürüm (`1.0`) mevcuttur;
+gelecekte kırıcı bir değişiklik gerektiğinde yalnızca yeni bir `[ApiVersion("2.0")]` işaretli
+controller/aksiyon eklenmesi yeterli olacaktır, mevcut `v1` sözleşmesi bozulmaz.
