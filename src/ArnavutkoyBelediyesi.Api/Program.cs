@@ -6,8 +6,6 @@ using ArnavutkoyBelediyesi.Api.Middleware;
 using ArnavutkoyBelediyesi.Application;
 using ArnavutkoyBelediyesi.Infrastructure;
 using ArnavutkoyBelediyesi.Persistence;
-using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +15,9 @@ builder.Services
 
 builder.Services.AddProblemDetails();
 builder.Services.AddAuthorization();
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddApiRateLimiting();
+builder.Services.AddApiCors(builder.Configuration, builder.Environment);
 
 builder.Services
     .AddApiVersioning(options =>
@@ -70,7 +71,15 @@ if (app.Configuration.GetValue("Swagger:Enabled", defaultValue: true))
     });
 }
 
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseHttpsRedirection();
+app.UseCors(CorsExtensions.PolicyName);
+app.UseRateLimiter();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -81,4 +90,3 @@ app.Run();
 /// üst düzey (top-level) Program sınıfını dışa açan kısmi bildirim.
 /// </summary>
 public partial class Program;
-
