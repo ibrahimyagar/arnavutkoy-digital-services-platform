@@ -14,7 +14,6 @@ namespace ArnavutkoyBelediyesi.Api.Controllers.V1;
 /// </summary>
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/auth")]
-[AllowAnonymous]
 public sealed class AuthController(ISender sender, ICurrentUserService currentUserService) : ApiControllerBase
 {
     /// <summary>
@@ -23,6 +22,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     /// <response code="201">Hesap oluşturuldu, kullanıcı kimliği döndürülür.</response>
     /// <response code="400">İstek doğrulaması başarısız oldu ya da kimlik numarası zaten kayıtlı.</response>
     [HttpPost("register")]
+    [AllowAnonymous]
     [EnableRateLimiting("auth")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +42,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     /// <response code="200">Giriş başarılı.</response>
     /// <response code="400">Kimlik bilgileri hatalı ya da hesap kilitli.</response>
     [HttpPost("login")]
+    [AllowAnonymous]
     [EnableRateLimiting("auth")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -57,6 +58,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     /// <response code="200">Token yenilendi.</response>
     /// <response code="400">Yenileme token'ı geçersiz veya süresi dolmuş.</response>
     [HttpPost("refresh")]
+    [AllowAnonymous]
     [EnableRateLimiting("auth")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -71,6 +73,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     /// </summary>
     /// <response code="204">Çıkış yapıldı.</response>
     [HttpPost("logout")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken)
     {
@@ -83,13 +86,22 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     /// </summary>
     /// <response code="204">Parola değiştirildi.</response>
     /// <response code="400">Mevcut parola hatalı ya da yeni parola kurallara uymuyor.</response>
+    /// <response code="401">Kimlik doğrulama gerekli.</response>
     [HttpPost("change-password")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        var command = new ChangePasswordCommand(currentUserService.UserId!.Value, request.CurrentPassword, request.NewPassword);
+        // [Authorize] garantisi sayesinde UserId her zaman doludur; yine de savunmacı bir
+        // kontrol, gelecekteki bir yanlış yapılandırmanın 500 yerine 401 üretmesini sağlar.
+        if (currentUserService.UserId is null)
+        {
+            return Unauthorized();
+        }
+
+        var command = new ChangePasswordCommand(currentUserService.UserId.Value, request.CurrentPassword, request.NewPassword);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
         return HandleResult(result);
