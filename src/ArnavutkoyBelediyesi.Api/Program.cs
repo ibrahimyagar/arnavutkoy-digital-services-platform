@@ -78,7 +78,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors(CorsExtensions.PolicyName);
-app.UseRateLimiter();
+
+// "Testing" ortamında (WebApplicationFactory tabanlı API entegrasyon testleri) hız sınırlama
+// devre dışı bırakılır; aksi hâlde aynı IP'den (TestServer'da hepsi "unknown" bölümüne düşer)
+// kısa sürede çok sayıda istek atan test paketleri, gerçek bir güvenlik açığı olmaksızın
+// 429 alır. Üretim ve Development ortamlarında davranış değişmez.
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.UseRateLimiter();
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
