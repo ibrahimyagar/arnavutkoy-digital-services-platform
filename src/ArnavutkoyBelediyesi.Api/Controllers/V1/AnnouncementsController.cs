@@ -2,6 +2,7 @@ using Asp.Versioning;
 using ArnavutkoyBelediyesi.Api.Controllers.V1.Requests;
 using ArnavutkoyBelediyesi.Application.Features.Announcements.Commands;
 using ArnavutkoyBelediyesi.Application.Features.Announcements.Queries;
+using ArnavutkoyBelediyesi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,16 +36,23 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     }
 
     /// <summary>
-    /// Kimliğine göre bir duyurunun tam detayını getirir (taslak dahil).
+    /// Kimliğine göre bir duyurunun tam detayını getirir. Vatandaşlar ve anonim istekler
+    /// yalnızca yayındaki duyuruları görebilir; taslak/arşivlenmiş duyurular Officer/Administrator
+    /// rolü dışında "bulunamadı" olarak döner.
     /// </summary>
     /// <response code="200">Duyuru bulundu.</response>
     /// <response code="400">Belirtilen kimlikte bir duyuru bulunamadı.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAnnouncementById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetAnnouncementByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        var includeUnpublished = User.IsInRole(Roles.Officer) || User.IsInRole(Roles.Administrator);
+        var result = await sender
+            .Send(new GetAnnouncementByIdQuery(id, includeUnpublished), cancellationToken)
+            .ConfigureAwait(false);
+
         return HandleResult(result);
     }
 
@@ -54,6 +62,7 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     /// <response code="201">Duyuru oluşturuldu, kimliği döndürülür.</response>
     /// <response code="400">İstek doğrulaması başarısız oldu.</response>
     [HttpPost]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAnnouncement(
@@ -74,6 +83,7 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     /// <response code="204">Duyuru güncellendi.</response>
     /// <response code="400">Duyuru bulunamadı ya da taslak durumunda değil.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateAnnouncement(
@@ -94,6 +104,7 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     /// <response code="204">Duyuru yayına alındı.</response>
     /// <response code="400">Duyuru bulunamadı ya da taslak durumunda değil.</response>
     [HttpPost("{id:guid}/publish")]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> PublishAnnouncement(Guid id, CancellationToken cancellationToken)
@@ -108,6 +119,7 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     /// <response code="204">Duyuru arşivlendi.</response>
     /// <response code="400">Duyuru bulunamadı.</response>
     [HttpPost("{id:guid}/archive")]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ArchiveAnnouncement(Guid id, CancellationToken cancellationToken)

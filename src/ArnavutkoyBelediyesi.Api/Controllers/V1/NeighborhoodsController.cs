@@ -2,6 +2,7 @@ using Asp.Versioning;
 using ArnavutkoyBelediyesi.Api.Controllers.V1.Requests;
 using ArnavutkoyBelediyesi.Application.Features.Geography.Commands;
 using ArnavutkoyBelediyesi.Application.Features.Geography.Queries;
+using ArnavutkoyBelediyesi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,7 @@ public sealed class NeighborhoodsController(ISender sender) : ApiControllerBase
     /// <response code="201">Mahalle oluşturuldu, kimliği döndürülür.</response>
     /// <response code="400">İstek doğrulaması başarısız oldu veya ilçe bulunamadı.</response>
     [HttpPost]
+    [Authorize(Roles = Roles.Administrator)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateNeighborhood(

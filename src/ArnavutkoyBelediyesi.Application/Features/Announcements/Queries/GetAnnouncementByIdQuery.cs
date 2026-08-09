@@ -7,10 +7,12 @@ using MediatR;
 namespace ArnavutkoyBelediyesi.Application.Features.Announcements.Queries;
 
 /// <summary>
-/// Kimliğine göre bir duyurunun tam detayını getirir (taslak dahil). Taslak görünürlüğü
-/// API katmanında Officer/Administrator rolüyle sınırlandırılır.
+/// Kimliğine göre bir duyurunun tam detayını getirir. <paramref name="IncludeUnpublished"/> API
+/// katmanında yalnızca Officer/Administrator rolü için <c>true</c> olarak gönderilir; anonim veya
+/// Vatandaş rolündeki istekler için taslak/arşivlenmiş duyurular "bulunamadı" olarak döner
+/// (bilgi ifşasını önlemek için).
 /// </summary>
-public sealed record GetAnnouncementByIdQuery(Guid AnnouncementId) : IRequest<Result<AnnouncementDto>>;
+public sealed record GetAnnouncementByIdQuery(Guid AnnouncementId, bool IncludeUnpublished) : IRequest<Result<AnnouncementDto>>;
 
 public sealed class GetAnnouncementByIdQueryHandler(IUnitOfWork unitOfWork)
     : IRequestHandler<GetAnnouncementByIdQuery, Result<AnnouncementDto>>
@@ -22,6 +24,11 @@ public sealed class GetAnnouncementByIdQueryHandler(IUnitOfWork unitOfWork)
             .ConfigureAwait(false);
 
         if (announcement is null)
+        {
+            return Result<AnnouncementDto>.Failure($"'{request.AnnouncementId}' kimlikli duyuru bulunamadı.");
+        }
+
+        if (!request.IncludeUnpublished && announcement.Status != AnnouncementStatus.Published)
         {
             return Result<AnnouncementDto>.Failure($"'{request.AnnouncementId}' kimlikli duyuru bulunamadı.");
         }
