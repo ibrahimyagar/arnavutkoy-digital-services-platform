@@ -1,0 +1,57 @@
+## .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.rsuser
+
+## Test results
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.trx
+
+## Secrets / environment
+appsettings.*.local.json
+.env
+.env.*
+*.pfx
+*.pem
+
+## EF Core
+*.dbmdl
+
+## Docker
+docker/**/data/
+
+## Node (docs tooling, if any)
+node_modules/
+
+## OS
+.DS_Store
+Thumbs.db
