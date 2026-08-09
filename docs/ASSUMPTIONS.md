@@ -81,6 +81,64 @@ Gerçek bir kurumsal üretim senaryosunda bu anahtarın ortam değişkeniyle `fa
 ya da IP/temel kimlik doğrulama ile korunması önerilir; bu proje için bilinçli bir görünürlük
 tercihi olarak işaretlenmiştir.
 
+## A14 — Faz 6: Ownership Alanlarının İstekten Değil JWT'den Okunması
+
+Faz 5'te "mine" uç noktaları ile bazı komutlar (`CreateCitizenRequestCommand`, `AddRequestMessageCommand`,
+`PayDebtCommand`) ilgili kullanıcı kimliğini istek gövdesinden/sorgu parametresinden alıyordu (bkz. A11).
+Faz 6'da JWT kimlik doğrulaması eklenince bu alanlar **istekten kaldırılıp** `ICurrentUserService.UserId`
+(JWT `NameIdentifier` claim'i) üzerinden okunacak şekilde güncellenmiştir. Böylece:
+
+- Bir vatandaş başka bir vatandaş adına talep oluşturamaz veya borç ödeyemez.
+- Bir talep mesajının gönderen türü (`SenderType`), istemcinin beyanına değil, JWT'deki rol claim'ine
+  göre sunucu tarafında belirlenir (rol sahteciliği engellenir).
+
+Bu, referans projedeki "istemcinin gönderdiği kullanıcı kimliğine güvenme" sınıfı güvenlik açıklarının
+(IDOR — Insecure Direct Object Reference / yetkisiz işlem) bu projedeki karşılığı için alınan önlemdir.
+
+## A15 — Kaynak Sahipliği Denetimi (Ownership Check) Deseni
+
+`GetCitizenRequestByIdQuery` ve `GetDebtByIdQuery`, Application katmanında herhangi bir kimlik
+denetimi yapmaz (sorgu, kimin sorduğuna bakılmaksızın kaydı döner). Yetkilendirme, API katmanında
+controller seviyesinde uygulanır: sonuç alındıktan sonra, çağıran kullanıcı kaydın sahibi değilse
+ve Officer/Administrator rolünde değilse `403 Forbidden` döner. Bu ayrım bilinçlidir: Application
+katmanı saf iş kuralı/veri erişimiyle ilgilenir, HTTP'ye özgü yetkilendirme kararları (401/403) API
+katmanının sorumluluğundadır. Alternatif olarak sorgu, çağıran kullanıcı kimliğini parametre olarak
+alıp filtreleme yapabilirdi; ancak bu, "bulunamadı" ve "yetkisiz" durumlarını ayırt edilemez hâle
+getirir ve hata mesajlarının anlamlılığını azaltırdı.
+
+## A16 — Duyuru Taslaklarının Anonim Kullanıcılardan Gizlenmesi
+
+`GET /announcements/{id}` uç noktası anonim erişime açıktır (bir duyurunun kalıcı bağlantısının
+paylaşılabilmesi için gereklidir), ancak `GetAnnouncementByIdQuery` artık bir `IncludeUnpublished`
+bayrağı alır. Bu bayrak API katmanında yalnızca çağıran kullanıcı Officer/Administrator rolündeyse
+`true` gönderilir; aksi hâlde taslak/arşivlenmiş bir duyuru "bulunamadı" olarak döner. Bu, taslak
+içeriğin (henüz yayınlanmamış duyuru metinleri) yanlışlıkla dışarı sızmasını önler.
+
+## A17 — Hesap Kilitleme (Lockout) ile Kaba Kuvvet Koruması
+
+ASP.NET Core Identity'nin yerleşik kilitleme mekanizması etkinleştirilmiştir: 5 başarısız giriş
+denemesi sonrası hesap 15 dakika kilitlenir (`IdentityOptions.Lockout`). Bu, `/auth/login` uç
+noktasındaki IP bazlı hız sınırlamasına (rate limiting) ek bir savunma katmanıdır (defense in depth);
+tek bir IP'den değil, dağıtık (distributed) kaba kuvvet denemelerine karşı da koruma sağlar. Referans
+projede bu tür bir koruma bulunmuyordu.
+
+## A18 — JWT İmzalama Anahtarının Başlangıçta (Fail-Fast) Doğrulanması
+
+Uygulama, `Jwt:SigningKey` değeri boş veya 256 bitten (32 bayt) kısa ise **başlangıçta çöker**
+(`InvalidOperationException`). Bu bilinçli bir tercihtir: zayıf veya eksik bir imzalama anahtarıyla
+sessizce ayağa kalkıp çalışma zamanında güvensiz token'lar üretmek, üretimde fark edilmesi güç bir
+güvenlik açığına dönüşebilir. Dev ortamında `dotnet user-secrets set "Jwt:SigningKey" "..."`,
+prod'da `Jwt__SigningKey` ortam değişkeni ile sağlanmalıdır (bkz. docs/DEPLOYMENT.md — Faz 9'da yazılacak).
+
+## A19 — Seed Verisinin Uygulama Başlangıcında Otomatik Çalıştırılmaması
+
+`ApplicationDbContextSeeder.SeedAsync`, Faz 3'te yazılmış olup roller/demo kullanıcılar/referans
+verilerini oluşturur, ancak `Program.cs` içinden henüz çağrılmamaktadır. Bunun bilinçli olarak
+Faz 8'e (Docker & CI/CD) bırakılmasının nedeni, `docker-compose up` sonrası "tek komutla çalışan,
+seed'lenmiş bir ortam" hedefinin doğal olarak konteyner başlatma/orkestrasyon adımıyla birlikte ele
+alınmasıdır; Faz 7'deki entegrasyon testleri ise `SeedAsync`'i kendi Testcontainers fixture'ları
+içinde bağımsız olarak çağıracaktır.
+
 ## A13 — API Sürüm Stratejisi
 
 `Asp.Versioning` ile URL segment tabanlı sürümleme (`/api/v1/...`) seçilmiştir; header veya query
