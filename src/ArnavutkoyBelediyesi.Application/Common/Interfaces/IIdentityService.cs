@@ -40,6 +40,12 @@ public interface IIdentityService
         string currentPassword,
         string newPassword,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Kimliğine göre bir kullanıcının güncel ad-soyad ve rol bilgilerini getirir. Yenileme
+    /// token'ı akışında, yeni erişim token'ının güncel rollerle üretilebilmesi için kullanılır.
+    /// </summary>
+    Task<Result<AuthenticatedUser>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

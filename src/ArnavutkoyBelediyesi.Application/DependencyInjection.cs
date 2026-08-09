@@ -1,6 +1,7 @@
 using System.Reflection;
 using ArnavutkoyBelediyesi.Application.Common.Behaviors;
 using ArnavutkoyBelediyesi.Application.Common.Options;
+using ArnavutkoyBelediyesi.Application.Features.Auth.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +35,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(ApplicationAssembly);
 
         services.Configure<PaymentOptions>(configuration.GetSection(PaymentOptions.SectionName));
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+
+        services.AddScoped<AuthTokenIssuer>();
 
         return services;
     }

@@ -26,4 +26,10 @@ public static class Roles
     /// Tüm tanımlı rollerin listesi (seed işlemleri için).
     /// </summary>
     public static readonly IReadOnlyCollection<string> All = [Citizen, Officer, Administrator];
+
+    /// <summary>
+    /// <c>[Authorize(Roles = ...)]</c> ile kullanılmak üzere, virgülle ayrılmış "Officer veya
+    /// Administrator" rol ifadesi (ASP.NET Core'da virgülle ayrılmış roller VEYA mantığıyla değerlendirilir).
+    /// </summary>
+    public const string OfficerOrAdministrator = $"{Officer},{Administrator}";
 }
