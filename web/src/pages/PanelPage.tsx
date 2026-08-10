@@ -20,10 +20,10 @@ export function PanelPage() {
         <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Merhaba, {user?.fullName}</h1>
         <p className="muted">
           {admin
-            ? 'Yönetici olarak coğrafya ve personel işlemlerini yönetebilirsiniz.'
+            ? 'Yönetici olarak coğrafya, duyuru ve personel işlemlerini buradan yönetin.'
             : staff
-              ? 'Personel olarak talepleri ve başvuruları yönetebilirsiniz.'
-              : 'Hizmetlerinize buradan devam edin.'}
+              ? 'Personel araçlarına panelden ulaşın; üst menü sade tutuldu.'
+              : 'Hizmetlerinize buradan devam edin. Üst menüde Panel kısayolu yeterlidir.'}
         </p>
       </div>
 
@@ -47,6 +47,10 @@ export function PanelPage() {
             <Link className="panel" to="/duyuru-yonetimi">
               <h3>Duyuru yönetimi</h3>
               <p className="muted">Taslak, yayın ve arşiv</p>
+            </Link>
+            <Link className="panel" to="/talepler">
+              <h3>Talepler</h3>
+              <p className="muted">Tüm hizmet talepleri</p>
             </Link>
           </>
         ) : staff ? (

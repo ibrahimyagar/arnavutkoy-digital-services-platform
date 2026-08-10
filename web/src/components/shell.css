@@ -53,6 +53,14 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
+.shell-menu {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  flex: 1;
+}
+
 .shell-nav {
   display: flex;
   flex-wrap: wrap;
@@ -83,6 +91,62 @@
   color: var(--ink-soft);
 }
 
+.shell-menu-toggle {
+  display: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.shell-menu-icon,
+.shell-menu-icon::before,
+.shell-menu-icon::after {
+  display: block;
+  width: 1.1rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--brand);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.shell-menu-icon {
+  position: relative;
+}
+
+.shell-menu-icon::before,
+.shell-menu-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.shell-menu-icon::before {
+  top: -6px;
+}
+
+.shell-menu-icon::after {
+  top: 6px;
+}
+
+.shell-menu-icon[data-open='true'] {
+  background: transparent;
+}
+
+.shell-menu-icon[data-open='true']::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.shell-menu-icon[data-open='true']::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
 .shell-main {
   padding: 2rem 0 3.5rem;
 }
@@ -95,17 +159,67 @@
 }
 
 @media (max-width: 860px) {
-  .shell-header-inner {
-    flex-wrap: wrap;
-    padding-block: 0.75rem;
+  .shell-menu-toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .shell-menu {
+    display: none;
+    order: 3;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 0.35rem 0 0.75rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .shell-menu.is-open {
+    display: flex;
+    animation: shell-menu-in 180ms ease;
   }
 
   .shell-nav {
-    order: 3;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .shell-nav a {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .shell-nav a.active {
+    border-bottom-color: var(--line);
+  }
+
+  .shell-actions {
+    justify-content: space-between;
+  }
+
+  .shell-actions .btn {
     width: 100%;
   }
 
   .shell-user {
     display: none;
+  }
+}
+
+@keyframes shell-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-menu.is-open {
+    animation: none;
   }
 }

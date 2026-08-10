@@ -14,6 +14,8 @@ npm run dev
 
 Tarayıcı: `http://localhost:5173`
 
+Node.js **20.19+** (veya 22.12+) önerilir; Vite 7 bunu bekler. `web/.nvmrc` dosyası `20.19.0` işaret eder.
+
 Vite, `/api` isteklerini `localhost:8080`'e proxy eder. Doğrudan API adresi için `.env`:
 
 ```
@@ -38,6 +40,7 @@ VITE_API_BASE_URL=http://localhost:8080
 - Talep UX: durum zaman çizelgesi, Türkçe durumlar, yazışma görünümü, durum filtreleri
 - Mülkte sokak seçimi; su aboneliğinde isteğe bağlı mülk bağlama
 - Personel duyuru yönetimi (taslak / yayın / arşiv)
+- Sade üst menü + mobil açılır navigasyon
 
 ## Bilinçli sınırlar
 
