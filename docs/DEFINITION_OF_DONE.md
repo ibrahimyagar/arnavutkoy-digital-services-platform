@@ -62,7 +62,8 @@ doğrulanmıştır. Tarih: 2026-08-10.
 - ~~R2 Properties~~ — tamamlandı
 - ~~R3 UtilitySubscriptions~~ — tamamlandı
 - ~~R4 Hr~~ — tamamlandı
-- R5 SocialAssistance · R6 Transportation
+- ~~R5 SocialAssistance~~ — tamamlandı
+- R6 Transportation
 
 ## Sonraki sertleştirme (Faz 11+)
 

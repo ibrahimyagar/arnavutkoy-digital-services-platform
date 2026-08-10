@@ -92,6 +92,18 @@ Taban yol: `/api/v1`
 | GET | `/staff` | Anonim | Personel (`departmentId` opsiyonel) |
 | POST | `/staff` | Administrator | Personel ekle |
 
+## SocialAssistance
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
+| GET | `/social-assistance/mine` | Authenticated | Kendi başvurularım |
+| GET | `/social-assistance` | Officer/Administrator | Tüm başvurular |
+| GET | `/social-assistance/{id}` | Başvuran veya personel | Detay |
+| POST | `/social-assistance` | Citizen | Başvuru gönder |
+| POST | `/social-assistance/{id}/start-review` | Officer/Administrator | İncelemeye al |
+| POST | `/social-assistance/{id}/decide` | Officer/Administrator | Onayla/reddet |
+| POST | `/social-assistance/{id}/withdraw` | Citizen (sahip) | Geri çek |
+
 ## Operasyonel
 
 | Metot | Yol | Auth | Açıklama |

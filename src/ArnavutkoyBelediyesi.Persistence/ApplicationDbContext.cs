@@ -4,6 +4,7 @@ using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using ArnavutkoyBelediyesi.Domain.Properties;
+using ArnavutkoyBelediyesi.Domain.SocialAssistance;
 using ArnavutkoyBelediyesi.Domain.UtilitySubscriptions;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -36,6 +37,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<Department> Departments => Set<Department>();
 
     public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
+
+    public DbSet<SocialAssistanceApplication> SocialAssistanceApplications => Set<SocialAssistanceApplication>();
 
     public DbSet<Announcement> Announcements => Set<Announcement>();
 

@@ -87,8 +87,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Properties | CitizenProperty | Mahalle/sokak bağlama; sahip JWT; pasife alma |
 | UtilitySubscriptions | WaterSubscription | Active/Suspended/Closed; su borcu üretimi |
 | Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
+| SocialAssistance | SocialAssistanceApplication | Sabit alan + JSONB; durum makinesi |
 
-Yol haritası kalanı (`SocialAssistance`, `Transportation`) `PRD.md`'de;
+Yol haritası kalanı (`Transportation`) `PRD.md`'de;
 mimari `Features/<Yeni>` eklenerek genişlemeye uygundur.
 
 ## 6. Kalıcılık Desenleri

@@ -44,7 +44,7 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 | Mülkler | `Properties` | ✅ R2 |
 | Su Aboneliği | `UtilitySubscriptions` | ✅ R3 |
 | Belediye Personelleri / Departmanlar | `Hr` | ✅ R4 |
-| Sosyal Yardım Başvurusu | `SocialAssistance` | R5 |
+| Sosyal Yardım Başvurusu | `SocialAssistance` | ✅ R5 |
 | Dijital Vezne — Ulaşım Kartı | `Transportation` | R6 |
 
 ## 4. Faz 1 Kapsamındaki Modüllerin Detaylı Gereksinimleri
@@ -89,6 +89,10 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 ### 4.8. Hr (Personel / Departman Dizini)
 - Halka açık departman ve personel listesi; Identity login hesaplarından ayrıdır.
 - Anonim okuma; yazma yalnızca Administrator.
+
+### 4.9. SocialAssistance
+- Sabit alanlar (tür, hane, gelir, özet) + isteğe bağlı JSON esnek alan.
+- Durum: Submitted → UnderReview → Approved/Rejected; vatandaş Submitted/UnderReview iken çekebilir.
 
 ## 5. Referans Projeden Öğrenilen ve Bilinçli Olarak Düzeltilen Noktalar
 
