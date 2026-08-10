@@ -61,7 +61,8 @@ doğrulanmıştır. Tarih: 2026-08-10.
 - ~~R1 Street (Geography)~~ — tamamlandı
 - ~~R2 Properties~~ — tamamlandı
 - ~~R3 UtilitySubscriptions~~ — tamamlandı
-- R4 Hr · R5 SocialAssistance · R6 Transportation
+- ~~R4 Hr~~ — tamamlandı
+- R5 SocialAssistance · R6 Transportation
 
 ## Sonraki sertleştirme (Faz 11+)
 

@@ -86,8 +86,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Payments | Debt + Payment | Gecikme faizi salt okunur hesap; ödeme idempotent; kart maskeli |
 | Properties | CitizenProperty | Mahalle/sokak bağlama; sahip JWT; pasife alma |
 | UtilitySubscriptions | WaterSubscription | Active/Suspended/Closed; su borcu üretimi |
+| Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
 
-Yol haritası kalanı (`Hr`, `SocialAssistance`, `Transportation`) `PRD.md`'de;
+Yol haritası kalanı (`SocialAssistance`, `Transportation`) `PRD.md`'de;
 mimari `Features/<Yeni>` eklenerek genişlemeye uygundur.
 
 ## 6. Kalıcılık Desenleri

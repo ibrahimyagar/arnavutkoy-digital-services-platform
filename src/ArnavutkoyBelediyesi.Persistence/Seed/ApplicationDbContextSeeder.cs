@@ -2,6 +2,7 @@ using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.Common;
 using ArnavutkoyBelediyesi.Domain.Geography;
+using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +33,7 @@ public static class ApplicationDbContextSeeder
         var districtId = await SeedGeographyAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedRequestCategoriesAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedAnnouncementsAsync(context, cancellationToken).ConfigureAwait(false);
+        await SeedHrAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedDebtsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
 
         _ = districtId;
@@ -245,6 +247,31 @@ public static class ApplicationDbContextSeeder
         maintenance.Publish(DateTime.UtcNow);
 
         await context.Announcements.AddRangeAsync([welcome, maintenance], cancellationToken).ConfigureAwait(false);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task SeedHrAsync(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        if (await context.Departments.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return;
+        }
+
+        var fen = Department.Create("Fen İşleri", "Yol, kaldırım ve altyapı bakımı");
+        var temiz = Department.Create("Temizlik İşleri", "Cadde ve park temizliği");
+        var basvuru = Department.Create("Başvuru ve Hizmet Masası", "Vatandaş talepleri ve yönlendirme");
+
+        await context.Departments.AddRangeAsync([fen, temiz, basvuru], cancellationToken).ConfigureAwait(false);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        var staff = new[]
+        {
+            StaffMember.Create(fen.Id, "Demo Fen Müdürü", "Müdür", "fen@demo.arnavutkoy.local", "+905009990001"),
+            StaffMember.Create(temiz.Id, "Demo Temizlik Şefi", "Şef", "temizlik@demo.arnavutkoy.local", "+905009990002"),
+            StaffMember.Create(basvuru.Id, "Demo Hizmet Danışmanı", "Danışman", "hizmet@demo.arnavutkoy.local", "+905009990003")
+        };
+
+        await context.StaffMembers.AddRangeAsync(staff, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 

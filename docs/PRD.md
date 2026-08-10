@@ -43,7 +43,7 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 | Sokak (Geography genişlemesi) | `Geography` / Street | ✅ R1 |
 | Mülkler | `Properties` | ✅ R2 |
 | Su Aboneliği | `UtilitySubscriptions` | ✅ R3 |
-| Belediye Personelleri / Departmanlar | `Hr` | R4 |
+| Belediye Personelleri / Departmanlar | `Hr` | ✅ R4 |
 | Sosyal Yardım Başvurusu | `SocialAssistance` | R5 |
 | Dijital Vezne — Ulaşım Kartı | `Transportation` | R6 |
 
@@ -85,6 +85,10 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 - Vatandaş mahalle (+ opsiyonel mülk) ile abonelik açar; abone numarası benzersizdir.
 - Durum: Active → Suspended ↔ Active → Closed. Yalnızca Active iken personel `DebtType.Water` borcu üretebilir.
 - Ödeme mevcut `/debts` akışıyla yapılır.
+
+### 4.8. Hr (Personel / Departman Dizini)
+- Halka açık departman ve personel listesi; Identity login hesaplarından ayrıdır.
+- Anonim okuma; yazma yalnızca Administrator.
 
 ## 5. Referans Projeden Öğrenilen ve Bilinçli Olarak Düzeltilen Noktalar
 

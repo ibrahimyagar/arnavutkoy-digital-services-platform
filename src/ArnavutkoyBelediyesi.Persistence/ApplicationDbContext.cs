@@ -1,6 +1,7 @@
 using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.Geography;
+using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using ArnavutkoyBelediyesi.Domain.Properties;
 using ArnavutkoyBelediyesi.Domain.UtilitySubscriptions;
@@ -31,6 +32,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<CitizenProperty> CitizenProperties => Set<CitizenProperty>();
 
     public DbSet<WaterSubscription> WaterSubscriptions => Set<WaterSubscription>();
+
+    public DbSet<Department> Departments => Set<Department>();
+
+    public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
 
     public DbSet<Announcement> Announcements => Set<Announcement>();
 

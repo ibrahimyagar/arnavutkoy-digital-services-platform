@@ -83,6 +83,15 @@ Taban yol: `/api/v1`
 | POST | `/water-subscriptions/{id}/close` | Officer/Administrator | Kapat |
 | POST | `/water-subscriptions/{id}/debts` | Officer/Administrator | Su borcu oluştur |
 
+## Hr
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
+| GET | `/departments` | Anonim | Departmanlar |
+| POST | `/departments` | Administrator | Departman ekle |
+| GET | `/staff` | Anonim | Personel (`departmentId` opsiyonel) |
+| POST | `/staff` | Administrator | Personel ekle |
+
 ## Operasyonel
 
 | Metot | Yol | Auth | Açıklama |
