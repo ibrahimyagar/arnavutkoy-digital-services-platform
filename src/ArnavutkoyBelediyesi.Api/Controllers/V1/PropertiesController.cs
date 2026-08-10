@@ -161,6 +161,27 @@ public sealed class PropertiesController(ISender sender, ICurrentUserService cur
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Aktif mülk için emlak vergisi borcu oluşturur; borç <c>/debts</c> üzerinden ödenir.
+    /// </summary>
+    [HttpPost("{id:guid}/debts")]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateDebt(
+        Guid id,
+        [FromBody] CreatePropertyDebtRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new CreatePropertyDebtCommand(id, request.PrincipalAmount, request.DueDateUtc), cancellationToken)
+            .ConfigureAwait(false);
+
+        return result.IsSuccess
+            ? Created($"/api/v{HttpContext.GetRequestedApiVersion()}/debts/{result.Value}", new { id = result.Value })
+            : HandleResult(result);
+    }
+
     private bool IsOwnerOrStaff(Guid ownerUserId) =>
         currentUserService.UserId == ownerUserId
         || User.IsInRole(Roles.Officer)

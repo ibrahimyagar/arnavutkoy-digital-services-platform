@@ -170,4 +170,9 @@ public sealed class CitizenProperty : AuditableEntity
     {
         IsActive = true;
     }
+
+    /// <summary>
+    /// Bu mülk için emlak vergisi borcu üretilebilir mi?
+    /// </summary>
+    public bool CanGenerateDebt => IsActive;
 }

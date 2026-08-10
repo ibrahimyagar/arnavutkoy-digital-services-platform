@@ -73,4 +73,68 @@ public sealed class PropertiesEndpointsTests(ApiFactory factory)
         var response = await client.GetAsync("/api/v1/properties/mine");
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    [Fact]
+    public async Task CreatePropertyDebt_AsOfficer_OnActiveProperty_ShouldSucceed()
+    {
+        var citizenClient = factory.CreateClient();
+        var neighborhoods = await (await citizenClient.GetAsync("/api/v1/neighborhoods"))
+            .ReadAsAsync<IReadOnlyCollection<NeighborhoodDto>>();
+        var citizen = await AuthHelper.RegisterAndLoginCitizenAsync(citizenClient);
+        AuthHelper.AttachBearerToken(citizenClient, citizen.AccessToken);
+
+        var create = await citizenClient.PostAsJsonAsync("/api/v1/properties", new
+        {
+            neighborhoodId = neighborhoods!.First().Id,
+            streetId = (Guid?)null,
+            type = PropertyType.Residential,
+            title = "Vergi Mülkü",
+            doorNumber = "7",
+            blockParcel = "3/1",
+        });
+        create.EnsureSuccessStatusCode();
+        var created = await create.ReadAsAsync<CreatedIdResponse>();
+
+        var officerClient = factory.CreateClient();
+        var officer = await AuthHelper.LoginAsync(
+            officerClient,
+            ApiFactory.DemoUsers.OfficerNationalId,
+            ApiFactory.DemoUsers.OfficerPassword);
+        AuthHelper.AttachBearerToken(officerClient, officer.AccessToken);
+
+        var debtResponse = await officerClient.PostAsJsonAsync($"/api/v1/properties/{created!.Id}/debts", new
+        {
+            principalAmount = 950m,
+            dueDateUtc = DateTime.UtcNow.AddDays(45),
+        });
+        debtResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task CreatePropertyDebt_AsCitizen_ShouldReturn403()
+    {
+        var client = factory.CreateClient();
+        var neighborhoods = await (await client.GetAsync("/api/v1/neighborhoods"))
+            .ReadAsAsync<IReadOnlyCollection<NeighborhoodDto>>();
+        var auth = await AuthHelper.RegisterAndLoginCitizenAsync(client);
+        AuthHelper.AttachBearerToken(client, auth.AccessToken);
+
+        var create = await client.PostAsJsonAsync("/api/v1/properties", new
+        {
+            neighborhoodId = neighborhoods!.First().Id,
+            streetId = (Guid?)null,
+            type = PropertyType.Land,
+            title = "Yetkisiz Borç",
+            doorNumber = "2",
+            blockParcel = "2/2",
+        });
+        var created = await create.ReadAsAsync<CreatedIdResponse>();
+
+        var response = await client.PostAsJsonAsync($"/api/v1/properties/{created!.Id}/debts", new
+        {
+            principalAmount = 100m,
+            dueDateUtc = DateTime.UtcNow.AddDays(10),
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 }

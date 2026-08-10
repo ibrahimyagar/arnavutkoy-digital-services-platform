@@ -21,3 +21,8 @@ public sealed record UpdateCitizenPropertyAddressRequest(
     Guid? StreetId,
     string DoorNumber,
     string? BlockParcel);
+
+/// <summary>
+/// Aktif mülk için emlak vergisi borcu oluşturma isteği.
+/// </summary>
+public sealed record CreatePropertyDebtRequest(decimal PrincipalAmount, DateTime DueDateUtc);
