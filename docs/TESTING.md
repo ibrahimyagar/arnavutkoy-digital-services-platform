@@ -22,7 +22,7 @@ CI: `.github/workflows/ci.yml` — `ubuntu-latest` üzerinde restore → build �
 | `Infrastructure.Tests` | Entegrasyon | Testcontainers PostgreSQL 16 | Repository, audit/soft-delete, domain event, AddMessage kalıcılığı |
 | `Api.IntegrationTests` | Uçtan uca | WebApplicationFactory + Testcontainers | Auth, RBAC, talep/borç/duyuru yaşam döngüsü |
 
-Yaklaşık **264** test (R1–R6 yol haritası sonrası: 102 Domain + 91 Application + 26 Infrastructure + 45 API).
+Yaklaşık **282** test (R1–R6 + yol haritası API entegrasyonları: 102 Domain + 91 Application + 26 Infrastructure + 63 API).
 
 ## API Entegrasyon Testleri
 
