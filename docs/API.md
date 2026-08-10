@@ -42,6 +42,7 @@ Taban yol: `/api/v1`
 | Metot | Yol | Auth | Açıklama |
 |---|---|---|---|
 | GET | `/` | Anonim | Yayındaki duyurular |
+| GET | `/managed` | Officer/Admin | Taslak/yayın/arşiv listesi (`status` opsiyonel) |
 | GET | `/{id}` | Anonim* | Detay (*taslak staff dışı gizlenir) |
 | POST | `/` | Officer/Admin | Taslak oluştur |
 | PUT | `/{id}` | Officer/Admin | Taslak güncelle |
@@ -69,6 +70,7 @@ Taban yol: `/api/v1`
 | POST | `/properties` | Citizen | Mülk kaydı |
 | PUT | `/properties/{id}/address` | Sahip veya Administrator | Adres güncelle |
 | POST | `/properties/{id}/deactivate` | Sahip veya Administrator | Pasife al |
+| POST | `/properties/{id}/debts` | Officer/Administrator | Emlak vergisi borcu oluştur |
 
 ## UtilitySubscriptions
 
@@ -128,3 +130,5 @@ Taban yol: `/api/v1`
 | GET | `/health/ready` | Anonim | Readiness (PostgreSQL) |
 
 Demo hesaplar: [`DEPLOYMENT.md`](DEPLOYMENT.md).
+Portföy turu: [`DEMO_WALKTHROUGH.md`](DEMO_WALKTHROUGH.md).
+Web rotaları: [`../web/README.md`](../web/README.md).

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Link, Navigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { StaffGate } from '../components/RoleGates'
 import {
   apiFetch,
   type CitizenRequestSummary,
@@ -8,7 +8,6 @@ import {
   type RequestCategory,
   type SocialAssistanceApplication,
 } from '../lib/api'
-import { isStaff } from '../lib/roles'
 import {
   REQUEST_STATUSES,
   requestStatusBadgeClass,
@@ -263,14 +262,6 @@ function StaffDeskContent() {
       </section>
     </div>
   )
-}
-
-function StaffGate({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
-  if (!user || !isStaff(user.roles)) {
-    return <Navigate to="/panel" replace />
-  }
-  return children
 }
 
 export function StaffDeskPage() {

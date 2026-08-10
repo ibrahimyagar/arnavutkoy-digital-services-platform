@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { StaffGate } from '../components/RoleGates'
 import { apiFetch, type Announcement, type Paginated } from '../lib/api'
-import { isStaff } from '../lib/roles'
 import { RequireAuth } from './PanelPage'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -294,14 +292,6 @@ function AnnouncementsManageContent() {
       </div>
     </div>
   )
-}
-
-function StaffGate({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
-  if (!user || !isStaff(user.roles)) {
-    return <Navigate to="/panel" replace />
-  }
-  return children
 }
 
 export function AnnouncementsManagePage() {

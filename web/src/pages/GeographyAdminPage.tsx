@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { AdminGate } from '../components/RoleGates'
 import { apiFetch, type District, type Neighborhood, type Street } from '../lib/api'
-import { isAdmin } from '../lib/roles'
 import { RequireAuth } from './PanelPage'
 
 function GeographyContent() {
@@ -315,14 +313,6 @@ function GeographyContent() {
       </section>
     </div>
   )
-}
-
-function AdminGate({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
-  if (!user || !isAdmin(user.roles)) {
-    return <Navigate to="/panel" replace />
-  }
-  return children
 }
 
 export function GeographyAdminPage() {
