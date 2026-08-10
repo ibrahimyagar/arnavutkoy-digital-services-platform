@@ -148,10 +148,25 @@ export function HomePage() {
             <Link className="btn btn-ghost" to="/vezne">
               Dijital vezne
             </Link>
+            <Link className="btn btn-ghost" to="/e-belediye">
+              E-Belediye
+            </Link>
           </div>
         </div>
       </section>
 
+      <section className="container home-quick">
+        <div className="home-quick-grid">
+          <Link to="/haberler">Haberler</Link>
+          <Link to="/etkinlikler">Etkinlikler</Link>
+          <Link to="/basvuru-takip">Başvuru takibi</Link>
+          <Link to="/nikah">Nikah</Link>
+          <Link to="/imar">İmar / harç</Link>
+          <Link to="/spor-randevu">Spor randevu</Link>
+          <Link to="/iletisim">İletişim</Link>
+          <Link to="/hizmet-rehberi">Hizmet rehberi</Link>
+        </div>
+      </section>
       {opsLoading ? (
         <div className="container">
           <p className="home-ops-line home-ops-line--skeleton" aria-busy="true" aria-live="polite">

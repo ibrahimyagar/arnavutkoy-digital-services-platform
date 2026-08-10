@@ -1,8 +1,10 @@
 using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
+using ArnavutkoyBelediyesi.Domain.EServices;
 using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
+using ArnavutkoyBelediyesi.Domain.Portal;
 using ArnavutkoyBelediyesi.Domain.Properties;
 using ArnavutkoyBelediyesi.Domain.SocialAssistance;
 using ArnavutkoyBelediyesi.Domain.Transportation;
@@ -62,6 +64,22 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<Debt> Debts => Set<Debt>();
 
     public DbSet<Payment> Payments => Set<Payment>();
+
+    public DbSet<PortalContent> PortalContents => Set<PortalContent>();
+
+    public DbSet<SportsFacility> SportsFacilities => Set<SportsFacility>();
+
+    public DbSet<SportsAppointment> SportsAppointments => Set<SportsAppointment>();
+
+    public DbSet<MarriageSlot> MarriageSlots => Set<MarriageSlot>();
+
+    public DbSet<MarriageBooking> MarriageBookings => Set<MarriageBooking>();
+
+    public DbSet<DocumentApplication> DocumentApplications => Set<DocumentApplication>();
+
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+
+    public DbSet<ZoningParcel> ZoningParcels => Set<ZoningParcel>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 

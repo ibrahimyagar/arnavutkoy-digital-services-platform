@@ -9,10 +9,10 @@
 
 ## Neden bu proje?
 
-Açık kaynak bir PHP e-belediye referansındaki modül envanterini temel alıp, aynı kavramları
-**.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile **sıfırdan** yeniden tasarlar.
-Amaç satır satır port değil; SQL injection, IDOR, düz metin oturum, N+1 ve yan etkili GET gibi
-sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymaktır.
+Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış portföy uygulaması.
+**.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile vatandaş ve personel akışlarını
+tek üründe birleştirir: güvenli kimlik, borç / vezne, hizmet masası, ulaşım, coğrafya ve operasyon panelleri.
+Odak; okunabilir mimari, test edilebilir API ve gerçekçi bir demo deneyimi.
 
 ## Ekran görüntüleri
 
@@ -36,7 +36,8 @@ sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymakt
 
 ## Öne çıkanlar
 
-- **Vatandaş portalı** — duyuru, muhtarlık, birim, dijital vezne, borç, hizmet masası, ulaşım kartı / biniş, mülk, su, sosyal yardım
+- **Vatandaş portalı** — duyuru, haber, etkinlik, kültür, faaliyet, hizmet rehberi, dijital vezne, borç, hizmet masası, ulaşım, mülk, su, sosyal yardım
+- **E-Belediye** — belge başvurusu / takip, nikah randevu, imar durumu & harç hesabı, spor tesisi randevu, iletişim
 - **Personel / yönetici** — talep masası, duyuru yönetimi, coğrafya, hat ve İK yönetimi
 - **Kimlik** — e-posta + şifre, JWT access + refresh rotation, rol bazlı yetki
 - **Mimari** — Clean Architecture, CQRS (MediatR), FluentValidation, EF Core + PostgreSQL
@@ -93,7 +94,7 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 |---|---|
 | [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md) | Portföy demo senaryosu (vatandaş / görevli / yönetici) |
 | [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı ve modül envanteri |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, referans dersleri |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, mimari kararlar |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli ve kontroller |
 | [`docs/TESTING.md`](docs/TESTING.md) | Test stratejisi |
 | [`docs/API.md`](docs/API.md) | v1 uç nokta haritası |

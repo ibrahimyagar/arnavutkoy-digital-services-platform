@@ -46,6 +46,101 @@ export type Announcement = {
   createdAtUtc: string
 }
 
+export type PortalContent = {
+  id: string
+  kind: string
+  title: string
+  summary: string
+  body: string
+  slug: string
+  location: string | null
+  category: string | null
+  startsAtUtc: string | null
+  endsAtUtc: string | null
+  sortOrder: number
+  createdAtUtc: string
+}
+
+export type SportsFacility = {
+  id: string
+  name: string
+  address: string
+  activityType: string
+  capacityPerSlot: number
+}
+
+export type SportsAppointment = {
+  id: string
+  facilityId: string
+  facilityName: string
+  slotStartUtc: string
+  slotEndUtc: string
+  trackingCode: string
+  status: string
+}
+
+export type MarriageSlot = {
+  id: string
+  hallName: string
+  ceremonyAtUtc: string
+  capacity: number
+  remaining: number
+  isOpen: boolean
+}
+
+export type MarriageBooking = {
+  id: string
+  slotId: string
+  hallName: string
+  ceremonyAtUtc: string
+  partnerFullName: string
+  trackingCode: string
+  status: string
+}
+
+export type DocumentApplication = {
+  id: string
+  type: string
+  title: string
+  description: string
+  trackingCode: string
+  status: string
+  staffNote: string | null
+  createdAtUtc: string
+}
+
+export type TrackingLookup = {
+  kind: string
+  trackingCode: string
+  status: string
+  title: string
+  whenUtc: string | null
+  detail: string | null
+}
+
+export type ZoningParcel = {
+  id: string
+  ada: string
+  parsel: string
+  neighborhoodName: string
+  zoningStatus: string
+  landUse: string
+  areaSqm: number
+  feePerSqm: number
+}
+
+export type ZoningFeeQuote = {
+  ada: string
+  parsel: string
+  neighborhoodName: string
+  zoningStatus: string
+  landUse: string
+  areaSqm: number
+  feePerSqm: number
+  requestedAreaSqm: number
+  totalFee: number
+}
+
 export type TransportCard = {
   id: string
   ownerUserId: string

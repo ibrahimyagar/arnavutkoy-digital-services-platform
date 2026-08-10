@@ -59,6 +59,35 @@
   margin-top: 2rem;
 }
 
+.home-quick {
+  padding: 1rem 0 0.25rem;
+}
+
+.home-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.55rem;
+}
+
+.home-quick-grid a {
+  display: block;
+  text-align: center;
+  padding: 0.7rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.home-quick-grid a:hover {
+  border-color: rgba(15, 76, 69, 0.35);
+  background: #fff;
+}
+
 .home-ops-line {
   margin: 1.25rem 0 0;
   padding: 0.85rem 1rem;

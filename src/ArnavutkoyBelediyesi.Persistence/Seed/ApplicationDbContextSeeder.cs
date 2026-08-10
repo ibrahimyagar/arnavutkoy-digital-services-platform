@@ -1,9 +1,11 @@
 using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.Common;
+using ArnavutkoyBelediyesi.Domain.EServices;
 using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
+using ArnavutkoyBelediyesi.Domain.Portal;
 using ArnavutkoyBelediyesi.Domain.Properties;
 using ArnavutkoyBelediyesi.Domain.Transportation;
 using ArnavutkoyBelediyesi.Domain.UtilitySubscriptions;
@@ -37,6 +39,7 @@ public static class ApplicationDbContextSeeder
         await SeedTransportationAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedCitizenDemoAssetsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
         await SeedDebtsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
+        await SeedPortalAndEServicesAsync(context, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task SeedRolesAsync(RoleManager<ApplicationRole> roleManager)
@@ -683,5 +686,104 @@ public static class ApplicationDbContextSeeder
 
         await context.Debts.AddRangeAsync(debts, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task SeedPortalAndEServicesAsync(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        if (!await context.PortalContents.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            var now = DateTime.UtcNow;
+            var contents = new[]
+            {
+                PortalContent.Create(PortalContentKind.Mayor, "Başkanın mesajı", "Demo portföy — kurgusal başkan mesajı.",
+                    "Arnavutköy’de dijital hizmetleri tek portalda sunmak için bu örnek platform geliştirildi. Tüm içerikler kurgusaldır; resmi kurumla bağlantısı yoktur.",
+                    "baskan-mesaji", category: "Kurumsal", sortOrder: 1),
+                PortalContent.Create(PortalContentKind.Corporate, "Kurumsal yapı", "Organizasyon ve birimler.",
+                    "Belediye hizmetleri; mali hizmetler, fen işleri, kültür, sosyal destek ve ulaşım birimleri üzerinden kurgusal olarak sunulur.",
+                    "kurumsal-yapi", category: "Kurumsal", sortOrder: 1),
+                PortalContent.Create(PortalContentKind.News, "Hadımköy’de yol iyileştirme tamamlandı", "Demo haber — altyapı.",
+                    "Hadımköy sanayi aksında kurgusal yol yenileme çalışması tamamlandı. Trafik düzeni güncellendi.",
+                    "haber-hadimkoy-yol", category: "Altyapı", startsAtUtc: now.AddDays(-2), sortOrder: 1),
+                PortalContent.Create(PortalContentKind.News, "Taşoluk’ta aile destek başvurusu", "Demo haber — sosyal destek.",
+                    "Taşoluk sosyal yardım biriminde kurgusal başvuru günleri duyuruldu. Gerçek kurum duyurusu değildir.",
+                    "haber-tasoluk-destek", category: "Sosyal", startsAtUtc: now.AddDays(-1), sortOrder: 2),
+                PortalContent.Create(PortalContentKind.News, "Durusu sahil bandı temizlik seferberliği", "Demo haber — çevre.",
+                    "Durusu ve Terkos hattında kurgusal temizlik etkinliği planlandı.",
+                    "haber-durusu-temizlik", category: "Çevre", startsAtUtc: now.AddHours(-6), sortOrder: 3),
+                PortalContent.Create(PortalContentKind.Event, "Açık hava sineması — Merkez Meydan", "Kültür etkinliği (demo).",
+                    "Merkez meydanda kurgusal açık hava sineması. Bilet gerekmez; portföy demosudur.",
+                    "etkinlik-sinema", location: "Arnavutköy Merkez", category: "Kültür",
+                    startsAtUtc: now.AddDays(5).Date.AddHours(19), endsAtUtc: now.AddDays(5).Date.AddHours(22), sortOrder: 1),
+                PortalContent.Create(PortalContentKind.Event, "Gençlik koşusu — Boğazköy", "Spor etkinliği (demo).",
+                    "Boğazköy parkuru üzerinde 5 km kurgusal koşu. Kayıt spor randevu modülünden yapılabilir.",
+                    "etkinlik-kosu", location: "Boğazköy", category: "Spor",
+                    startsAtUtc: now.AddDays(12).Date.AddHours(9), endsAtUtc: now.AddDays(12).Date.AddHours(12), sortOrder: 2),
+                PortalContent.Create(PortalContentKind.Project, "Yeşilbayır park yenileme", "Faaliyet / proje (demo).",
+                    "Yeşilbayır mahallesinde kurgusal park yenileme projesi. İlerleme oranı demo veridir.",
+                    "faaliyet-yesilbayir-park", location: "Yeşilbayır", category: "Park", sortOrder: 1),
+                PortalContent.Create(PortalContentKind.Project, "Hadımköy bisiklet yolu", "Faaliyet / proje (demo).",
+                    "Hadımköy–Taşoluk aksında kurgusal bisiklet yolu etüdü.",
+                    "faaliyet-bisiklet", location: "Hadımköy", category: "Ulaşım", sortOrder: 2),
+                PortalContent.Create(PortalContentKind.CultureVenue, "Arnavutköy Kültür Merkezi", "Kültür tesisi (demo).",
+                    "Konferans salonu, sergi alanı ve kurs odaları. Rezervasyon için iletişime geçin (demo).",
+                    "kultur-merkezi", location: "Merkez", category: "Tesis", sortOrder: 1),
+                PortalContent.Create(PortalContentKind.CultureVenue, "Durusu Sahil Amfisi", "Açık hava alanı (demo).",
+                    "Yaz etkinlikleri için kurgusal amfi. Gerçek tesis bilgisi değildir.",
+                    "durusu-amfi", location: "Durusu", category: "Tesis", sortOrder: 2),
+                PortalContent.Create(PortalContentKind.ServiceGuide, "Vergi ödeme", "E-belediye vezne üzerinden.",
+                    "Emlak ve su borçlarınızı dijital vezne ile ödeyin. Demo kart bilgisi kullanın.",
+                    "rehber-vergi", category: "Mali", sortOrder: 1),
+                PortalContent.Create(PortalContentKind.ServiceGuide, "İmar durumu sorgulama", "Ada/parsel ile sorgu.",
+                    "Demo imar parselleri: 45/8 (Hadımköy), 12/3 (Merkez), 7/21 (Taşoluk).",
+                    "rehber-imar", category: "İmar", sortOrder: 2),
+                PortalContent.Create(PortalContentKind.ServiceGuide, "Nikah randevusu", "Salon ve saat seçimi.",
+                    "Nikah salonlarında kurgusal kontenjan. Takip kodu ile durum sorgulanır.",
+                    "rehber-nikah", category: "Nüfus", sortOrder: 3),
+                PortalContent.Create(PortalContentKind.ServiceGuide, "Spor tesisi randevusu", "Halı saha ve salon.",
+                    "Spor merkezlerinden saatlik randevu alın. Kapasite dolunca yeni slot seçin.",
+                    "rehber-spor", category: "Spor", sortOrder: 4),
+            };
+
+            await context.PortalContents.AddRangeAsync(contents, cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (!await context.SportsFacilities.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            await context.SportsFacilities.AddRangeAsync(
+                [
+                    SportsFacility.Create("Merkez Kapalı Spor Salonu", "Arnavutköy Merkez", "Basketbol", 12),
+                    SportsFacility.Create("Hadımköy Halı Saha", "Hadımköy", "Futbol", 8),
+                    SportsFacility.Create("Taşoluk Yüzme Havuzu", "Taşoluk", "Yüzme", 20),
+                ],
+                cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (!await context.MarriageSlots.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            var baseDay = DateTime.UtcNow.Date.AddDays(10);
+            await context.MarriageSlots.AddRangeAsync(
+                [
+                    MarriageSlot.Create("Nikah Salonu A", baseDay.AddHours(10), 4),
+                    MarriageSlot.Create("Nikah Salonu A", baseDay.AddHours(12), 4),
+                    MarriageSlot.Create("Nikah Salonu B", baseDay.AddDays(2).AddHours(11), 3),
+                    MarriageSlot.Create("Açık Hava Alanı", baseDay.AddDays(5).AddHours(16), 6),
+                ],
+                cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (!await context.ZoningParcels.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            await context.ZoningParcels.AddRangeAsync(
+                [
+                    ZoningParcel.Create("45", "8", "Hadımköy", "İmarlı", "Konut", 450m, 18.50m),
+                    ZoningParcel.Create("12", "3", "Arnavutköy Merkez", "İmarlı", "Ticaret+Konut", 320m, 24.00m),
+                    ZoningParcel.Create("7", "21", "Taşoluk", "Plan değişikliği sürecinde", "Konut", 600m, 15.75m),
+                ],
+                cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

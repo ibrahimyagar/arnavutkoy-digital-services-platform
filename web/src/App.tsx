@@ -26,6 +26,27 @@ import { StaffPropertyPage } from './pages/StaffPropertyPage'
 import { StaffWaterPage } from './pages/StaffWaterPage'
 import { TransportNetworkPage } from './pages/TransportNetworkPage'
 import { TransportPage } from './pages/TransportPage'
+import {
+  ContactPage,
+  CorporatePage,
+  CultureDetailPage,
+  CulturePage,
+  DocumentApplicationsPage,
+  EBelediyeHubPage,
+  EventsDetailPage,
+  EventsPage,
+  MarriagePage,
+  MayorPage,
+  NewsDetailPage,
+  NewsPage,
+  ProjectsDetailPage,
+  ProjectsPage,
+  ServiceGuideDetailPage,
+  ServiceGuidePage,
+  SportsAppointmentPage,
+  TrackingPage,
+  ZoningPage,
+} from './pages/MunicipalPages'
 
 export default function App() {
   return (
@@ -39,6 +60,25 @@ export default function App() {
             <Route path="duyurular" element={<AnnouncementsPage />} />
             <Route path="duyurular/:id" element={<AnnouncementDetailPage />} />
             <Route path="duyuru-yonetimi" element={<AnnouncementsManagePage />} />
+            <Route path="haberler" element={<NewsPage />} />
+            <Route path="haberler/:id" element={<NewsDetailPage />} />
+            <Route path="etkinlikler" element={<EventsPage />} />
+            <Route path="etkinlikler/:id" element={<EventsDetailPage />} />
+            <Route path="faaliyetler" element={<ProjectsPage />} />
+            <Route path="faaliyetler/:id" element={<ProjectsDetailPage />} />
+            <Route path="kultur" element={<CulturePage />} />
+            <Route path="kultur/:id" element={<CultureDetailPage />} />
+            <Route path="hizmet-rehberi" element={<ServiceGuidePage />} />
+            <Route path="hizmet-rehberi/:id" element={<ServiceGuideDetailPage />} />
+            <Route path="baskan" element={<MayorPage />} />
+            <Route path="kurumsal" element={<CorporatePage />} />
+            <Route path="e-belediye" element={<EBelediyeHubPage />} />
+            <Route path="iletisim" element={<ContactPage />} />
+            <Route path="basvuru-takip" element={<TrackingPage />} />
+            <Route path="basvurular" element={<DocumentApplicationsPage />} />
+            <Route path="nikah" element={<MarriagePage />} />
+            <Route path="imar" element={<ZoningPage />} />
+            <Route path="spor-randevu" element={<SportsAppointmentPage />} />
             <Route path="hatlar" element={<BusLinesPage />} />
             <Route path="hatlar/:id" element={<BusLineDetailPage />} />
             <Route path="ulasim-agi" element={<TransportNetworkPage />} />
