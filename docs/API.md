@@ -58,12 +58,30 @@ Taban yol: `/api/v1`
 | POST | `/neighborhoods` | Administrator | Mahalle ekle |
 | GET | `/streets` | Anonim | Sokaklar (`neighborhoodId` opsiyonel) |
 | POST | `/streets` | Administrator | Sokak ekle |
+
+## Properties
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
 | GET | `/properties/mine` | Authenticated | Kendi mülklerim |
 | GET | `/properties` | Officer/Administrator | Tüm mülkler (filtre: `ownerUserId`, `neighborhoodId`) |
 | GET | `/properties/{id}` | Sahip veya personel | Mülk detayı |
 | POST | `/properties` | Citizen | Mülk kaydı |
 | PUT | `/properties/{id}/address` | Sahip veya Administrator | Adres güncelle |
 | POST | `/properties/{id}/deactivate` | Sahip veya Administrator | Pasife al |
+
+## UtilitySubscriptions
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
+| GET | `/water-subscriptions/mine` | Authenticated | Kendi aboneliklerim |
+| GET | `/water-subscriptions` | Officer/Administrator | Tüm abonelikler |
+| GET | `/water-subscriptions/{id}` | Abone veya personel | Abonelik detayı |
+| POST | `/water-subscriptions` | Citizen | Abonelik aç |
+| POST | `/water-subscriptions/{id}/suspend` | Officer/Administrator | Askıya al |
+| POST | `/water-subscriptions/{id}/reactivate` | Officer/Administrator | Yeniden aktif et |
+| POST | `/water-subscriptions/{id}/close` | Officer/Administrator | Kapat |
+| POST | `/water-subscriptions/{id}/debts` | Officer/Administrator | Su borcu oluştur |
 
 ## Operasyonel
 
