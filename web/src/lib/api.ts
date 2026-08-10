@@ -91,6 +91,21 @@ export type WaterSubscription = {
   closedAtUtc: string | null
 }
 
+export type SocialAssistanceApplication = {
+  id: string
+  applicantUserId: string
+  type: string
+  householdSize: number
+  monthlyIncome: number
+  householdSummary: string
+  extraFieldsJson: string
+  status: string
+  submittedAtUtc: string
+  reviewedAtUtc: string | null
+  reviewedByUserId: string | null
+  reviewNote: string
+}
+
 export type BusLine = {
   id: string
   code: string

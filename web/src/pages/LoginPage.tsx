@@ -37,7 +37,9 @@ export function LoginPage() {
         </div>
 
         <div className="notice">
-          Demo: <code>10000000146</code> / <code>Demo!Citizen123</code>
+          Vatandaş: <code>10000000146</code> / <code>Demo!Citizen123</code>
+          <br />
+          Görevli: <code>10000000252</code> / <code>Demo!Officer123</code>
         </div>
 
         {error ? <div className="error-box">{error}</div> : null}

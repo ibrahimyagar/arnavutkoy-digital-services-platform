@@ -22,8 +22,8 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## Demo giriş
 
-- TCKN: `10000000146`
-- Şifre: `Demo!Citizen123`
+- Vatandaş: `10000000146` / `Demo!Citizen123`
+- Görevli: `10000000252` / `Demo!Officer123`
 
 ## Bu fazda olanlar
 
@@ -31,10 +31,10 @@ VITE_API_BASE_URL=http://localhost:8080
 - Giriş / çıkış + refresh token
 - Panel, borçlar (ödeme), talepler (oluşturma + detay/mesaj), ulaşım kartı
 - Duyurular, hat listesi + hat detayı (durak/saat)
-- Mülk ve su aboneliği kayıt ekranları
+- Mülk, su aboneliği, sosyal yardım
+- Personel masası (talep durumu + sosyal yardım onay/red)
 
 ## Bilinçli sınırlar
 
-- Personel/admin paneli yok
-- Sosyal yardım UI sonraki faz
+- Tam admin coğrafya/yönetim UI yok
 - Resmi belediye bağlantısı yoktur (portföy demosu)

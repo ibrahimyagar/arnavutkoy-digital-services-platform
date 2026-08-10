@@ -10,6 +10,8 @@ import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
 import { AnnouncementsPage } from './pages/PublicPages'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsPage } from './pages/RequestsPage'
+import { SocialAssistancePage } from './pages/SocialAssistancePage'
+import { StaffDeskPage } from './pages/StaffDeskPage'
 import { TransportPage } from './pages/TransportPage'
 
 export default function App() {
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="ulasim" element={<TransportPage />} />
             <Route path="mulkler" element={<PropertiesPage />} />
             <Route path="su" element={<WaterPage />} />
+            <Route path="yardim" element={<SocialAssistancePage />} />
+            <Route path="personel" element={<StaffDeskPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
