@@ -38,7 +38,7 @@ Adım adım senaryolar: [`../docs/DEMO_WALKTHROUGH.md`](../docs/DEMO_WALKTHROUGH
 
 **Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su borç kesme, emlak borç kesme
 
-**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi (+ görevli yetkileri)
+**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi, hat yönetimi (+ görevli yetkileri)
 
 ## Bilinçli sınırlar
 

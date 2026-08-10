@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { AppShell } from './components/AppShell'
 import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
+import { BusLinesManagePage } from './pages/BusLinesManagePage'
 import { AnnouncementsManagePage } from './pages/AnnouncementsManagePage'
 import { DebtsPage } from './pages/DebtsPage'
 import { GeographyAdminPage } from './pages/GeographyAdminPage'
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="duyuru-yonetimi" element={<AnnouncementsManagePage />} />
             <Route path="hatlar" element={<BusLinesPage />} />
             <Route path="hatlar/:id" element={<BusLineDetailPage />} />
+            <Route path="hat-yonetimi" element={<BusLinesManagePage />} />
             <Route path="birimler" element={<HrDirectoryPage />} />
             <Route path="birim-yonetimi" element={<HrManagePage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />

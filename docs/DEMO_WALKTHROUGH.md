@@ -61,6 +61,7 @@ Yönetici girişi:
 | Adım | Sayfa | Ne gösterilir |
 |---|---|---|
 | Coğrafya | `/cografya` | İlçe → mahalle → sokak oluştur |
+| Hatlar | `/hat-yonetimi` | Hat, durak, hareket saati |
 | Birimler | `/birim-yonetimi` | Departman + dizin personeli |
 | (+ görevli yetkileri) | personel / duyuru / su / mülk | Aynı operasyonel masalar |
 

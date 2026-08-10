@@ -40,6 +40,10 @@ export function PanelPage() {
               <h3>Coğrafya</h3>
               <p className="muted">İlçe, mahalle ve sokak yönetimi</p>
             </Link>
+            <Link className="panel" to="/hat-yonetimi">
+              <h3>Hat yönetimi</h3>
+              <p className="muted">Hat, durak ve hareket saatleri</p>
+            </Link>
             <Link className="panel" to="/birim-yonetimi">
               <h3>Birim yönetimi</h3>
               <p className="muted">Departman ve dizin personeli</p>
