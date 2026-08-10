@@ -56,6 +56,8 @@ Taban yol: `/api/v1`
 | POST | `/districts` | Administrator | İlçe ekle |
 | GET | `/neighborhoods` | Anonim | Mahalleler (`districtId` opsiyonel) |
 | POST | `/neighborhoods` | Administrator | Mahalle ekle |
+| GET | `/streets` | Anonim | Sokaklar (`neighborhoodId` opsiyonel) |
+| POST | `/streets` | Administrator | Sokak ekle |
 
 ## Operasyonel
 

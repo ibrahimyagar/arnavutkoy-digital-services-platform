@@ -14,3 +14,8 @@ public sealed record CreateNeighborhoodRequest(
     string HeadmanFullName,
     string HeadmanPhoneNumber,
     int Population);
+
+/// <summary>
+/// Yeni bir sokak oluşturma isteği gövdesi.
+/// </summary>
+public sealed record CreateStreetRequest(Guid NeighborhoodId, string Name);

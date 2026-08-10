@@ -15,3 +15,8 @@ public sealed record NeighborhoodDto(
     string HeadmanFullName,
     string HeadmanPhoneNumber,
     int Population);
+
+/// <summary>
+/// Bir sokağın API'ye sunulan görünümü.
+/// </summary>
+public sealed record StreetDto(Guid Id, Guid NeighborhoodId, string Name);

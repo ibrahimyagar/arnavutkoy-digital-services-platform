@@ -24,6 +24,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
 
     public DbSet<Neighborhood> Neighborhoods => Set<Neighborhood>();
 
+    public DbSet<Street> Streets => Set<Street>();
+
     public DbSet<Announcement> Announcements => Set<Announcement>();
 
     public DbSet<RequestCategory> RequestCategories => Set<RequestCategory>();

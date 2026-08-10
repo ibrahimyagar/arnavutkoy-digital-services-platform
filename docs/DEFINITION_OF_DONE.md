@@ -48,16 +48,20 @@ doğrulanmıştır. Tarih: 2026-08-10.
 
 1. Kullanılmayan **Mapster** paketleri kaldırıldı; ASSUMPTIONS A5 güncellendi.
 2. `Microsoft.Extensions.DependencyInjection.Abstractions` **10.x → 8.0.2** pin (net8.0 hizası).
-3. PRD: `Street` bu sürümde yok (yol haritası); Serilog iddiası `ILogger` olarak düzeltildi.
+3. PRD: `Street` R1 ile uygulandı; Serilog iddiası `ILogger` olarak düzeltildi.
 
 ## Bilinçli kapsam dışı (dürüst borç)
 
 - Redis — ihtiyaç doğunca (`ASSUMPTIONS` A8)
 - Coverlet zorunlu yüzde eşiği — CI rapor üretir, eşik yok (`TESTING.md`)
-- `Street` entity — yol haritası
 - Gerçek ödeme PSP entegrasyonu — demo kart doğrulama
+
+## Yol haritası (R1–R6)
+
+- ~~R1 Street (Geography)~~ — tamamlandı
+- R2 Properties · R3 UtilitySubscriptions · R4 Hr · R5 SocialAssistance · R6 Transportation
 
 ## Sonraki sertleştirme (Faz 11+)
 
-- Serilog konsol + opsiyonel Seq (`Serilog:Seq:ServerUrl`)
-- CI Coverlet Cobertura artifact
+- Serilog konsol + opsiyonel Seq (`Serilog:Seq:ServerUrl`) — uygulandı
+- CI Coverlet Cobertura artifact — uygulandı

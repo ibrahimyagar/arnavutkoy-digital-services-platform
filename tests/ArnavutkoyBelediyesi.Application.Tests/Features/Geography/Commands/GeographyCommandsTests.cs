@@ -83,3 +83,51 @@ public sealed class CreateNeighborhoodCommandTests
         await neighborhoodRepository.Received(1).AddAsync(Arg.Any<Neighborhood>(), Arg.Any<CancellationToken>());
     }
 }
+
+public sealed class CreateStreetCommandTests
+{
+    private readonly CreateStreetCommandValidator _validator = new();
+
+    [Fact]
+    public void Validate_WithBlankName_ShouldHaveError()
+    {
+        var result = _validator.TestValidate(new CreateStreetCommand(Guid.NewGuid(), string.Empty));
+
+        result.ShouldHaveValidationErrorFor(x => x.Name);
+    }
+
+    [Fact]
+    public async Task Handle_WhenNeighborhoodNotFound_ShouldReturnFailure()
+    {
+        var neighborhoodId = Guid.NewGuid();
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var neighborhoodRepository = Substitute.For<IRepository<Neighborhood>>();
+        unitOfWork.Repository<Neighborhood>().Returns(neighborhoodRepository);
+        neighborhoodRepository.GetByIdAsync(neighborhoodId, Arg.Any<CancellationToken>()).Returns((Neighborhood?)null);
+        var handler = new CreateStreetCommandHandler(unitOfWork);
+
+        var result = await handler.Handle(new CreateStreetCommand(neighborhoodId, "Test Sokak"), CancellationToken.None);
+
+        result.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Handle_WhenNeighborhoodFound_ShouldCreateStreet()
+    {
+        var district = District.Create("Arnavutköy");
+        var neighborhood = Neighborhood.Create(district.Id, "Hadımköy", "Ali Veli", "05551112233", 1000);
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var neighborhoodRepository = Substitute.For<IRepository<Neighborhood>>();
+        var streetRepository = Substitute.For<IRepository<Street>>();
+        unitOfWork.Repository<Neighborhood>().Returns(neighborhoodRepository);
+        unitOfWork.Repository<Street>().Returns(streetRepository);
+        neighborhoodRepository.GetByIdAsync(neighborhood.Id, Arg.Any<CancellationToken>()).Returns(neighborhood);
+        var handler = new CreateStreetCommandHandler(unitOfWork);
+
+        var result = await handler.Handle(new CreateStreetCommand(neighborhood.Id, "Atatürk Caddesi"), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        await streetRepository.Received(1).AddAsync(Arg.Any<Street>(), Arg.Any<CancellationToken>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+}

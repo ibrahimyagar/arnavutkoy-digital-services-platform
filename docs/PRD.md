@@ -55,10 +55,10 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 - Şifre asla düz metin veya özel algoritmayla saklanmaz; ASP.NET Core Identity'nin `PasswordHasher`'ı kullanılır.
 
 ### 4.2. Geography
-- `District` (İlçe) → `Neighborhood` (Mahalle) hiyerarşisi. `Street` (Sokak) bu sürümde
-  uygulanmamıştır; yol haritasına bırakılmıştır (mahalle düzeyi referans veri yeterli görüldü).
+- `District` (İlçe) → `Neighborhood` (Mahalle) → `Street` (Sokak) hiyerarşisi.
 - Her mahallenin muhtar adı, telefonu ve nüfusu tutulur.
 - Salt okunur referans veri; sadece `Administrator` rolü değişiklik yapabilir.
+- Anonim `GET` ile listelenir; oluşturma `Administrator` yetkisi ister.
 
 ### 4.3. Announcements
 - Belediye tarafından yayınlanan duyurular; başlık, içerik, yayın tarihi, geçerlilik bitiş tarihi, yayında/taslak durumu.

@@ -124,6 +124,7 @@ public static class ApplicationDbContextSeeder
 
         if (existingDistrict is not null)
         {
+            await EnsureDemoStreetsAsync(context, cancellationToken).ConfigureAwait(false);
             return existingDistrict.Id;
         }
 
@@ -141,7 +142,67 @@ public static class ApplicationDbContextSeeder
         await context.Neighborhoods.AddRangeAsync(neighborhoods, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        await SeedDemoStreetsForNeighborhoodsAsync(context, neighborhoods.Select(n => n.Id).ToArray(), cancellationToken)
+            .ConfigureAwait(false);
+
         return district.Id;
+    }
+
+    private static async Task EnsureDemoStreetsAsync(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        if (await context.Streets.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return;
+        }
+
+        var neighborhoodIds = await context.Neighborhoods
+            .OrderBy(n => n.Name)
+            .Select(n => n.Id)
+            .Take(4)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (neighborhoodIds.Length == 0)
+        {
+            return;
+        }
+
+        await SeedDemoStreetsForNeighborhoodsAsync(context, neighborhoodIds, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task SeedDemoStreetsForNeighborhoodsAsync(
+        ApplicationDbContext context,
+        Guid[] neighborhoodIds,
+        CancellationToken cancellationToken)
+    {
+        if (neighborhoodIds.Length == 0)
+        {
+            return;
+        }
+
+        var streets = new List<Street>
+        {
+            Street.Create(neighborhoodIds[0], "Atatürk Caddesi"),
+            Street.Create(neighborhoodIds[0], "Cumhuriyet Sokak")
+        };
+
+        if (neighborhoodIds.Length > 1)
+        {
+            streets.Add(Street.Create(neighborhoodIds[1], "İstiklal Caddesi"));
+        }
+
+        if (neighborhoodIds.Length > 2)
+        {
+            streets.Add(Street.Create(neighborhoodIds[2], "Fatih Sokak"));
+        }
+
+        if (neighborhoodIds.Length > 3)
+        {
+            streets.Add(Street.Create(neighborhoodIds[3], "Yeşilbayır Bulvarı"));
+        }
+
+        await context.Streets.AddRangeAsync(streets, cancellationToken).ConfigureAwait(false);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task SeedRequestCategoriesAsync(ApplicationDbContext context, CancellationToken cancellationToken)

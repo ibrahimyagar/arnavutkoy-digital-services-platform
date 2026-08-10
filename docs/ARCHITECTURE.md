@@ -80,7 +80,7 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Context | Aggregate / kavram | Önemli domain kuralları |
 |---|---|---|
 | Identity | Kullanıcı, rol, refresh token | TCKN checksum; refresh token hash + rotasyon; lockout |
-| Geography | District → Neighborhood | Salt okunur referans; yazma yalnızca Administrator |
+| Geography | District → Neighborhood → Street | Salt okunur referans; yazma yalnızca Administrator |
 | Announcements | Announcement | Draft → Published → Archived; taslak anonime kapalı |
 | CitizenRequests | CitizenRequest + RequestMessage | Pending → UnderReview → Resolved/Closed; Closed'a mesaj yok |
 | Payments | Debt + Payment | Gecikme faizi salt okunur hesap; ödeme idempotent; kart maskeli |
