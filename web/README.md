@@ -41,8 +41,10 @@ VITE_API_BASE_URL=http://localhost:8080
 - Mülkte sokak seçimi; su aboneliğinde isteğe bağlı mülk bağlama
 - Personel duyuru yönetimi (taslak / yayın / arşiv)
 - Sade üst menü + mobil açılır navigasyon
+- Personel su abonelik yönetimi ve borç kesme
 
 ## Bilinçli sınırlar
 
 - Coğrafya düzenleme/silme yok (yalnızca liste + oluşturma)
+- Emlak vergisi borcu UI’da yok (yalnızca seed / API)
 - Resmi belediye bağlantısı yoktur (portföy demosu)

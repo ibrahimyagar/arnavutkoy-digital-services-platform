@@ -14,6 +14,7 @@ import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsPage } from './pages/RequestsPage'
 import { SocialAssistancePage } from './pages/SocialAssistancePage'
 import { StaffDeskPage } from './pages/StaffDeskPage'
+import { StaffWaterPage } from './pages/StaffWaterPage'
 import { TransportPage } from './pages/TransportPage'
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="su" element={<WaterPage />} />
             <Route path="yardim" element={<SocialAssistancePage />} />
             <Route path="personel" element={<StaffDeskPage />} />
+            <Route path="su-yonetimi" element={<StaffWaterPage />} />
             <Route path="cografya" element={<GeographyAdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

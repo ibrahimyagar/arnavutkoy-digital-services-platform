@@ -44,6 +44,10 @@ export function PanelPage() {
               <h3>Personel masası</h3>
               <p className="muted">Talep ve sosyal yardım değerlendirme</p>
             </Link>
+            <Link className="panel" to="/su-yonetimi">
+              <h3>Su yönetimi</h3>
+              <p className="muted">Abonelik durumu ve borç kesme</p>
+            </Link>
             <Link className="panel" to="/duyuru-yonetimi">
               <h3>Duyuru yönetimi</h3>
               <p className="muted">Taslak, yayın ve arşiv</p>
@@ -58,6 +62,10 @@ export function PanelPage() {
             <Link className="panel" to="/personel">
               <h3>Personel masası</h3>
               <p className="muted">Talep ve sosyal yardım değerlendirme</p>
+            </Link>
+            <Link className="panel" to="/su-yonetimi">
+              <h3>Su yönetimi</h3>
+              <p className="muted">Abonelik durumu ve borç kesme</p>
             </Link>
             <Link className="panel" to="/duyuru-yonetimi">
               <h3>Duyuru yönetimi</h3>

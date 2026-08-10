@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react'
 import { apiFetch, type Debt, type Paginated } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
+const typeLabels: Record<string, string> = {
+  Water: 'Su',
+  Property: 'Emlak',
+}
+
+const statusLabels: Record<string, string> = {
+  Unpaid: 'Ödenmedi',
+  Paid: 'Ödendi',
+}
+
 function statusBadge(status: string) {
   if (status === 'Paid') return 'badge badge-ok'
   if (status === 'Unpaid') return 'badge badge-warn'
@@ -31,15 +41,19 @@ function DebtsContent() {
     setBusyId(debtId)
     setError(null)
     try {
-      await apiFetch(`/api/v1/debts/${debtId}/payments`, {
-        method: 'POST',
-        body: JSON.stringify({
-          cardHolderName: 'Demo Kart Sahibi',
-          cardNumber: '4111111111111111',
-          expiryMonthYear: '12/30',
-          cvv: '123',
-        }),
-      }, true)
+      await apiFetch(
+        `/api/v1/debts/${debtId}/payments`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            cardHolderName: 'Demo Kart Sahibi',
+            cardNumber: '4111111111111111',
+            expiryMonthYear: '12/30',
+            cvv: '123',
+          }),
+        },
+        true,
+      )
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ödeme başarısız.')
@@ -62,12 +76,14 @@ function DebtsContent() {
           <article key={debt.id} className="panel" style={{ display: 'grid', gap: '0.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
               <div>
-                <h3>{debt.type}</h3>
-                <p className="muted">
+                <h3 style={{ margin: 0 }}>{typeLabels[debt.type] ?? debt.type}</h3>
+                <p className="muted" style={{ marginBottom: 0 }}>
                   Vade: {new Date(debt.dueDateUtc).toLocaleDateString('tr-TR')}
                 </p>
               </div>
-              <span className={statusBadge(debt.status)}>{debt.status}</span>
+              <span className={statusBadge(debt.status)}>
+                {statusLabels[debt.status] ?? debt.status}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
               <div>
