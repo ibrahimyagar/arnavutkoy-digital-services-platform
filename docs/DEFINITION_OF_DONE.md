@@ -1,0 +1,57 @@
+# Definition of Done — Faz 10 Son Kontrol
+
+Bu kontrol listesi, proje talimatındaki tamamlanma kriterlerine göre Faz 10'da
+doğrulanmıştır. Tarih: 2026-08-10.
+
+## Kalite kapıları
+
+| Kriter | Sonuç |
+|---|---|
+| `dotnet build` — 0 uyarı / 0 hata | ✅ |
+| `dotnet test` — tüm testler yeşil | ✅ 228 (79 Domain + 78 Application + 26 Infrastructure + 45 API) |
+| Commit geçmişinde AI/araç adı yok | ✅ |
+| `.env` / sır dosyaları commit'te yok | ✅ |
+| Resmi kurum bağlantısı olmadığına dair uyarı (README + docs) | ✅ |
+| MIT lisans mevcut | ✅ |
+
+## Çalışır demo
+
+| Kriter | Sonuç |
+|---|---|
+| `docker compose up --build` ile API + PostgreSQL | ✅ (healthy) |
+| `/health`, `/health/ready` | ✅ 200 |
+| Swagger `/swagger/v1/swagger.json` | ✅ 200 |
+| Anonim uçlar (announcements, districts, categories) | ✅ 200 |
+| Demo vatandaş login + `/debts/mine` | ✅ 200 |
+| Kimliksiz `/debts/mine` | ✅ 401 |
+
+## Mimari / güvenlik
+
+| Kriter | Sonuç |
+|---|---|
+| Clean Architecture katman sınırları | ✅ `ARCHITECTURE.md` |
+| CQRS + FluentValidation + Result | ✅ |
+| JWT + refresh rotation + ownership | ✅ `SECURITY.md` |
+| Kart tam numarası/CVV persist edilmez | ✅ |
+| ProblemDetails; teknik hata sızdırılmaz | ✅ |
+| Seed idempotent; Testing'de atlanır | ✅ |
+
+## Dokümantasyon
+
+| Belge | Durum |
+|---|---|
+| PRD, ASSUMPTIONS, ARCHITECTURE, SECURITY, TESTING, API, DEPLOYMENT, CONTRIBUTING | ✅ |
+| README indeks + hızlı başlangıç | ✅ |
+| CI workflow (`.github/workflows/ci.yml`) | ✅ |
+
+## Faz 10'da yapılan cilalar
+
+1. Kullanılmayan **Mapster** paketleri kaldırıldı; ASSUMPTIONS A5 güncellendi.
+2. `Microsoft.Extensions.DependencyInjection.Abstractions` **10.x → 8.0.2** pin (net8.0 hizası).
+3. PRD: `Street` bu sürümde yok (yol haritası); Serilog iddiası `ILogger` olarak düzeltildi.
+
+## Bilinçli kapsam dışı (dürüst borç)
+
+- Redis / Seq / Coverlet eşiği — ihtiyaç doğunca (`ASSUMPTIONS` A8, `TESTING.md`)
+- `Street` entity — yol haritası
+- Gerçek ödeme PSP entegrasyonu — demo kart doğrulama

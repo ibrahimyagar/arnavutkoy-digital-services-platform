@@ -53,13 +53,16 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 | [`docs/API.md`](docs/API.md) | v1 uç nokta haritası |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker / sırlar / demo hesaplar |
 | [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) | Mühendislik varsayımları |
+| [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md) | Faz 10 doğrulama kaydı |
 | [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Katkı kuralları |
 
 ## Proje durumu
 
 - [x] Faz 0–8 — Keşif → domain → application → persistence → API → güvenlik → test → Docker/CI
 - [x] Faz 9 — Kapsamlı dokümantasyon
-- [ ] Faz 10 — Son kontrol (Definition of Done turu)
+- [x] Faz 10 — Son kontrol (Definition of Done)
+
+DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
 
 ## Çözüm yapısı (özet)
 

@@ -22,9 +22,18 @@ Bu, mimariyi kökten değiştirecek bir karar değildir (yeni modül eklemek mev
 
 Minimal API yerine controller-based MVC seçilmiştir; XML doc comment + Swagger + API versiyonlama (`Asp.Versioning`) ile birlikte daha okunaklı, büyüyebilir bir yapı sağlar ve Clean Architecture'da controller'ların "ince" (yalnızca MediatR'a delege eden) katman olması konvansiyonuna daha uygundur.
 
-## A5 — Mapping: Mapster
+## A5 — Mapping: Açık DTO / Projeksiyon (Mapster kullanılmadı)
 
-AutoMapper'ın son sürümlerindeki lisans modeli değişikliği nedeniyle **Mapster** seçilmiştir (ücretsiz, kaynak üretimli, performanslı).
+Başlangıçta AutoMapper lisans modeli nedeniyle **Mapster** paket olarak eklenmişti; ancak
+CQRS handler'larında eşleme fiilen **açık DTO constructor'ları** ve EF `Select` projeksiyonlarıyla
+yapıldı. Bu yaklaşım:
+
+- handler okunabilirliğini artırır (gizli profil yok),
+- gereksiz bir NuGet bağımlılığını ortadan kaldırır,
+- N+1 riskini projeksiyonla daha kolay kontrol eder.
+
+Faz 10 son kontrolünde kullanılmayan `Mapster` / `Mapster.DependencyInjection` paket referansları
+kaldırılmıştır. İleride karmaşık nesne grafikleri doğarsa Mapster yeniden değerlendirilebilir.
 
 ## A6 — Kimlik Doğrulama Alanı
 
