@@ -38,6 +38,8 @@ Seed varsayılan olarak açıktır (`DATABASE_SEED_ON_STARTUP=true`). Kurgusal h
 | Officer | `10000000252` | `Demo!Officer123` |
 | Administrator | `10000000368` | `Demo!Admin123` |
 
+Portföy için adım adım tur: [`DEMO_WALKTHROUGH.md`](DEMO_WALKTHROUGH.md).
+
 ## Ortam Değişkenleri
 
 Sırlar **asla** `appsettings.json` içine yazılmaz. Docker'da `docker/.env` (gitignore'lı)

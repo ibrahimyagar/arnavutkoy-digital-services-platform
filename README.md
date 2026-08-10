@@ -38,7 +38,9 @@ docker compose up --build -d
 | Health | http://localhost:8080/health |
 | Vatandaş UI | `cd web && npm install && npm run dev` → http://localhost:5173 |
 
-Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Vatandaş arayüzü → [`web/README.md`](web/README.md).
+Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Portföy demo turu → [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md).
+Vatandaş arayüzü → [`web/README.md`](web/README.md).
 
 ```bash
 dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers)
@@ -48,6 +50,7 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 
 | Belge | İçerik |
 |---|---|
+| [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md) | Portföy demo senaryosu (vatandaş / görevli / yönetici) |
 | [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı ve modül envanteri |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, referans dersleri |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli ve kontroller |
@@ -63,7 +66,8 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 - [x] Faz 0–8 — Keşif → domain → application → persistence → API → güvenlik → test → Docker/CI
 - [x] Faz 9 — Kapsamlı dokümantasyon
 - [x] Faz 10 — Son kontrol (Definition of Done)
-- [x] Yol haritası R1–R6 + vatandaş web paneli (faz 1)
+- [x] Yol haritası R1–R6 + vatandaş web paneli
+- [x] Personel operasyon UI + demo walkthrough
 
 DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
 

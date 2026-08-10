@@ -1,6 +1,6 @@
 # Vatandaş Web Arayüzü
 
-Vite + React + TypeScript vatandaş paneli. API'ye JWT ile bağlanır.
+Vite + React + TypeScript portal. API'ye JWT ile bağlanır.
 
 ## Çalıştırma
 
@@ -28,22 +28,17 @@ VITE_API_BASE_URL=http://localhost:8080
 - Görevli: `10000000252` / `Demo!Officer123`
 - Yönetici: `10000000368` / `Demo!Admin123`
 
-## Bu fazda olanlar
+Adım adım senaryolar: [`../docs/DEMO_WALKTHROUGH.md`](../docs/DEMO_WALKTHROUGH.md).
 
-- Marka odaklı ana sayfa
-- Giriş / çıkış + refresh token
-- Panel, borçlar (ödeme), talepler (oluşturma + detay/mesaj), ulaşım kartı
-- Duyurular, hat listesi + hat detayı (durak/saat)
-- Mülk, su aboneliği, sosyal yardım
-- Personel masası (talep durumu + sosyal yardım onay/red)
-- Yönetici coğrafya ekranı (ilçe / mahalle / sokak)
-- Talep UX: durum zaman çizelgesi, Türkçe durumlar, yazışma görünümü, durum filtreleri
-- Mülkte sokak seçimi; su aboneliğinde isteğe bağlı mülk bağlama
-- Personel duyuru yönetimi (taslak / yayın / arşiv)
-- Sade üst menü + mobil açılır navigasyon
-- Personel su abonelik yönetimi ve borç kesme
-- Personel mülk yönetimi ve emlak vergisi borcu kesme
-- Halka açık birim/personel dizini + yönetici birim yönetimi
+## Özellikler
+
+**Herkese açık:** ana sayfa, duyurular, otobüs hatları, birim/personel dizini
+
+**Vatandaş:** panel, borç ödeme, talepler + yazışma, ulaşım kartı, mülk, su, sosyal yardım
+
+**Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su borç kesme, emlak borç kesme
+
+**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi (+ görevli yetkileri)
 
 ## Bilinçli sınırlar
 
