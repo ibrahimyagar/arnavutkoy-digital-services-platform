@@ -54,6 +54,43 @@ export type TransportCard = {
   isActive: boolean
 }
 
+export type RequestCategory = {
+  id: string
+  name: string
+}
+
+export type Neighborhood = {
+  id: string
+  districtId: string
+  name: string
+  headmanFullName: string
+  headmanPhoneNumber: string
+  population: number
+}
+
+export type CitizenProperty = {
+  id: string
+  ownerUserId: string
+  neighborhoodId: string
+  streetId: string | null
+  type: string
+  title: string
+  doorNumber: string
+  blockParcel: string
+  isActive: boolean
+}
+
+export type WaterSubscription = {
+  id: string
+  subscriberUserId: string
+  neighborhoodId: string
+  propertyId: string | null
+  subscriptionNumber: string
+  status: string
+  activatedAtUtc: string
+  closedAtUtc: string | null
+}
+
 export type BusLine = {
   id: string
   code: string
@@ -62,6 +99,27 @@ export type BusLine = {
   baseFare: number
   isActive: boolean
 }
+
+export type BusLineStop = {
+  id: string
+  busLineId: string
+  sequence: number
+  name: string
+}
+
+export type BusLineDeparture = {
+  id: string
+  busLineId: string
+  dayOfWeek: string
+  departureTime: string
+  note: string
+}
+
+export type BusLineDetails = BusLine & {
+  stops: BusLineStop[]
+  departures: BusLineDeparture[]
+}
+
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 

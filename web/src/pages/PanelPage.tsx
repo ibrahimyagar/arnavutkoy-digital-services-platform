@@ -37,6 +37,14 @@ export function PanelPage() {
           <h3>Ulaşım kartım</h3>
           <p className="muted">Bakiye ve biniş işlemleri</p>
         </Link>
+        <Link className="panel" to="/mulkler">
+          <h3>Mülklerim</h3>
+          <p className="muted">Mahalle bazlı kayıtlar</p>
+        </Link>
+        <Link className="panel" to="/su">
+          <h3>Su aboneliği</h3>
+          <p className="muted">Abone no ve durum</p>
+        </Link>
       </div>
     </div>
   )

@@ -1,11 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { AppShell } from './components/AppShell'
+import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
 import { DebtsPage } from './pages/DebtsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
-import { AnnouncementsPage, BusLinesPage } from './pages/PublicPages'
+import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
+import { AnnouncementsPage } from './pages/PublicPages'
+import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsPage } from './pages/RequestsPage'
 import { TransportPage } from './pages/TransportPage'
 
@@ -19,10 +22,14 @@ export default function App() {
             <Route path="giris" element={<LoginPage />} />
             <Route path="duyurular" element={<AnnouncementsPage />} />
             <Route path="hatlar" element={<BusLinesPage />} />
+            <Route path="hatlar/:id" element={<BusLineDetailPage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />
             <Route path="borclar" element={<DebtsPage />} />
             <Route path="talepler" element={<RequestsPage />} />
+            <Route path="talepler/:id" element={<RequestDetailPage />} />
             <Route path="ulasim" element={<TransportPage />} />
+            <Route path="mulkler" element={<PropertiesPage />} />
+            <Route path="su" element={<WaterPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

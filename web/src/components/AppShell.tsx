@@ -26,6 +26,8 @@ export function AppShell() {
                 <NavLink to="/borclar">Borçlar</NavLink>
                 <NavLink to="/talepler">Talepler</NavLink>
                 <NavLink to="/ulasim">Ulaşım</NavLink>
+                <NavLink to="/mulkler">Mülkler</NavLink>
+                <NavLink to="/su">Su</NavLink>
               </>
             ) : null}
           </nav>

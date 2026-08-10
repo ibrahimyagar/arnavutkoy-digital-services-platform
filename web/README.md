@@ -29,10 +29,12 @@ VITE_API_BASE_URL=http://localhost:8080
 
 - Marka odaklı ana sayfa
 - Giriş / çıkış + refresh token
-- Panel, borçlar (ödeme), talepler listesi, ulaşım kartı, duyurular, hatlar
+- Panel, borçlar (ödeme), talepler (oluşturma + detay/mesaj), ulaşım kartı
+- Duyurular, hat listesi + hat detayı (durak/saat)
+- Mülk ve su aboneliği kayıt ekranları
 
 ## Bilinçli sınırlar
 
-- Talep oluşturma formu sonraki faz
 - Personel/admin paneli yok
+- Sosyal yardım UI sonraki faz
 - Resmi belediye bağlantısı yoktur (portföy demosu)
