@@ -18,6 +18,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddApiRateLimiting();
 builder.Services.AddApiCors(builder.Configuration, builder.Environment);
+builder.Services.AddApiHealthChecks(builder.Configuration);
 
 builder.Services
     .AddApiVersioning(options =>
@@ -76,7 +77,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Docker / ters vekil arkasında TLS genelde dışarıda sonlanır; konteyner yalnızca HTTP dinler.
+// DISABLE_HTTPS_REDIRECTION=true (docker-compose varsayılanı) ile yönlendirme kapatılır.
+if (!string.Equals(
+        Environment.GetEnvironmentVariable("DISABLE_HTTPS_REDIRECTION"),
+        "true",
+        StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors(CorsExtensions.PolicyName);
 
 // "Testing" ortamında (WebApplicationFactory tabanlı API entegrasyon testleri) hız sınırlama
@@ -91,6 +101,9 @@ if (!app.Environment.IsEnvironment("Testing"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapApiHealthChecks();
+
+await app.InitializeDatabaseAsync().ConfigureAwait(false);
 
 app.Run();
 
