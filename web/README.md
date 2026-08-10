@@ -34,11 +34,11 @@ Adım adım senaryolar: [`../docs/DEMO_WALKTHROUGH.md`](../docs/DEMO_WALKTHROUGH
 
 **Herkese açık:** ana sayfa, duyurular, otobüs hatları, birim/personel dizini
 
-**Vatandaş:** panel, borç ödeme, talepler + yazışma, ulaşım kartı, mülk, su, sosyal yardım
+**Vatandaş:** panel, borç ödeme, talepler + yazışma, ulaşım kartı, mülk, su, sosyal yardım, parola değiştirme
 
-**Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su borç kesme, emlak borç kesme
+**Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su borç kesme, emlak borç kesme, parola
 
-**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi, hat yönetimi (+ görevli yetkileri)
+**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi, hat yönetimi (+ görevli yetkileri), parola
 
 ## Bilinçli sınırlar
 

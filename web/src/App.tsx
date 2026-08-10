@@ -4,6 +4,7 @@ import { AppShell } from './components/AppShell'
 import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
 import { BusLinesManagePage } from './pages/BusLinesManagePage'
 import { AnnouncementsManagePage } from './pages/AnnouncementsManagePage'
+import { ChangePasswordPage } from './pages/ChangePasswordPage'
 import { DebtsPage } from './pages/DebtsPage'
 import { GeographyAdminPage } from './pages/GeographyAdminPage'
 import { HomePage } from './pages/HomePage'
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="birimler" element={<HrDirectoryPage />} />
             <Route path="birim-yonetimi" element={<HrManagePage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />
+            <Route path="parola" element={<ChangePasswordPage />} />
             <Route path="borclar" element={<DebtsPage />} />
             <Route path="talepler" element={<RequestsPage />} />
             <Route path="talepler/:id" element={<RequestDetailPage />} />

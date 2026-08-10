@@ -68,6 +68,10 @@ export function PanelPage() {
               <h3>Talepler</h3>
               <p className="muted">Tüm hizmet talepleri</p>
             </Link>
+            <Link className="panel" to="/parola">
+              <h3>Parola</h3>
+              <p className="muted">Hesap parolasını güncelle</p>
+            </Link>
           </>
         ) : staff ? (
           <>
@@ -90,6 +94,10 @@ export function PanelPage() {
             <Link className="panel" to="/talepler">
               <h3>Talepler</h3>
               <p className="muted">Tüm hizmet talepleri</p>
+            </Link>
+            <Link className="panel" to="/parola">
+              <h3>Parola</h3>
+              <p className="muted">Hesap parolasını güncelle</p>
             </Link>
           </>
         ) : (
@@ -117,6 +125,10 @@ export function PanelPage() {
             <Link className="panel" to="/yardim">
               <h3>Sosyal yardım</h3>
               <p className="muted">Başvuru ve durum takibi</p>
+            </Link>
+            <Link className="panel" to="/parola">
+              <h3>Parola</h3>
+              <p className="muted">Hesap parolasını güncelle</p>
             </Link>
           </>
         )}
