@@ -8,7 +8,7 @@ doğrulanmıştır. Tarih: 2026-08-10.
 | Kriter | Sonuç |
 |---|---|
 | `dotnet build` — 0 uyarı / 0 hata | ✅ |
-| `dotnet test` — tüm testler yeşil | ✅ 228 (79 Domain + 78 Application + 26 Infrastructure + 45 API) |
+| `dotnet test` — tüm testler yeşil | ✅ 264 (102 Domain + 91 Application + 26 Infrastructure + 45 API) |
 | Commit geçmişinde AI/araç adı yok | ✅ |
 | `.env` / sır dosyaları commit'te yok | ✅ |
 | Resmi kurum bağlantısı olmadığına dair uyarı (README + docs) | ✅ |
