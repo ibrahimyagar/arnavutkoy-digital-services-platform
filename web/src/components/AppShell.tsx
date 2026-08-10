@@ -26,7 +26,12 @@ export function AppShell() {
             {isAuthenticated ? (
               <>
                 <NavLink to="/panel">Panel</NavLink>
-                {staff ? <NavLink to="/personel">Personel</NavLink> : null}
+                {staff ? (
+                  <>
+                    <NavLink to="/personel">Personel</NavLink>
+                    <NavLink to="/talepler">Talepler</NavLink>
+                  </>
+                ) : null}
                 {admin ? <NavLink to="/cografya">Coğrafya</NavLink> : null}
                 {!staff ? (
                   <>

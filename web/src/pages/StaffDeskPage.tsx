@@ -1,28 +1,39 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import {
   apiFetch,
   type CitizenRequestSummary,
   type Paginated,
+  type RequestCategory,
   type SocialAssistanceApplication,
 } from '../lib/api'
 import { isStaff } from '../lib/roles'
+import {
+  REQUEST_STATUSES,
+  requestStatusBadgeClass,
+  requestStatusLabel,
+  type RequestStatus,
+} from '../lib/requestStatus'
 import { RequireAuth } from './PanelPage'
 
 function StaffDeskContent() {
   const [requests, setRequests] = useState<CitizenRequestSummary[]>([])
   const [applications, setApplications] = useState<SocialAssistanceApplication[]>([])
+  const [categories, setCategories] = useState<RequestCategory[]>([])
+  const [statusFilter, setStatusFilter] = useState<'all' | RequestStatus>('all')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [reqPage, appPage] = await Promise.all([
+    const [reqPage, appPage, cats] = await Promise.all([
       apiFetch<Paginated<CitizenRequestSummary>>('/api/v1/citizen-requests', {}, true),
       apiFetch<Paginated<SocialAssistanceApplication>>('/api/v1/social-assistance', {}, true),
+      apiFetch<RequestCategory[]>('/api/v1/citizen-requests/categories'),
     ])
     setRequests(reqPage.items)
     setApplications(appPage.items)
+    setCategories(cats)
   }, [])
 
   useEffect(() => {
@@ -30,6 +41,16 @@ function StaffDeskContent() {
       setError(err instanceof Error ? err.message : 'Personel verisi yüklenemedi.')
     })
   }, [load])
+
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c.name])),
+    [categories],
+  )
+
+  const filteredRequests = useMemo(() => {
+    if (statusFilter === 'all') return requests
+    return requests.filter((item) => item.status === statusFilter)
+  }, [requests, statusFilter])
 
   async function run(action: () => Promise<unknown>, okMessage: string) {
     setError(null)
@@ -54,19 +75,59 @@ function StaffDeskContent() {
       {info ? <div className="notice">{info}</div> : null}
 
       <section className="stack">
-        <h2 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Hizmet talepleri</h2>
-        {requests.map((item) => (
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Hizmet talepleri</h2>
+          <Link className="btn btn-ghost" to="/talepler" style={{ padding: '0.55rem 0.95rem' }}>
+            Tüm liste
+          </Link>
+        </div>
+
+        <div className="filter-row" role="tablist" aria-label="Talep durum filtresi">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={statusFilter === 'all'}
+            className={statusFilter === 'all' ? 'btn btn-primary' : 'btn btn-ghost'}
+            onClick={() => setStatusFilter('all')}
+          >
+            Tümü
+          </button>
+          {REQUEST_STATUSES.map((status) => (
+            <button
+              key={status}
+              type="button"
+              role="tab"
+              aria-selected={statusFilter === status}
+              className={statusFilter === status ? 'btn btn-primary' : 'btn btn-ghost'}
+              onClick={() => setStatusFilter(status)}
+            >
+              {requestStatusLabel(status)}
+            </button>
+          ))}
+        </div>
+
+        {filteredRequests.map((item) => (
           <article key={item.id} className="panel stack">
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
               <div>
-                <h3>
+                <p className="muted" style={{ margin: '0 0 0.25rem', fontSize: '0.85rem' }}>
+                  {categoryMap.get(item.categoryId) ?? 'Kategori'}
+                </p>
+                <h3 style={{ margin: 0 }}>
                   <Link to={`/talepler/${item.id}`}>#{item.id.slice(0, 8)}</Link>
                 </h3>
-                <p className="muted">{new Date(item.createdAtUtc).toLocaleString('tr-TR')}</p>
+                <p className="muted" style={{ marginBottom: 0 }}>
+                  {new Date(item.createdAtUtc).toLocaleString('tr-TR')}
+                </p>
               </div>
-              <span className="badge">{item.status}</span>
+              <span className={requestStatusBadgeClass(item.status)}>
+                {requestStatusLabel(item.status)}
+              </span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <Link className="btn btn-ghost" to={`/talepler/${item.id}`} style={{ padding: '0.55rem 0.95rem' }}>
+                Yazışma
+              </Link>
               {item.status === 'Pending' ? (
                 <button
                   type="button"
@@ -84,7 +145,7 @@ function StaffDeskContent() {
                   İncelemeye al
                 </button>
               ) : null}
-              {item.status === 'UnderReview' ? (
+              {item.status === 'Pending' || item.status === 'UnderReview' ? (
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -121,7 +182,7 @@ function StaffDeskContent() {
             </div>
           </article>
         ))}
-        {requests.length === 0 ? <p className="muted">Açık talep yok.</p> : null}
+        {filteredRequests.length === 0 ? <p className="muted">Bu filtrede talep yok.</p> : null}
       </section>
 
       <section className="stack">
