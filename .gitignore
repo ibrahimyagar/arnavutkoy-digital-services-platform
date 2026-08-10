@@ -40,6 +40,8 @@ coverage*.info
 appsettings.*.local.json
 .env
 .env.*
+!.env.example
+!docker/.env.example
 *.pfx
 *.pem
 
