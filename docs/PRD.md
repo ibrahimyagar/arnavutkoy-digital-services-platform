@@ -96,6 +96,7 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 
 ### 4.10. Transportation
 - `BusLine` (hat kodu, güzergah özeti, taban ücret) — anonim liste; Administrator ekler.
+- `BusLineStop` / `BusLineDeparture` — sıralı duraklar ve haftalık hareket saatleri.
 - `TransportCard` — vatandaş kart çıkarır, bakiye yükler, hatta biner (biniş simülasyonu `BoardingRecord`).
 - Yetersiz bakiyede domain exception → Result failure.
 

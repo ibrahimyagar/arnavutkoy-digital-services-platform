@@ -78,6 +78,42 @@ public sealed class TransportationEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task GetBusLineById_ReturnsStopsAndDepartures_WhenSeeded()
+    {
+        var client = factory.CreateClient();
+        var lines = await (await client.GetAsync("/api/v1/bus-lines")).ReadAsAsync<IReadOnlyCollection<BusLineDto>>();
+        var line36 = lines!.Single(l => l.Code == "36AS");
+
+        var detail = await (await client.GetAsync($"/api/v1/bus-lines/{line36.Id}"))
+            .ReadAsAsync<BusLineDetailsDto>();
+
+        detail!.Stops.Should().HaveCountGreaterThanOrEqualTo(3);
+        detail.Departures.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task AddStop_AsAdministrator_ShouldSucceed()
+    {
+        var client = factory.CreateClient();
+        var lines = await (await client.GetAsync("/api/v1/bus-lines")).ReadAsAsync<IReadOnlyCollection<BusLineDto>>();
+        var line = lines!.First(l => l.Code == "336");
+
+        var admin = await AuthHelper.LoginAsync(
+            client,
+            ApiFactory.DemoUsers.AdministratorNationalId,
+            ApiFactory.DemoUsers.AdministratorPassword);
+        AuthHelper.AttachBearerToken(client, admin.AccessToken);
+
+        var response = await client.PostAsJsonAsync($"/api/v1/bus-lines/{line.Id}/stops", new
+        {
+            sequence = 99,
+            name = "Test Durak",
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
     public async Task CreateBusLine_AsCitizen_ShouldReturn403()
     {
         var client = factory.CreateClient();

@@ -45,3 +45,30 @@ public sealed class BoardingRecordConfiguration : IEntityTypeConfiguration<Board
         builder.HasQueryFilter(x => !x.IsDeleted);
     }
 }
+
+public sealed class BusLineStopConfiguration : IEntityTypeConfiguration<BusLineStop>
+{
+    public void Configure(EntityTypeBuilder<BusLineStop> builder)
+    {
+        builder.ToTable("BusLineStops");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Name).IsRequired().HasMaxLength(150);
+        builder.HasIndex(x => new { x.BusLineId, x.Sequence }).IsUnique();
+        builder.HasOne<BusLine>().WithMany().HasForeignKey(x => x.BusLineId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasQueryFilter(x => !x.IsDeleted);
+    }
+}
+
+public sealed class BusLineDepartureConfiguration : IEntityTypeConfiguration<BusLineDeparture>
+{
+    public void Configure(EntityTypeBuilder<BusLineDeparture> builder)
+    {
+        builder.ToTable("BusLineDepartures");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Note).IsRequired().HasMaxLength(200);
+        builder.Property(x => x.DayOfWeek).HasConversion<string>().HasMaxLength(15);
+        builder.HasIndex(x => new { x.BusLineId, x.DayOfWeek, x.DepartureTime });
+        builder.HasOne<BusLine>().WithMany().HasForeignKey(x => x.BusLineId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasQueryFilter(x => !x.IsDeleted);
+    }
+}

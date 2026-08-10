@@ -22,6 +22,14 @@ public sealed class BusLinesController(ISender sender) : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpGet("{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetBusLineByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
     [HttpPost]
     [Authorize(Roles = Roles.Administrator)]
     public async Task<IActionResult> Create([FromBody] CreateBusLineRequest request, CancellationToken cancellationToken)
@@ -32,6 +40,32 @@ public sealed class BusLinesController(ISender sender) : ApiControllerBase
 
         return result.IsSuccess
             ? Created($"/api/v{HttpContext.GetRequestedApiVersion()}/bus-lines/{result.Value}", new { id = result.Value })
+            : HandleResult(result);
+    }
+
+    [HttpPost("{id:guid}/stops")]
+    [Authorize(Roles = Roles.Administrator)]
+    public async Task<IActionResult> AddStop(Guid id, [FromBody] AddBusLineStopRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new AddBusLineStopCommand(id, request.Sequence, request.Name), cancellationToken)
+            .ConfigureAwait(false);
+
+        return result.IsSuccess
+            ? Created($"/api/v{HttpContext.GetRequestedApiVersion()}/bus-lines/{id}", new { id = result.Value })
+            : HandleResult(result);
+    }
+
+    [HttpPost("{id:guid}/departures")]
+    [Authorize(Roles = Roles.Administrator)]
+    public async Task<IActionResult> AddDeparture(Guid id, [FromBody] AddBusLineDepartureRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new AddBusLineDepartureCommand(id, request.DayOfWeek, request.DepartureTime, request.Note), cancellationToken)
+            .ConfigureAwait(false);
+
+        return result.IsSuccess
+            ? Created($"/api/v{HttpContext.GetRequestedApiVersion()}/bus-lines/{id}", new { id = result.Value })
             : HandleResult(result);
     }
 }

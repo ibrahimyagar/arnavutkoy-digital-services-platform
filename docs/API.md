@@ -109,7 +109,10 @@ Taban yol: `/api/v1`
 | Metot | Yol | Auth | Açıklama |
 |---|---|---|---|
 | GET | `/bus-lines` | Anonim | Hatlar |
+| GET | `/bus-lines/{id}` | Anonim | Hat detayı (durak + hareket saatleri) |
 | POST | `/bus-lines` | Administrator | Hat ekle |
+| POST | `/bus-lines/{id}/stops` | Administrator | Durak ekle |
+| POST | `/bus-lines/{id}/departures` | Administrator | Hareket saati ekle |
 | GET | `/transport-cards/mine` | Authenticated | Kartlarım |
 | GET | `/transport-cards/mine/boardings` | Authenticated | Binişlerim |
 | GET | `/transport-cards/{id}` | Sahip veya personel | Kart detayı |

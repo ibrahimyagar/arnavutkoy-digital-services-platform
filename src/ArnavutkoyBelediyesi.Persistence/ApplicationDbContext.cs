@@ -47,6 +47,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
 
     public DbSet<BoardingRecord> BoardingRecords => Set<BoardingRecord>();
 
+    public DbSet<BusLineStop> BusLineStops => Set<BusLineStop>();
+
+    public DbSet<BusLineDeparture> BusLineDepartures => Set<BusLineDeparture>();
+
     public DbSet<Announcement> Announcements => Set<Announcement>();
 
     public DbSet<RequestCategory> RequestCategories => Set<RequestCategory>();

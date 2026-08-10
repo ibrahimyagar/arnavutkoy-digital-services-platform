@@ -279,19 +279,40 @@ public static class ApplicationDbContextSeeder
 
     private static async Task SeedTransportationAsync(ApplicationDbContext context, CancellationToken cancellationToken)
     {
-        if (await context.BusLines.AnyAsync(cancellationToken).ConfigureAwait(false))
+        if (!await context.BusLines.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            var lines = new[]
+            {
+                BusLine.Create("36AS", "Hadımköy - Metro", "Hadımköy → Taşoluk → Metro", 17.50m),
+                BusLine.Create("336", "Boğazköy Ring", "Boğazköy merkez ring", 12.00m),
+                BusLine.Create("78YB", "Yeşilbayır Express", "Yeşilbayır → Merkez", 15.00m)
+            };
+
+            await context.BusLines.AddRangeAsync(lines, cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        if (await context.BusLineStops.AnyAsync(cancellationToken).ConfigureAwait(false))
         {
             return;
         }
 
-        var lines = new[]
+        var line36 = await context.BusLines.FirstAsync(l => l.Code == "36AS", cancellationToken).ConfigureAwait(false);
+        var stops = new[]
         {
-            BusLine.Create("36AS", "Hadımköy - Metro", "Hadımköy → Taşoluk → Metro", 17.50m),
-            BusLine.Create("336", "Boğazköy Ring", "Boğazköy merkez ring", 12.00m),
-            BusLine.Create("78YB", "Yeşilbayır Express", "Yeşilbayır → Merkez", 15.00m)
+            BusLineStop.Create(line36.Id, 1, "Hadımköy Merkez"),
+            BusLineStop.Create(line36.Id, 2, "Taşoluk Kavşağı"),
+            BusLineStop.Create(line36.Id, 3, "Metro Aktarma")
+        };
+        var departures = new[]
+        {
+            BusLineDeparture.Create(line36.Id, DayOfWeek.Monday, new TimeOnly(7, 0), "İş saati"),
+            BusLineDeparture.Create(line36.Id, DayOfWeek.Monday, new TimeOnly(8, 30), null),
+            BusLineDeparture.Create(line36.Id, DayOfWeek.Saturday, new TimeOnly(10, 0), "Hafta sonu")
         };
 
-        await context.BusLines.AddRangeAsync(lines, cancellationToken).ConfigureAwait(false);
+        await context.BusLineStops.AddRangeAsync(stops, cancellationToken).ConfigureAwait(false);
+        await context.BusLineDepartures.AddRangeAsync(departures, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 

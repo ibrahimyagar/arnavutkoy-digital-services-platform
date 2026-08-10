@@ -34,7 +34,7 @@ public sealed class WaterSubscriptionsEndpointsTests(ApiFactory factory)
 
         var mine = await (await citizenClient.GetAsync("/api/v1/water-subscriptions/mine"))
             .ReadAsAsync<PaginatedList<WaterSubscriptionDto>>();
-        mine!.Items.Should().Contain(s => s.Id == created!.Id && s.Status == WaterSubscriptionStatus.Active);
+        mine!.Items.Should().Contain(s => s.Id == created.Id && s.Status == WaterSubscriptionStatus.Active);
 
         var officerClient = factory.CreateClient();
         var officer = await AuthHelper.LoginAsync(

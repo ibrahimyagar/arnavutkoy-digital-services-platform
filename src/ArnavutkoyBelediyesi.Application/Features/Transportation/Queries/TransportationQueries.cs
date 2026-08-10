@@ -2,6 +2,7 @@ using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Common.Models;
 using ArnavutkoyBelediyesi.Application.Features.Transportation.Dtos;
 using ArnavutkoyBelediyesi.Domain.Transportation;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -97,5 +98,53 @@ public sealed class GetMyBoardingsQueryHandler(IUnitOfWork unitOfWork)
             .ConfigureAwait(false);
 
         return Result<PaginatedList<BoardingRecordDto>>.Success(page);
+    }
+}
+
+public sealed record GetBusLineByIdQuery(Guid BusLineId) : IRequest<Result<BusLineDetailsDto>>;
+
+public sealed class GetBusLineByIdQueryValidator : AbstractValidator<GetBusLineByIdQuery>
+{
+    public GetBusLineByIdQueryValidator() => RuleFor(x => x.BusLineId).NotEmpty();
+}
+
+public sealed class GetBusLineByIdQueryHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<GetBusLineByIdQuery, Result<BusLineDetailsDto>>
+{
+    public async Task<Result<BusLineDetailsDto>> Handle(GetBusLineByIdQuery request, CancellationToken cancellationToken)
+    {
+        var line = await unitOfWork.Repository<BusLine>()
+            .GetByIdAsync(request.BusLineId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (line is null)
+        {
+            return Result<BusLineDetailsDto>.Failure("Hat bulunamadı.");
+        }
+
+        var stops = await unitOfWork.Repository<BusLineStop>().Query()
+            .Where(s => s.BusLineId == line.Id)
+            .OrderBy(s => s.Sequence)
+            .Select(s => new BusLineStopDto(s.Id, s.BusLineId, s.Sequence, s.Name))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var departures = await unitOfWork.Repository<BusLineDeparture>().Query()
+            .Where(d => d.BusLineId == line.Id)
+            .OrderBy(d => d.DayOfWeek)
+            .ThenBy(d => d.DepartureTime)
+            .Select(d => new BusLineDepartureDto(d.Id, d.BusLineId, d.DayOfWeek, d.DepartureTime, d.Note))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return Result<BusLineDetailsDto>.Success(new BusLineDetailsDto(
+            line.Id,
+            line.Code,
+            line.Name,
+            line.RouteSummary,
+            line.BaseFare,
+            line.IsActive,
+            stops,
+            departures));
     }
 }

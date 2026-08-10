@@ -88,7 +88,7 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | UtilitySubscriptions | WaterSubscription | Active/Suspended/Closed; su borcu üretimi |
 | Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
 | SocialAssistance | SocialAssistanceApplication | Sabit alan + JSONB; durum makinesi |
-| Transportation | TransportCard, BusLine, BoardingRecord | Bakiye, hat ücreti, biniş simülasyonu |
+| Transportation | TransportCard, BusLine, BusLineStop, BusLineDeparture, BoardingRecord | Bakiye, hat, durak, saat, biniş |
 
 Yol haritası R1–R6 tamamlandı.
 

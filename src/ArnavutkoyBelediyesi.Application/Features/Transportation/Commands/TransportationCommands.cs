@@ -169,3 +169,82 @@ public sealed class BoardBusCommandHandler(IUnitOfWork unitOfWork, IDateTimeProv
         return Result<Guid>.Success(boarding.Id);
     }
 }
+
+public sealed record AddBusLineStopCommand(Guid BusLineId, int Sequence, string Name) : IRequest<Result<Guid>>;
+
+public sealed class AddBusLineStopCommandValidator : AbstractValidator<AddBusLineStopCommand>
+{
+    public AddBusLineStopCommandValidator()
+    {
+        RuleFor(x => x.BusLineId).NotEmpty();
+        RuleFor(x => x.Sequence).GreaterThanOrEqualTo(1);
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(150);
+    }
+}
+
+public sealed class AddBusLineStopCommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<AddBusLineStopCommand, Result<Guid>>
+{
+    public async Task<Result<Guid>> Handle(AddBusLineStopCommand request, CancellationToken cancellationToken)
+    {
+        var line = await unitOfWork.Repository<BusLine>()
+            .GetByIdAsync(request.BusLineId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (line is null)
+        {
+            return Result<Guid>.Failure("Hat bulunamadı.");
+        }
+
+        var duplicate = await unitOfWork.Repository<BusLineStop>().Query()
+            .AnyAsync(s => s.BusLineId == request.BusLineId && s.Sequence == request.Sequence, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (duplicate)
+        {
+            return Result<Guid>.Failure($"Bu hatta {request.Sequence}. sıra zaten tanımlı.");
+        }
+
+        var stop = BusLineStop.Create(request.BusLineId, request.Sequence, request.Name);
+        await unitOfWork.Repository<BusLineStop>().AddAsync(stop, cancellationToken).ConfigureAwait(false);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return Result<Guid>.Success(stop.Id);
+    }
+}
+
+public sealed record AddBusLineDepartureCommand(
+    Guid BusLineId,
+    DayOfWeek DayOfWeek,
+    TimeOnly DepartureTime,
+    string? Note) : IRequest<Result<Guid>>;
+
+public sealed class AddBusLineDepartureCommandValidator : AbstractValidator<AddBusLineDepartureCommand>
+{
+    public AddBusLineDepartureCommandValidator()
+    {
+        RuleFor(x => x.BusLineId).NotEmpty();
+        RuleFor(x => x.DayOfWeek).IsInEnum();
+        RuleFor(x => x.Note).MaximumLength(200);
+    }
+}
+
+public sealed class AddBusLineDepartureCommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<AddBusLineDepartureCommand, Result<Guid>>
+{
+    public async Task<Result<Guid>> Handle(AddBusLineDepartureCommand request, CancellationToken cancellationToken)
+    {
+        var line = await unitOfWork.Repository<BusLine>()
+            .GetByIdAsync(request.BusLineId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (line is null)
+        {
+            return Result<Guid>.Failure("Hat bulunamadı.");
+        }
+
+        var departure = BusLineDeparture.Create(request.BusLineId, request.DayOfWeek, request.DepartureTime, request.Note);
+        await unitOfWork.Repository<BusLineDeparture>().AddAsync(departure, cancellationToken).ConfigureAwait(false);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return Result<Guid>.Success(departure.Id);
+    }
+}
