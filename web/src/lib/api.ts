@@ -54,6 +54,14 @@ export type TransportCard = {
   isActive: boolean
 }
 
+export type BoardingRecord = {
+  id: string
+  transportCardId: string
+  busLineId: string
+  fareCharged: number
+  boardedAtUtc: string
+}
+
 export type RequestCategory = {
   id: string
   name: string
@@ -269,10 +277,10 @@ export async function apiFetch<T>(
   return (await response.json()) as T
 }
 
-export async function login(nationalId: string, password: string) {
+export async function login(email: string, password: string) {
   const auth = await apiFetch<AuthResult>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ nationalId, password }),
+    body: JSON.stringify({ email, password }),
   })
   saveSession(auth)
   return auth

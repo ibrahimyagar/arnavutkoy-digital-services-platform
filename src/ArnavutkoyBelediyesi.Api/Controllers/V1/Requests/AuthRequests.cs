@@ -1,26 +1,20 @@
 namespace ArnavutkoyBelediyesi.Api.Controllers.V1.Requests;
 
-/// <summary>
-/// Vatandaş kaydı oluşturma isteği gövdesi.
-/// </summary>
-public sealed record RegisterRequest(string NationalId, string FullName, string PhoneNumber, string Password);
+public sealed record RegisterRequest(
+    string Email,
+    string FullName,
+    string PhoneNumber,
+    string NationalId,
+    DateOnly BirthDate,
+    string Gender,
+    string Password);
 
-/// <summary>
-/// Giriş isteği gövdesi.
-/// </summary>
-public sealed record LoginRequest(string NationalId, string Password);
+public sealed record LoginRequest(string Email, string Password);
 
-/// <summary>
-/// Erişim token'ı yenileme isteği gövdesi.
-/// </summary>
 public sealed record RefreshTokenRequest(string RefreshToken);
 
-/// <summary>
-/// Çıkış isteği gövdesi.
-/// </summary>
 public sealed record LogoutRequest(string RefreshToken);
 
-/// <summary>
-/// Parola değiştirme isteği gövdesi.
-/// </summary>
 public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+
+public sealed record UpdatePhoneRequest(string PhoneNumber);

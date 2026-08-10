@@ -5,15 +5,10 @@ using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 namespace ArnavutkoyBelediyesi.Api.IntegrationTests.Common;
 
 /// <summary>
-/// Testlerde tekrarlanan "yeni bir vatandaş kaydet ve giriş yap" / "demo kullanıcı olarak giriş
-/// yap" / "istemciye Bearer token ekle" adımlarını tek bir yerde toplayan yardımcı sınıf.
+/// Test auth yardımcıları — giriş kimliği e-postadır.
 /// </summary>
 public static class AuthHelper
 {
-    /// <summary>
-    /// Rastgele ama geçerli bir sağlama toplamına (checksum) sahip T.C. Kimlik Numarası üretir;
-    /// böylece her test kendi benzersiz kullanıcısını oluşturabilir.
-    /// </summary>
     public static string GenerateValidNationalId()
     {
         var random = Random.Shared;
@@ -38,28 +33,35 @@ public static class AuthHelper
         return string.Concat(digits) + tenthDigit + eleventhDigit;
     }
 
+    public static string GenerateUniqueEmail(string prefix = "citizen") =>
+        $"{prefix}.{Guid.NewGuid():N}@test.arnavutkoy.local";
+
     public static async Task<AuthResultDto> RegisterAndLoginCitizenAsync(
         HttpClient client,
         string fullName = "Test Vatandaş",
         string password = "Test1234")
     {
+        var email = GenerateUniqueEmail();
         var nationalId = GenerateValidNationalId();
 
         var registerResponse = await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
-            nationalId,
+            email,
             fullName,
             phoneNumber = "+905551112233",
+            nationalId,
+            birthDate = "1995-06-15",
+            gender = "E",
             password,
         });
         registerResponse.EnsureSuccessStatusCode();
 
-        return await LoginAsync(client, nationalId, password);
+        return await LoginAsync(client, email, password);
     }
 
-    public static async Task<AuthResultDto> LoginAsync(HttpClient client, string nationalId, string password)
+    public static async Task<AuthResultDto> LoginAsync(HttpClient client, string email, string password)
     {
-        var loginResponse = await client.PostAsJsonAsync("/api/v1/auth/login", new { nationalId, password });
+        var loginResponse = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
         loginResponse.EnsureSuccessStatusCode();
 
         var result = await loginResponse.ReadAsAsync<AuthResultDto>();

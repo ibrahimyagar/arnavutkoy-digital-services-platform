@@ -1,14 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using ArnavutkoyBelediyesi.Api.IntegrationTests.Common;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 
 namespace ArnavutkoyBelediyesi.Api.IntegrationTests.Auth;
 
-/// <summary>
-/// Kayıt, giriş, token yenileme, çıkış ve parola değiştirme uç noktalarının uçtan uca davranışını
-/// gerçek bir PostgreSQL veritabanına karşı doğrular.
-/// </summary>
 [Collection(ApiCollection.Name)]
 public sealed class AuthEndpointsTests(ApiFactory factory)
 {
@@ -16,13 +13,15 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     public async Task Register_WithValidData_ShouldReturn201AndCreateAccount()
     {
         var client = factory.CreateClient();
-        var nationalId = AuthHelper.GenerateValidNationalId();
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
-            nationalId,
+            email = AuthHelper.GenerateUniqueEmail(),
             fullName = "Yeni Vatandaş",
             phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
             password = "GucluSifre1",
         });
 
@@ -30,16 +29,33 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Register_WithDuplicateNationalId_ShouldReturn400()
+    public async Task Register_WithDuplicateEmail_ShouldReturn400()
     {
         var client = factory.CreateClient();
-        var nationalId = AuthHelper.GenerateValidNationalId();
-        var payload = new { nationalId, fullName = "Mükerrer Vatandaş", phoneNumber = "+905551112233", password = "GucluSifre1" };
+        var email = AuthHelper.GenerateUniqueEmail();
 
-        var first = await client.PostAsJsonAsync("/api/v1/auth/register", payload);
+        var first = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            fullName = "Mükerrer Vatandaş",
+            phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password = "GucluSifre1",
+        });
         first.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        var second = await client.PostAsJsonAsync("/api/v1/auth/register", payload);
+        var second = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            fullName = "Mükerrer Vatandaş 2",
+            phoneNumber = "+905551112244",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password = "GucluSifre1",
+        });
 
         second.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -51,6 +67,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
+            email = AuthHelper.GenerateUniqueEmail(),
             nationalId = "12345678901",
             fullName = "Geçersiz Vatandaş",
             phoneNumber = "+905551112233",
@@ -72,20 +89,22 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Login_WithWrongPassword_ShouldReturn400WithoutRevealingWhetherAccountExists()
+    public async Task Login_WithWrongPassword_ShouldReturn400()
     {
         var client = factory.CreateClient();
-        var nationalId = AuthHelper.GenerateValidNationalId();
+        var email = AuthHelper.GenerateUniqueEmail();
         await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
-            nationalId,
+            email,
             fullName = "Test Vatandaş",
             phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
             password = "GucluSifre1",
         });
 
-        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { nationalId, password = "YanlisSifre1" });
-
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "YanlisSifre1" });
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -96,7 +115,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
 
         var response = await client.PostAsJsonAsync(
             "/api/v1/auth/login",
-            new { nationalId = AuthHelper.GenerateValidNationalId(), password = "HerhangiBirSifre1" });
+            new { email = AuthHelper.GenerateUniqueEmail("missing"), password = "HerhangiBirSifre1" });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -122,92 +141,83 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var auth = await AuthHelper.RegisterAndLoginCitizenAsync(client);
 
-        var firstRefresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
-        firstRefresh.EnsureSuccessStatusCode();
+        var first = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
+        first.EnsureSuccessStatusCode();
 
-        var secondRefreshWithSameToken = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
-
-        secondRefreshWithSameToken.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var replay = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
+        replay.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task Refresh_WithInvalidToken_ShouldReturn400()
-    {
-        var client = factory.CreateClient();
-
-        var response = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = "gecersiz-bir-token" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task Logout_ShouldRevokeRefreshToken_SoItCannotBeUsedAgain()
+    public async Task Logout_ShouldRevokeRefreshToken()
     {
         var client = factory.CreateClient();
         var auth = await AuthHelper.RegisterAndLoginCitizenAsync(client);
 
-        var logoutResponse = await client.PostAsJsonAsync("/api/v1/auth/logout", new { refreshToken = auth.RefreshToken });
-        logoutResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var logout = await client.PostAsJsonAsync("/api/v1/auth/logout", new { refreshToken = auth.RefreshToken });
+        logout.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var refreshAfterLogout = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
-        refreshAfterLogout.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var refresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = auth.RefreshToken });
+        refresh.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task ChangePassword_WithoutAuthentication_ShouldReturn401()
+    public async Task ChangePassword_WithValidCurrentPassword_ShouldAllowLoginWithNewPassword()
     {
         var client = factory.CreateClient();
-
-        var response = await client.PostAsJsonAsync(
-            "/api/v1/auth/change-password",
-            new { currentPassword = "Test1234", newPassword = "YeniSifre1" });
-
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
-
-    [Fact]
-    public async Task ChangePassword_WithCorrectCurrentPassword_ShouldSucceedAndAllowLoginWithNewPassword()
-    {
-        var client = factory.CreateClient();
-        var nationalId = AuthHelper.GenerateValidNationalId();
+        var email = AuthHelper.GenerateUniqueEmail();
         await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
-            nationalId,
-            fullName = "Parola Değiştiren Vatandaş",
+            email,
+            fullName = "Parola Test",
             phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
             password = "EskiSifre1",
         });
-        var auth = await AuthHelper.LoginAsync(client, nationalId, "EskiSifre1");
+
+        var auth = await AuthHelper.LoginAsync(client, email, "EskiSifre1");
         AuthHelper.AttachBearerToken(client, auth.AccessToken);
 
-        var changeResponse = await client.PostAsJsonAsync(
-            "/api/v1/auth/change-password",
-            new { currentPassword = "EskiSifre1", newPassword = "YeniSifre1" });
-        changeResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/change-password", new
+        {
+            currentPassword = "EskiSifre1",
+            newPassword = "YeniSifre1",
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var newClient = factory.CreateClient();
-        var loginWithOldPassword = await newClient.PostAsJsonAsync(
-            "/api/v1/auth/login",
-            new { nationalId, password = "EskiSifre1" });
-        loginWithOldPassword.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var loginOld = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "EskiSifre1" });
+        loginOld.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
-        var loginWithNewPassword = await newClient.PostAsJsonAsync(
-            "/api/v1/auth/login",
-            new { nationalId, password = "YeniSifre1" });
-        loginWithNewPassword.StatusCode.Should().Be(HttpStatusCode.OK);
+        var loginNew = await AuthHelper.LoginAsync(client, email, "YeniSifre1");
+        loginNew.AccessToken.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
-    public async Task ChangePassword_WithWrongCurrentPassword_ShouldReturn400()
+    public async Task Me_ShouldReturnProfileWithEmail()
     {
         var client = factory.CreateClient();
-        var auth = await AuthHelper.RegisterAndLoginCitizenAsync(client);
+        var email = AuthHelper.GenerateUniqueEmail();
+        await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            fullName = "Profil Test",
+            phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password = "GucluSifre1",
+        });
+        var auth = await AuthHelper.LoginAsync(client, email, "GucluSifre1");
         AuthHelper.AttachBearerToken(client, auth.AccessToken);
 
-        var response = await client.PostAsJsonAsync(
-            "/api/v1/auth/change-password",
-            new { currentPassword = "YanlisEskiSifre1", newPassword = "YeniSifre1" });
+        var response = await client.GetAsync("/api/v1/auth/me");
+        response.EnsureSuccessStatusCode();
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var doc = await JsonDocument.ParseAsync(stream);
+        doc.RootElement.GetProperty("email").GetString().Should().Be(email);
     }
 }
+

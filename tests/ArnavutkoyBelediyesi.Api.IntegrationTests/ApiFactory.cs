@@ -32,12 +32,17 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     /// </summary>
     public static class DemoUsers
     {
-        public const string CitizenNationalId = "10000000146";
+        public const string CitizenEmail = "vatandas@demo.arnavutkoy.local";
         public const string CitizenPassword = "Demo!Citizen123";
-        public const string OfficerNationalId = "10000000252";
+        public const string OfficerEmail = "gorevli@demo.arnavutkoy.local";
         public const string OfficerPassword = "Demo!Officer123";
-        public const string AdministratorNationalId = "10000000368";
+        public const string AdministratorEmail = "yonetici@demo.arnavutkoy.local";
         public const string AdministratorPassword = "Demo!Admin123";
+
+        // Geriye dönük alias — eski test sabit adları
+        public const string CitizenNationalId = CitizenEmail;
+        public const string OfficerNationalId = OfficerEmail;
+        public const string AdministratorNationalId = AdministratorEmail;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

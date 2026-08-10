@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 export function LoginPage() {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
-  const [nationalId, setNationalId] = useState('10000000146')
+  const [email, setEmail] = useState('vatandas@demo.arnavutkoy.local')
   const [password, setPassword] = useState('Demo!Citizen123')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -19,7 +19,7 @@ export function LoginPage() {
     setBusy(true)
     setError(null)
     try {
-      await login(nationalId.trim(), password)
+      await login(email.trim(), password)
       navigate('/panel')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Giriş başarısız.')
@@ -33,28 +33,28 @@ export function LoginPage() {
       <div className="panel stack">
         <div>
           <h2>Hesap girişi</h2>
-          <p className="muted">T.C. kimlik numarası ve şifrenizle giriş yapın.</p>
+          <p className="muted">E-posta ve şifrenizle giriş yapın.</p>
         </div>
 
         <div className="notice">
-          Vatandaş: <code>10000000146</code> / <code>Demo!Citizen123</code>
+          Vatandaş: <code>vatandas@demo.arnavutkoy.local</code> / <code>Demo!Citizen123</code>
           <br />
-          Görevli: <code>10000000252</code> / <code>Demo!Officer123</code>
+          Görevli: <code>gorevli@demo.arnavutkoy.local</code> / <code>Demo!Officer123</code>
           <br />
-          Yönetici: <code>10000000368</code> / <code>Demo!Admin123</code>
+          Yönetici: <code>yonetici@demo.arnavutkoy.local</code> / <code>Demo!Admin123</code>
         </div>
 
         {error ? <div className="error-box">{error}</div> : null}
 
         <form className="stack" onSubmit={(e) => void onSubmit(e)}>
           <div className="field">
-            <label htmlFor="nationalId">T.C. Kimlik No</label>
+            <label htmlFor="email">E-posta</label>
             <input
-              id="nationalId"
-              inputMode="numeric"
+              id="email"
+              type="email"
               autoComplete="username"
-              value={nationalId}
-              onChange={(e) => setNationalId(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -75,7 +75,9 @@ export function LoginPage() {
         </form>
 
         <p className="muted">
-          <Link to="/">Ana sayfaya dön</Link>
+          Hesabınız yok mu? <Link to="/kayit">Kayıt olun</Link>
+          {' · '}
+          <Link to="/">Ana sayfa</Link>
         </p>
       </div>
     </div>

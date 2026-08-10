@@ -13,7 +13,14 @@ public sealed class RegisterCitizenCommandValidatorTests
     private readonly RegisterCitizenCommandValidator _validator = new();
 
     private static RegisterCitizenCommand ValidCommand() =>
-        new("12345678950", "Ahmet Yılmaz", "05551112233", "Sifre123");
+        new(
+            "ahmet@test.local",
+            "Ahmet Yılmaz",
+            "05551112233",
+            "12345678950",
+            new DateOnly(1995, 6, 15),
+            "E",
+            "Sifre123");
 
     [Fact]
     public void Validate_WithValidCommand_ShouldNotHaveErrors()
@@ -21,6 +28,18 @@ public sealed class RegisterCitizenCommandValidatorTests
         var result = _validator.TestValidate(ValidCommand());
 
         result.ShouldNotHaveAnyValidationErrors();
+    }
+
+    [Theory]
+    [InlineData("not-an-email")]
+    [InlineData("")]
+    public void Validate_WithInvalidEmail_ShouldHaveError(string email)
+    {
+        var command = ValidCommand() with { Email = email };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
     [Theory]
@@ -68,12 +87,27 @@ public sealed class RegisterCitizenCommandHandlerTests
         var identityService = Substitute.For<IIdentityService>();
         var expected = Result<Guid>.Success(Guid.NewGuid());
         identityService
-            .CreateCitizenAsync("12345678950", "Ahmet Yılmaz", "05551112233", "Sifre123", Arg.Any<CancellationToken>())
+            .CreateCitizenAsync(
+                "ahmet@test.local",
+                "Ahmet Yılmaz",
+                "05551112233",
+                "12345678950",
+                new DateOnly(1995, 6, 15),
+                "E",
+                "Sifre123",
+                Arg.Any<CancellationToken>())
             .Returns(expected);
         var handler = new RegisterCitizenCommandHandler(identityService);
 
         var result = await handler.Handle(
-            new RegisterCitizenCommand("12345678950", "Ahmet Yılmaz", "05551112233", "Sifre123"),
+            new RegisterCitizenCommand(
+                "ahmet@test.local",
+                "Ahmet Yılmaz",
+                "05551112233",
+                "12345678950",
+                new DateOnly(1995, 6, 15),
+                "E",
+                "Sifre123"),
             CancellationToken.None);
 
         result.Should().Be(expected);
@@ -107,11 +141,11 @@ public sealed class LoginCommandHandlerTests
     public async Task Handle_WhenCredentialsInvalid_ShouldReturnFailureWithoutIssuingToken()
     {
         _identityService
-            .ValidateCredentialsAsync("12345678950", "wrong", Arg.Any<CancellationToken>())
-            .Returns(Result<AuthenticatedUser>.Failure("Kullanıcı adı veya parola hatalı."));
+            .ValidateCredentialsAsync("ahmet@test.local", "wrong", Arg.Any<CancellationToken>())
+            .Returns(Result<AuthenticatedUser>.Failure("E-posta veya parola hatalı."));
         var handler = CreateHandler();
 
-        var result = await handler.Handle(new LoginCommand("12345678950", "wrong"), CancellationToken.None);
+        var result = await handler.Handle(new LoginCommand("ahmet@test.local", "wrong"), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         _jwtTokenGenerator.DidNotReceive().GenerateAccessToken(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<IEnumerable<string>>());
@@ -122,13 +156,13 @@ public sealed class LoginCommandHandlerTests
     {
         var user = new AuthenticatedUser(Guid.NewGuid(), "Ahmet Yılmaz", ["Citizen"]);
         _identityService
-            .ValidateCredentialsAsync("12345678950", "Sifre123", Arg.Any<CancellationToken>())
+            .ValidateCredentialsAsync("ahmet@test.local", "Sifre123", Arg.Any<CancellationToken>())
             .Returns(Result<AuthenticatedUser>.Success(user));
         _jwtTokenGenerator.GenerateAccessToken(user.UserId, user.FullName, user.Roles).Returns("access-token");
         _jwtTokenGenerator.GenerateRefreshToken().Returns("refresh-token");
         var handler = CreateHandler();
 
-        var result = await handler.Handle(new LoginCommand("12345678950", "Sifre123"), CancellationToken.None);
+        var result = await handler.Handle(new LoginCommand("ahmet@test.local", "Sifre123"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().Be("access-token");

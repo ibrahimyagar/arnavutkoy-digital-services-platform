@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { RequestStatusTimeline } from '../components/RequestStatusTimeline'
@@ -27,6 +27,52 @@ type CitizenRequestDetail = {
   messages: RequestMessage[]
 }
 
+const STAFF_REPLY_TEMPLATES = [
+  {
+    id: 'ack',
+    label: 'Alındı',
+    text: 'Talebiniz alındı. İlgili birim incelemesine yönlendirildi; süreç hakkında bu kanaldan bilgilendirileceksiniz.',
+  },
+  {
+    id: 'info',
+    label: 'Ek bilgi',
+    text: 'İncelemeyi tamamlayabilmemiz için mahalle, sokak/yakın nokta ve mümkünse fotoğraf veya net konum bilgisini paylaşır mısınız?',
+  },
+  {
+    id: 'schedule',
+    label: 'Saha planı',
+    text: 'Saha ekibi planlamaya alındı. Arnavutköy sınırları içinde uygun çalışma penceresinde yerinde kontrol yapılacaktır.',
+  },
+  {
+    id: 'resolved',
+    label: 'Çözüldü',
+    text: 'Talebinizle ilgili işlem tamamlandı. Sahada yeni bir sorun görürseniz yeni talep açabilir veya bu yazışmaya not düşebilirsiniz.',
+  },
+  {
+    id: 'redirect',
+    label: 'Yönlendirme',
+    text: 'Konu ilgili müdürlüğe iletildi. Takip numarası bu talep kaydıdır; ek belge gerekirse buradan yazabilirsiniz.',
+  },
+] as const
+
+const CITIZEN_REPLY_TEMPLATES = [
+  {
+    id: 'photo',
+    label: 'Konum ekle',
+    text: 'Mahalle: \nSokak / yakın nokta: \nEk açıklama: ',
+  },
+  {
+    id: 'thanks',
+    label: 'Teşekkür',
+    text: 'Bilgilendirme için teşekkürler. Güncelleme olursa buradan takip edeceğim.',
+  },
+  {
+    id: 'still',
+    label: 'Devam ediyor',
+    text: 'Sorun hâlen devam ediyor. Son gözlem tarih/saat: \nNot: ',
+  },
+] as const
+
 function RequestDetailContent() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -38,6 +84,7 @@ function RequestDetailContent() {
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     if (!id) return
@@ -50,10 +97,26 @@ function RequestDetailContent() {
   }, [id])
 
   useEffect(() => {
-    void load().catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : 'Talep yüklenemedi.')
-    })
+    setLoading(true)
+    void load()
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Talep yüklenemedi.')
+      })
+      .finally(() => setLoading(false))
   }, [load])
+
+  const templates = useMemo(
+    () => (staff ? STAFF_REPLY_TEMPLATES : CITIZEN_REPLY_TEMPLATES),
+    [staff],
+  )
+
+  const stats = useMemo(() => {
+    if (!detail) return null
+    const officer = detail.messages.filter((m) => m.senderType === 'Officer').length
+    const citizen = detail.messages.filter((m) => m.senderType === 'Citizen').length
+    const last = detail.messages[detail.messages.length - 1]
+    return { officer, citizen, last }
+  }, [detail])
 
   async function onReply(event: FormEvent) {
     event.preventDefault()
@@ -96,6 +159,43 @@ function RequestDetailContent() {
     }
   }
 
+  async function resolveWithTemplate() {
+    if (!id || !detail) return
+    const resolvedTemplate = STAFF_REPLY_TEMPLATES.find((t) => t.id === 'resolved')
+    setBusy(true)
+    setError(null)
+    setInfo(null)
+    try {
+      if (resolvedTemplate && !reply.trim()) {
+        await apiFetch(
+          `/api/v1/citizen-requests/${id}/messages`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ message: resolvedTemplate.text }),
+          },
+          true,
+        )
+      } else if (reply.trim()) {
+        await apiFetch(
+          `/api/v1/citizen-requests/${id}/messages`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ message: reply.trim() }),
+          },
+          true,
+        )
+        setReply('')
+      }
+      await apiFetch(`/api/v1/citizen-requests/${id}/resolve`, { method: 'POST' }, true)
+      setInfo('Yanıt gönderildi ve talep çözüldü.')
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Çözüm işlemi başarısız.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const categoryName =
     categories.find((c) => c.id === detail?.categoryId)?.name ?? 'Kategori'
   const backTo = staff ? '/personel' : '/talepler'
@@ -108,6 +208,12 @@ function RequestDetailContent() {
     return senderType === 'Officer' ? 'Belediye' : 'Siz'
   }
 
+  function applyTemplate(text: string) {
+    setReply(text)
+    setInfo('Şablon yüklendi — göndermeden önce düzenleyebilirsiniz.')
+    setError(null)
+  }
+
   return (
     <div className="container stack">
       <p className="muted">
@@ -116,6 +222,24 @@ function RequestDetailContent() {
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
+
+      {loading && !detail ? (
+        <div className="stack" aria-busy="true" aria-label="Talep yükleniyor">
+          <div className="panel stack">
+            <span className="skeleton-line skeleton-line--sm" />
+            <span className="skeleton-line skeleton-line--lg" />
+            <span className="skeleton-line skeleton-line--xl" />
+          </div>
+          <div className="stats-strip stats-strip--skeleton">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div key={index}>
+                <span className="skeleton-line skeleton-line--sm" />
+                <span className="skeleton-line skeleton-line--lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {detail ? (
         <>
@@ -142,6 +266,29 @@ function RequestDetailContent() {
 
             <RequestStatusTimeline status={detail.status} />
 
+            {stats ? (
+              <div className="stats-strip" aria-label="Yazışma özeti">
+                <div>
+                  <span className="muted">Mesaj</span>
+                  <strong>{detail.messages.length}</strong>
+                </div>
+                <div>
+                  <span className="muted">Vatandaş</span>
+                  <strong>{stats.citizen}</strong>
+                </div>
+                <div>
+                  <span className="muted">Belediye</span>
+                  <strong>{stats.officer}</strong>
+                </div>
+                <div>
+                  <span className="muted">Son yazan</span>
+                  <strong>
+                    {stats.last ? senderLabel(stats.last.senderType).split(' ')[0] : '—'}
+                  </strong>
+                </div>
+              </div>
+            ) : null}
+
             {staff ? (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                 {detail.status === 'Pending' ? (
@@ -160,19 +307,29 @@ function RequestDetailContent() {
                   </button>
                 ) : null}
                 {detail.status === 'Pending' || detail.status === 'UnderReview' ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    disabled={busy}
-                    onClick={() =>
-                      void runStatus(
-                        `/api/v1/citizen-requests/${detail.id}/resolve`,
-                        'Talep çözüldü.',
-                      )
-                    }
-                  >
-                    Çöz
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={busy}
+                      onClick={() =>
+                        void runStatus(
+                          `/api/v1/citizen-requests/${detail.id}/resolve`,
+                          'Talep çözüldü.',
+                        )
+                      }
+                    >
+                      Çöz
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      disabled={busy}
+                      onClick={() => void resolveWithTemplate()}
+                    >
+                      Yanıtla ve çöz
+                    </button>
+                  </>
                 ) : null}
                 {detail.status !== 'Closed' ? (
                   <button
@@ -197,47 +354,65 @@ function RequestDetailContent() {
             <h2 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: '1.25rem' }}>
               Yazışma
             </h2>
-            <div className="message-thread">
-              {detail.messages.map((msg) => {
-                const mine =
-                  (staff && msg.senderType === 'Officer') ||
-                  (!staff && msg.senderType === 'Citizen')
-                return (
-                  <article
-                    key={msg.id}
-                    className={`message-bubble ${mine ? 'is-mine' : 'is-theirs'}`}
-                  >
-                    <div className="message-meta">
-                      <strong>{senderLabel(msg.senderType)}</strong>
-                      <time dateTime={msg.sentAtUtc}>
-                        {new Date(msg.sentAtUtc).toLocaleString('tr-TR')}
-                      </time>
-                    </div>
-                    <p>{msg.message}</p>
-                  </article>
-                )
-              })}
-            </div>
+            {detail.messages.length === 0 ? (
+              <p className="muted">Henüz mesaj yok. İlk yanıtı aşağıdan yazabilirsiniz.</p>
+            ) : (
+              <div className="message-thread">
+                {detail.messages.map((msg) => {
+                  const mine =
+                    (staff && msg.senderType === 'Officer') ||
+                    (!staff && msg.senderType === 'Citizen')
+                  return (
+                    <article
+                      key={msg.id}
+                      className={`message-bubble ${mine ? 'is-mine' : 'is-theirs'}`}
+                    >
+                      <div className="message-meta">
+                        <strong>{senderLabel(msg.senderType)}</strong>
+                        <time dateTime={msg.sentAtUtc}>
+                          {new Date(msg.sentAtUtc).toLocaleString('tr-TR')}
+                        </time>
+                      </div>
+                      <p>{msg.message}</p>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
           </section>
 
           {detail.status !== 'Closed' ? (
             <form className="panel stack" onSubmit={(e) => void onReply(e)}>
-              <h3>{staff ? 'Vatandaşa yanıt yaz' : 'Yanıt yaz'}</h3>
+              <h3 style={{ margin: 0 }}>{staff ? 'Vatandaşa yanıt yaz' : 'Yanıt yaz'}</h3>
+              <div className="dept-chip-row" role="group" aria-label="Hazır yanıt şablonları">
+                {templates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => applyTemplate(template.text)}
+                  >
+                    {template.label}
+                  </button>
+                ))}
+              </div>
               <div className="field">
                 <label htmlFor="reply">Mesaj</label>
                 <textarea
                   id="reply"
-                  rows={3}
+                  rows={4}
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                   required
                   maxLength={2000}
                   placeholder={
                     staff
-                      ? 'İnceleme sonucu veya ek bilgi talep edin…'
-                      : 'Ek bilgi veya güncelleme yazın…'
+                      ? 'Şablon seçin veya inceleme sonucunu yazın…'
+                      : 'Şablon seçin veya ek bilgi yazın…'
                   }
                 />
+                <p className="muted" style={{ margin: '0.35rem 0 0', fontSize: '0.85rem' }}>
+                  {reply.length}/2000
+                </p>
               </div>
               <button className="btn btn-primary" type="submit" disabled={busy}>
                 {busy ? 'Gönderiliyor…' : 'Gönder'}
@@ -247,13 +422,11 @@ function RequestDetailContent() {
             <div className="notice">Bu talep kapatılmış; yeni mesaj eklenemez.</div>
           )}
         </>
-      ) : !error ? (
-        <p className="muted">Yükleniyor…</p>
-      ) : (
+      ) : !loading && error ? (
         <button type="button" className="btn btn-ghost" onClick={() => navigate(backTo)}>
           Geri dön
         </button>
-      )}
+      ) : null}
     </div>
   )
 }

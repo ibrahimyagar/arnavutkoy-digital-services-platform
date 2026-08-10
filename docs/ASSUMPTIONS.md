@@ -37,7 +37,7 @@ kaldırılmıştır. İleride karmaşık nesne grafikleri doğarsa Mapster yenid
 
 ## A6 — Kimlik Doğrulama Alanı
 
-Referans projede T.C. kimlik no / sicil no / telefon ile giriş vardı. Bu projede ASP.NET Core Identity'nin `UserName` alanı **T.C. Kimlik Numarası** olarak kullanılır (11 haneli, TCKN algoritması ile doğrulanır — kurgusal/test amaçlı numaralar seed'de kullanılır, gerçek kişilere ait değildir). E-posta alanı iletişim/parola sıfırlama için tutulur ama giriş yöntemi değildir.
+Giriş kimliği **e-posta** adresidir (ASP.NET Core Identity `Email` / `UserName`). T.C. Kimlik Numarası profil alanıdır (kayıt sırasında alınır, checksum doğrulanır; kurgusal/test numaraları seed'de kullanılır). Bu, modern e-belediye UX'i için bilinçli bir sapmadır; referans PHP projesi TCK/sicil/telefon ile giriş yapıyordu.
 
 ## A7 — Borç Gecikme Faizi Hesaplama Zamanı
 

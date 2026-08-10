@@ -1,14 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { apiFetch, type Announcement, type Paginated } from '../lib/api'
+
+function excerpt(text: string, max = 160) {
+  const normalized = text.replace(/\s+/g, ' ').trim()
+  if (normalized.length <= max) return normalized
+  return `${normalized.slice(0, max).trimEnd()}…`
+}
+
+function publishedLabel(item: Announcement) {
+  const start = item.publishStartUtc ?? item.createdAtUtc
+  return new Date(start).toLocaleString('tr-TR')
+}
 
 export function AnnouncementsPage() {
   const [items, setItems] = useState<Announcement[]>([])
+  const [q, setQ] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     void (async () => {
       try {
-        const page = await apiFetch<Paginated<Announcement>>('/api/v1/announcements')
+        const page = await apiFetch<Paginated<Announcement>>(
+          '/api/v1/announcements?pageSize=50',
+        )
         setItems(page.items)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Duyurular yüklenemedi.')
@@ -16,30 +31,107 @@ export function AnnouncementsPage() {
     })()
   }, [])
 
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLocaleLowerCase('tr-TR')
+    if (!needle) return items
+    return items.filter(
+      (item) =>
+        item.title.toLocaleLowerCase('tr-TR').includes(needle) ||
+        item.content.toLocaleLowerCase('tr-TR').includes(needle),
+    )
+  }, [items, q])
+
   return (
-    <div className="container stack">
+    <div className="container stack page">
       <div>
         <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Duyurular</h1>
-        <p className="muted">Yayımlanmış belediye duyuruları.</p>
+        <p className="muted">Yayımlanmış belediye duyuruları — detay için başlığa tıklayın.</p>
       </div>
+
+      <div className="field" style={{ maxWidth: 420 }}>
+        <label htmlFor="ann-q">Duyuru ara</label>
+        <input
+          id="ann-q"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Örn. Hadımköy, bakım, sosyal"
+        />
+      </div>
+
       {error ? <div className="error-box">{error}</div> : null}
+
       <div className="stack">
-        {items.map((item) => (
-          <article key={item.id} className="panel">
-            <h3 style={{ marginTop: 0 }}>{item.title}</h3>
-            <p className="muted" style={{ marginTop: 0 }}>
-              {item.publishStartUtc
-                ? new Date(item.publishStartUtc).toLocaleString('tr-TR')
-                : new Date(item.createdAtUtc).toLocaleString('tr-TR')}
+        {filtered.map((item) => (
+          <article key={item.id} className="panel announcement-card">
+            <p className="muted" style={{ margin: '0 0 0.35rem', fontSize: '0.85rem' }}>
+              {publishedLabel(item)}
               {item.publishEndUtc
-                ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleString('tr-TR')}`
+                ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleDateString('tr-TR')}`
                 : ''}
             </p>
-            <p style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{item.content}</p>
+            <h3 style={{ margin: '0 0 0.5rem', fontFamily: 'var(--font-display)' }}>
+              <Link to={`/duyurular/${item.id}`}>{item.title}</Link>
+            </h3>
+            <p style={{ margin: 0, color: 'var(--ink-soft)', lineHeight: 1.55 }}>
+              {excerpt(item.content)}
+            </p>
+            <Link className="announcement-more" to={`/duyurular/${item.id}`}>
+              Devamını oku
+            </Link>
           </article>
         ))}
-        {items.length === 0 && !error ? <p className="muted">Yayında duyuru yok.</p> : null}
+        {filtered.length === 0 && !error ? (
+          <p className="muted">{q ? 'Aramanızla eşleşen duyuru yok.' : 'Yayında duyuru yok.'}</p>
+        ) : null}
       </div>
+    </div>
+  )
+}
+
+export function AnnouncementDetailPage() {
+  const { id } = useParams()
+  const [item, setItem] = useState<Announcement | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+    void (async () => {
+      try {
+        setItem(await apiFetch<Announcement>(`/api/v1/announcements/${id}`))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Duyuru bulunamadı.')
+      }
+    })()
+  }, [id])
+
+  return (
+    <div className="container stack page" style={{ maxWidth: 720 }}>
+      <p className="muted" style={{ marginTop: 0 }}>
+        <Link to="/duyurular">← Tüm duyurular</Link>
+      </p>
+
+      {error ? <div className="error-box">{error}</div> : null}
+      {!item && !error ? <p className="muted">Yükleniyor…</p> : null}
+
+      {item ? (
+        <article className="panel stack announcement-detail">
+          <div>
+            <p className="muted" style={{ margin: '0 0 0.5rem', fontSize: '0.85rem' }}>
+              {publishedLabel(item)}
+              {item.publishEndUtc
+                ? ` · Geçerlilik sonu: ${new Date(item.publishEndUtc).toLocaleString('tr-TR')}`
+                : ''}
+            </p>
+            <h1 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: 'clamp(1.8rem, 4vw, 2.4rem)' }}>
+              {item.title}
+            </h1>
+          </div>
+          <div className="announcement-body">{item.content}</div>
+          <div className="notice">
+            Bağımsız demo duyurusudur; gerçek Arnavutköy Belediyesi bildirimi değildir.
+          </div>
+        </article>
+      ) : null}
     </div>
   )
 }

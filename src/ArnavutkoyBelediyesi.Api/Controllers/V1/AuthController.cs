@@ -2,6 +2,7 @@ using Asp.Versioning;
 using ArnavutkoyBelediyesi.Api.Controllers.V1.Requests;
 using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Commands;
+using ArnavutkoyBelediyesi.Application.Features.Auth.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,14 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        var command = new RegisterCitizenCommand(request.NationalId, request.FullName, request.PhoneNumber, request.Password);
+        var command = new RegisterCitizenCommand(
+            request.Email,
+            request.FullName,
+            request.PhoneNumber,
+            request.NationalId,
+            request.BirthDate,
+            request.Gender,
+            request.Password);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
@@ -37,7 +45,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     }
 
     /// <summary>
-    /// T.C. Kimlik Numarası ve parola ile giriş yapar; JWT erişim ve yenileme token'ı döner.
+    /// E-posta ve parola ile giriş yapar; JWT erişim ve yenileme token'ı döner.
     /// </summary>
     /// <response code="200">Giriş başarılı.</response>
     /// <response code="400">Kimlik bilgileri hatalı ya da hesap kilitli.</response>
@@ -48,7 +56,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new LoginCommand(request.NationalId, request.Password), cancellationToken).ConfigureAwait(false);
+        var result = await sender.Send(new LoginCommand(request.Email, request.Password), cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -82,6 +90,49 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     }
 
     /// <summary>
+    /// Oturum açmış kullanıcının profil özetini döner.
+    /// </summary>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Me(CancellationToken cancellationToken)
+    {
+        if (currentUserService.UserId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await sender
+            .Send(new GetCurrentUserProfileQuery(currentUserService.UserId.Value), cancellationToken)
+            .ConfigureAwait(false);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Oturum açmış kullanıcının telefon numarasını günceller.
+    /// </summary>
+    [HttpPut("me/phone")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdatePhone([FromBody] UpdatePhoneRequest request, CancellationToken cancellationToken)
+    {
+        if (currentUserService.UserId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await sender
+            .Send(new UpdateMyPhoneCommand(currentUserService.UserId.Value, request.PhoneNumber), cancellationToken)
+            .ConfigureAwait(false);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Kimliği doğrulanmış geçerli kullanıcının parolasını değiştirir.
     /// </summary>
     /// <response code="204">Parola değiştirildi.</response>
@@ -94,8 +145,6 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
     {
-        // [Authorize] garantisi sayesinde UserId her zaman doludur; yine de savunmacı bir
-        // kontrol, gelecekteki bir yanlış yapılandırmanın 500 yerine 401 üretmesini sağlar.
         if (currentUserService.UserId is null)
         {
             return Unauthorized();

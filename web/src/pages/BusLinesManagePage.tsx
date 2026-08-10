@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { AdminGate } from '../components/RoleGates'
 import { apiFetch, type BusLine, type BusLineDetails } from '../lib/api'
@@ -14,10 +14,33 @@ const DAYS = [
   { value: 'Saturday', label: 'Cumartesi' },
 ] as const
 
+const LINE_TEMPLATES = [
+  {
+    code: 'AK-41',
+    name: 'Merkez – Hadımköy',
+    routeSummary: 'Arnavutköy Merkez → Taşoluk → Hadımköy Sanayi',
+    baseFare: '17.50',
+    stops: ['Merkez Meydan', 'Taşoluk Kavşak', 'Hadımköy Sanayi'],
+  },
+  {
+    code: 'AK-12',
+    name: 'Durusu ekspres',
+    routeSummary: 'Merkez → Boğazköy → Durusu',
+    baseFare: '22.00',
+    stops: ['Belediye', 'Boğazköy İstiklal', 'Durusu Sahil'],
+  },
+] as const
+
+const TIME_PRESETS = ['07:00', '08:30', '12:15', '17:45', '21:00'] as const
+
+type ActiveFilter = 'all' | 'active' | 'inactive'
+
 function BusLinesManageContent() {
   const [lines, setLines] = useState<BusLine[]>([])
   const [selectedId, setSelectedId] = useState('')
   const [detail, setDetail] = useState<BusLineDetails | null>(null)
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>('all')
+  const [q, setQ] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -26,6 +49,7 @@ function BusLinesManageContent() {
   const [name, setName] = useState('')
   const [routeSummary, setRouteSummary] = useState('')
   const [baseFare, setBaseFare] = useState('17.50')
+  const [pendingStops, setPendingStops] = useState<string[]>([])
 
   const [stopSequence, setStopSequence] = useState('1')
   const [stopName, setStopName] = useState('')
@@ -63,6 +87,37 @@ function BusLinesManageContent() {
       setError(err instanceof Error ? err.message : 'Hat detayı yüklenemedi.')
     })
   }, [selectedId, loadDetail])
+
+  const counts = useMemo(() => {
+    const next = { all: lines.length, active: 0, inactive: 0 }
+    for (const line of lines) {
+      if (line.isActive) next.active += 1
+      else next.inactive += 1
+    }
+    return next
+  }, [lines])
+
+  const filteredLines = useMemo(() => {
+    const needle = q.trim().toLocaleLowerCase('tr-TR')
+    return lines.filter((line) => {
+      if (activeFilter === 'active' && !line.isActive) return false
+      if (activeFilter === 'inactive' && line.isActive) return false
+      if (!needle) return true
+      return `${line.code} ${line.name} ${line.routeSummary}`
+        .toLocaleLowerCase('tr-TR')
+        .includes(needle)
+    })
+  }, [lines, activeFilter, q])
+
+  const departuresByDay = useMemo(() => {
+    if (!detail) return []
+    return DAYS.map((day) => ({
+      ...day,
+      items: detail.departures
+        .filter((d) => d.dayOfWeek === day.value)
+        .sort((a, b) => a.departureTime.localeCompare(b.departureTime)),
+    })).filter((group) => group.items.length > 0)
+  }, [detail])
 
   async function run(action: () => Promise<unknown>, okMessage: string) {
     setBusy(true)
@@ -105,12 +160,29 @@ function BusLinesManageContent() {
         },
         true,
       )
+
+      for (let i = 0; i < pendingStops.length; i += 1) {
+        await apiFetch(
+          `/api/v1/bus-lines/${created.id}/stops`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ sequence: i + 1, name: pendingStops[i] }),
+          },
+          true,
+        )
+      }
+
       setCode('')
       setName('')
       setRouteSummary('')
       setBaseFare('17.50')
+      setPendingStops([])
       setSelectedId(created.id)
-      setInfo('Hat oluşturuldu.')
+      setInfo(
+        pendingStops.length > 0
+          ? `Hat oluşturuldu; ${pendingStops.length} durak eklendi.`
+          : 'Hat oluşturuldu.',
+      )
       await loadLines()
       await loadDetail(created.id)
     } catch (err) {
@@ -159,24 +231,74 @@ function BusLinesManageContent() {
     }, 'Hareket saati eklendi.')
   }
 
+  function applyTemplate(template: (typeof LINE_TEMPLATES)[number]) {
+    setCode(template.code)
+    setName(template.name)
+    setRouteSummary(template.routeSummary)
+    setBaseFare(template.baseFare)
+    setPendingStops([...template.stops])
+    setInfo('Hat şablonu yüklendi — oluşturunca duraklar da eklenir.')
+    setError(null)
+  }
+
   return (
     <div className="container stack">
       <div>
         <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Hat yönetimi</h1>
         <p className="muted">
-          Yeni hat, durak ve hareket saati ekleyin. Genel görünüm:{' '}
-          <Link to="/hatlar">/hatlar</Link>
+          Yeni hat, durak ve hareket saati. Genel görünüm: <Link to="/hatlar">/hatlar</Link>
         </p>
       </div>
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
+      <div className="stats-strip" aria-label="Hat özeti">
+        <div>
+          <span className="muted">Toplam</span>
+          <strong>{counts.all}</strong>
+        </div>
+        <div>
+          <span className="muted">Aktif</span>
+          <strong>{counts.active}</strong>
+        </div>
+        <div>
+          <span className="muted">Pasif</span>
+          <strong>{counts.inactive}</strong>
+        </div>
+        <div>
+          <span className="muted">Seçili durak</span>
+          <strong>{detail?.stops.length ?? 0}</strong>
+        </div>
+      </div>
+
       <form className="panel stack" onSubmit={(e) => void onCreateLine(e)}>
-        <h3>Yeni hat</h3>
-        <div className="field">
-          <label htmlFor="lineCode">Kod</label>
-          <input id="lineCode" value={code} onChange={(e) => setCode(e.target.value)} required />
+        <h3 style={{ margin: 0 }}>Yeni hat</h3>
+        <div className="dept-chip-row" role="group" aria-label="Hat şablonları">
+          {LINE_TEMPLATES.map((template) => (
+            <button key={template.code} type="button" onClick={() => applyTemplate(template)}>
+              {template.code}
+              <span>{template.name.split('–')[0].trim()}</span>
+            </button>
+          ))}
+        </div>
+        <div className="form-two-col">
+          <div className="field">
+            <label htmlFor="lineCode">Kod</label>
+            <input id="lineCode" value={code} onChange={(e) => setCode(e.target.value)} required />
+          </div>
+          <div className="field">
+            <label htmlFor="lineFare">Taban ücret (₺)</label>
+            <input
+              id="lineFare"
+              type="number"
+              min="0"
+              step="0.01"
+              value={baseFare}
+              onChange={(e) => setBaseFare(e.target.value)}
+              required
+            />
+          </div>
         </div>
         <div className="field">
           <label htmlFor="lineName">Ad</label>
@@ -190,25 +312,49 @@ function BusLinesManageContent() {
             onChange={(e) => setRouteSummary(e.target.value)}
           />
         </div>
-        <div className="field">
-          <label htmlFor="lineFare">Taban ücret (₺)</label>
-          <input
-            id="lineFare"
-            type="number"
-            min="0"
-            step="0.01"
-            value={baseFare}
-            onChange={(e) => setBaseFare(e.target.value)}
-            required
-          />
-        </div>
+        {pendingStops.length > 0 ? (
+          <p className="muted" style={{ margin: 0 }}>
+            Şablon durakları: {pendingStops.join(' → ')}
+          </p>
+        ) : null}
         <button className="btn btn-primary" type="submit" disabled={busy}>
           Hat oluştur
         </button>
       </form>
 
       <section className="panel stack">
-        <h3>Hat seç</h3>
+        <h3 style={{ margin: 0 }}>Hat seç</h3>
+        <div className="field">
+          <label htmlFor="line-search">Ara</label>
+          <input
+            id="line-search"
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Kod, ad, güzergâh…"
+          />
+        </div>
+        <div className="desk-tabs" role="tablist" aria-label="Aktiflik filtresi">
+          {(
+            [
+              { id: 'all', label: 'Tümü', count: counts.all },
+              { id: 'active', label: 'Aktif', count: counts.active },
+              { id: 'inactive', label: 'Pasif', count: counts.inactive },
+            ] as const
+          ).map((filter) => (
+            <button
+              key={filter.id}
+              type="button"
+              role="tab"
+              aria-selected={activeFilter === filter.id}
+              className={activeFilter === filter.id ? 'is-active' : undefined}
+              onClick={() => setActiveFilter(filter.id)}
+            >
+              {filter.label}
+              <span>{filter.count}</span>
+            </button>
+          ))}
+        </div>
         <div className="field">
           <label htmlFor="selectedLine">Hat</label>
           <select
@@ -216,7 +362,7 @@ function BusLinesManageContent() {
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
           >
-            {lines.map((line) => (
+            {filteredLines.map((line) => (
               <option key={line.id} value={line.id}>
                 {line.code} — {line.name}
                 {line.isActive ? '' : ' (pasif)'}
@@ -224,10 +370,11 @@ function BusLinesManageContent() {
             ))}
           </select>
         </div>
+        {filteredLines.length === 0 ? <p className="muted">Bu filtrede hat yok.</p> : null}
         {detail ? (
           <p className="muted" style={{ margin: 0 }}>
             {detail.routeSummary || 'Güzergâh yok'} · ₺{detail.baseFare.toFixed(2)} ·{' '}
-            <Link to={`/hatlar/${detail.id}`}>Herkese açık detay</Link>
+            {detail.departures.length} sefer · <Link to={`/hatlar/${detail.id}`}>Herkese açık detay</Link>
           </p>
         ) : null}
       </section>
@@ -235,26 +382,28 @@ function BusLinesManageContent() {
       {selectedId ? (
         <>
           <form className="panel stack" onSubmit={(e) => void onAddStop(e)}>
-            <h3>Durak ekle</h3>
-            <div className="field">
-              <label htmlFor="stopSeq">Sıra</label>
-              <input
-                id="stopSeq"
-                type="number"
-                min="1"
-                value={stopSequence}
-                onChange={(e) => setStopSequence(e.target.value)}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="stopName">Durak adı</label>
-              <input
-                id="stopName"
-                value={stopName}
-                onChange={(e) => setStopName(e.target.value)}
-                required
-              />
+            <h3 style={{ margin: 0 }}>Durak ekle</h3>
+            <div className="form-two-col">
+              <div className="field">
+                <label htmlFor="stopSeq">Sıra</label>
+                <input
+                  id="stopSeq"
+                  type="number"
+                  min="1"
+                  value={stopSequence}
+                  onChange={(e) => setStopSequence(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="stopName">Durak adı</label>
+                <input
+                  id="stopName"
+                  value={stopName}
+                  onChange={(e) => setStopName(e.target.value)}
+                  required
+                />
+              </div>
             </div>
             <button className="btn btn-primary" type="submit" disabled={busy}>
               Durak ekle
@@ -273,30 +422,39 @@ function BusLinesManageContent() {
           </form>
 
           <form className="panel stack" onSubmit={(e) => void onAddDeparture(e)}>
-            <h3>Hareket saati ekle</h3>
-            <div className="field">
-              <label htmlFor="depDay">Gün</label>
-              <select
-                id="depDay"
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(e.target.value)}
-              >
-                {DAYS.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
+            <h3 style={{ margin: 0 }}>Hareket saati ekle</h3>
+            <div className="form-two-col">
+              <div className="field">
+                <label htmlFor="depDay">Gün</label>
+                <select
+                  id="depDay"
+                  value={dayOfWeek}
+                  onChange={(e) => setDayOfWeek(e.target.value)}
+                >
+                  {DAYS.map((d) => (
+                    <option key={d.value} value={d.value}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="depTime">Saat</label>
+                <input
+                  id="depTime"
+                  type="time"
+                  value={departureTime}
+                  onChange={(e) => setDepartureTime(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            <div className="field">
-              <label htmlFor="depTime">Saat</label>
-              <input
-                id="depTime"
-                type="time"
-                value={departureTime}
-                onChange={(e) => setDepartureTime(e.target.value)}
-                required
-              />
+            <div className="dept-chip-row" role="group" aria-label="Saat önerileri">
+              {TIME_PRESETS.map((time) => (
+                <button key={time} type="button" onClick={() => setDepartureTime(time)}>
+                  {time}
+                </button>
+              ))}
             </div>
             <div className="field">
               <label htmlFor="depNote">Not</label>
@@ -304,21 +462,28 @@ function BusLinesManageContent() {
                 id="depNote"
                 value={departureNote}
                 onChange={(e) => setDepartureNote(e.target.value)}
+                placeholder="Örn. Yoğun sefer"
               />
             </div>
             <button className="btn btn-primary" type="submit" disabled={busy}>
               Saat ekle
             </button>
-            {detail && detail.departures.length > 0 ? (
-              <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
-                {detail.departures.map((d) => (
-                  <li key={d.id}>
-                    {DAYS.find((x) => x.value === d.dayOfWeek)?.label ?? d.dayOfWeek} ·{' '}
-                    {d.departureTime.slice(0, 5)}
-                    {d.note ? ` — ${d.note}` : ''}
-                  </li>
+            {departuresByDay.length > 0 ? (
+              <div className="stack">
+                {departuresByDay.map((group) => (
+                  <div key={group.value}>
+                    <strong>{group.label}</strong>
+                    <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.2rem' }}>
+                      {group.items.map((d) => (
+                        <li key={d.id}>
+                          {d.departureTime.slice(0, 5)}
+                          {d.note ? ` — ${d.note}` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
               <p className="muted">Henüz hareket saati yok.</p>
             )}

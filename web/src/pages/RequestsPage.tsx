@@ -16,6 +16,46 @@ import {
 } from '../lib/requestStatus'
 import { RequireAuth } from './PanelPage'
 
+const CATEGORY_HINTS: Record<string, { hint: string; template: string }> = {
+  'Altyapı Arızası': {
+    hint: 'Konum (mahalle/sokak), arıza türü ve ne zamandan beri sürdüğünü yazın.',
+    template:
+      'Mahalle: \nSokak: \nArıza: (çökme / su baskını / kapak) \nNe zamandan beri: \nEk not: ',
+  },
+  Temizlik: {
+    hint: 'Cadde, park veya konteyner noktasını net belirtin.',
+    template: 'Mahalle: \nKonum: \nSorun: (çöp birikimi / süpürülmemiş cadde) \nEk not: ',
+  },
+  'Gürültü Şikayeti': {
+    hint: 'Saat aralığı ve kaynak (inşaat, işyeri vb.) yardımcı olur.',
+    template: 'Mahalle: \nAdres/yakın nokta: \nSaat aralığı: \nKaynak: \nEk not: ',
+  },
+  'Yol Bakımı': {
+    hint: 'Çukur, kaldırımı bozukluk veya işaret eksikliğini tarif edin.',
+    template: 'Mahalle: \nCadde/sokak: \nSorun: \nTrafik etkisi: \nEk not: ',
+  },
+  'Park ve Bahçeler': {
+    hint: 'Park adı veya yeşil alan konumunu yazın.',
+    template: 'Park / alan: \nMahalle: \nİhtiyaç: (budama / sulama / aydınlatma) \nEk not: ',
+  },
+  Aydınlatma: {
+    hint: 'Direk numarası veya kavşak tarifi varsa ekleyin.',
+    template: 'Mahalle: \nSokak/kavşak: \nSorun: (sönük / kırık) \nEk not: ',
+  },
+  'Hayvan Toplama': {
+    hint: 'Güvenli yaklaşım için yaklaşık konum yeterlidir.',
+    template: 'Mahalle: \nYaklaşık konum: \nDurum: \nEk not: ',
+  },
+  'İmar / Ruhsat Bilgi': {
+    hint: 'Bilgi talebi için ada/parsel veya adres yazabilirsiniz.',
+    template: 'Konu: \nAdres / ada-parsel: \nSoru: \nEk not: ',
+  },
+  Diğer: {
+    hint: 'Kısa ve net bir özet + konum yazın.',
+    template: 'Konu: \nMahalle: \nAçıklama: ',
+  },
+}
+
 function RequestsContent() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -51,11 +91,23 @@ function RequestsContent() {
     [categories],
   )
 
+  const selectedCategoryName = categoryMap.get(categoryId) ?? ''
+  const selectedHint = CATEGORY_HINTS[selectedCategoryName]
+
   const items = useMemo(() => {
     const list = data?.items ?? []
     if (statusFilter === 'all') return list
     return list.filter((item) => item.status === statusFilter)
   }, [data, statusFilter])
+
+  const statusCounts = useMemo(() => {
+    const list = data?.items ?? []
+    const counts: Record<string, number> = { all: list.length }
+    for (const status of REQUEST_STATUSES) {
+      counts[status] = list.filter((item) => item.status === status).length
+    }
+    return counts
+  }, [data])
 
   async function onCreate(event: FormEvent) {
     event.preventDefault()
@@ -81,107 +133,183 @@ function RequestsContent() {
     }
   }
 
+  function applyTemplate() {
+    if (!selectedHint) return
+    setMessage((current) => (current.trim() ? current : selectedHint.template))
+  }
+
   return (
-    <div className="container stack">
+    <div className="container stack page">
       <div>
         <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>
-          {staff ? 'Hizmet talepleri' : 'Taleplerim'}
+          {staff ? 'Hizmet talepleri' : 'Hizmet masası'}
         </h1>
         <p className="muted">
           {staff
             ? 'Tüm vatandaş taleplerini inceleyin; detayda yanıtlayın ve durum güncelleyin.'
-            : 'Yeni hizmet talebi açın ve durumunu takip edin.'}
+            : 'Sol: yeni talep · Sağ: talepleriniz — referans hizmet masası düzeni.'}
         </p>
       </div>
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
-      {!staff ? (
-        <form className="panel stack" onSubmit={(e) => void onCreate(e)}>
-          <h3>Yeni talep</h3>
-          <div className="field">
-            <label htmlFor="category">Kategori</label>
-            <select
-              id="category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
-            >
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="message">Mesajınız</label>
-            <textarea
-              id="message"
-              rows={4}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Örn. Mahallemizde yol çökmesi var…"
-              required
-              maxLength={2000}
-            />
-          </div>
-          <button className="btn btn-primary" type="submit" disabled={busy || !categoryId}>
-            {busy ? 'Gönderiliyor…' : 'Talep oluştur'}
-          </button>
-        </form>
-      ) : null}
-
-      <div className="filter-row" role="tablist" aria-label="Durum filtresi">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={statusFilter === 'all'}
-          className={statusFilter === 'all' ? 'btn btn-primary' : 'btn btn-ghost'}
-          onClick={() => setStatusFilter('all')}
-        >
-          Tümü
-        </button>
+      <div className="request-stats" aria-label="Talep özeti">
+        <div>
+          <strong>{statusCounts.all ?? 0}</strong>
+          <span className="muted">Toplam</span>
+        </div>
         {REQUEST_STATUSES.map((status) => (
           <button
             key={status}
             type="button"
-            role="tab"
-            aria-selected={statusFilter === status}
-            className={statusFilter === status ? 'btn btn-primary' : 'btn btn-ghost'}
+            className={statusFilter === status ? 'is-active' : ''}
             onClick={() => setStatusFilter(status)}
           >
-            {requestStatusLabel(status)}
+            <strong>{statusCounts[status] ?? 0}</strong>
+            <span className="muted">{requestStatusLabel(status)}</span>
           </button>
         ))}
       </div>
 
-      <div className="stack">
-        {items.map((item) => (
-          <article key={item.id} className="panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
-              <div>
-                <p className="muted" style={{ margin: '0 0 0.25rem', fontSize: '0.85rem' }}>
-                  {categoryMap.get(item.categoryId) ?? 'Kategori'}
+      <div className={`desk-split${staff ? ' is-single' : ''}`}>
+        {!staff ? (
+          <form className="panel stack" onSubmit={(e) => void onCreate(e)}>
+            <h3 style={{ margin: 0 }}>Yeni talep</h3>
+            <div className="field">
+              <label htmlFor="category">Başvuru türü</label>
+              <select
+                id="category"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                required
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {selectedHint ? (
+                <p className="muted" style={{ margin: '0.35rem 0 0', fontSize: '0.85rem' }}>
+                  {selectedHint.hint}
                 </p>
-                <h3 style={{ margin: 0 }}>
-                  <Link to={`/talepler/${item.id}`}>Talep #{item.id.slice(0, 8)}</Link>
-                </h3>
-                <p className="muted" style={{ marginBottom: 0 }}>
-                  {new Date(item.createdAtUtc).toLocaleString('tr-TR')}
-                  {item.resolvedAtUtc
-                    ? ` · Çözüldü ${new Date(item.resolvedAtUtc).toLocaleString('tr-TR')}`
-                    : ''}
-                </p>
-              </div>
-              <span className={requestStatusBadgeClass(item.status)}>
-                {requestStatusLabel(item.status)}
-              </span>
+              ) : null}
             </div>
-          </article>
-        ))}
-        {items.length === 0 ? <p className="muted">Bu filtrede talep yok.</p> : null}
+            <div className="field">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  alignItems: 'end',
+                }}
+              >
+                <label htmlFor="message">Mesajınız</label>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.82rem' }}
+                  onClick={applyTemplate}
+                >
+                  Şablon doldur
+                </button>
+              </div>
+              <textarea
+                id="message"
+                rows={8}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Örn. Hadımköy Caddesi’nde kaldırım çökmesi var…"
+                required
+                maxLength={2000}
+              />
+              <p className="muted" style={{ margin: 0, fontSize: '0.8rem', textAlign: 'right' }}>
+                {message.length}/2000
+              </p>
+            </div>
+            <button className="btn btn-primary" type="submit" disabled={busy || !categoryId}>
+              {busy ? 'Gönderiliyor…' : 'Gönder'}
+            </button>
+          </form>
+        ) : null}
+
+        <section className="panel stack">
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '1rem',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}
+          >
+            <h3 style={{ margin: 0 }}>{staff ? 'Tüm talepler' : 'Taleplerim'}</h3>
+            <div className="desk-tabs" role="tablist" aria-label="Durum filtresi">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={statusFilter === 'all'}
+                className={statusFilter === 'all' ? 'is-active' : undefined}
+                onClick={() => setStatusFilter('all')}
+              >
+                Tümü
+                <span>{statusCounts.all ?? 0}</span>
+              </button>
+              {REQUEST_STATUSES.map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  role="tab"
+                  aria-selected={statusFilter === status}
+                  className={statusFilter === status ? 'is-active' : undefined}
+                  onClick={() => setStatusFilter(status)}
+                >
+                  {requestStatusLabel(status)}
+                  <span>{statusCounts[status] ?? 0}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Talep</th>
+                  <th>Kategori</th>
+                  <th>Zaman</th>
+                  <th>Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <Link to={`/talepler/${item.id}`}>#{item.id.slice(0, 8)}</Link>
+                    </td>
+                    <td>{categoryMap.get(item.categoryId) ?? 'Kategori'}</td>
+                    <td>{new Date(item.createdAtUtc).toLocaleString('tr-TR')}</td>
+                    <td>
+                      <span className={requestStatusBadgeClass(item.status)}>
+                        {requestStatusLabel(item.status)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="muted">
+                      {staff
+                        ? 'Bu filtrede talep yok.'
+                        : 'Henüz talep yok — soldaki formdan oluşturun.'}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </div>
   )

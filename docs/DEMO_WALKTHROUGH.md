@@ -10,46 +10,52 @@ Bağımsız demo; gerçek belediye ile bağlantısı yoktur. Aşağıdaki akış
 
 ## Demo hesaplar
 
-| Rol | TCKN | Şifre |
+| Rol | E-posta | Şifre |
 |---|---|---|
-| Vatandaş | `10000000146` | `Demo!Citizen123` |
-| Görevli | `10000000252` | `Demo!Officer123` |
-| Yönetici | `10000000368` | `Demo!Admin123` |
+| Vatandaş | `vatandas@demo.arnavutkoy.local` | `Demo!Citizen123` |
+| Görevli | `gorevli@demo.arnavutkoy.local` | `Demo!Officer123` |
+| Yönetici | `yonetici@demo.arnavutkoy.local` | `Demo!Admin123` |
 
 ## 5 dakikalık tur
 
 ### 1) Giriş yapmadan
 
-- `/` — marka ana sayfa
-- `/duyurular` — yayındaki duyurular
-- `/hatlar` → hat detayı (durak/saat)
+- `/` — modül ızgarası (üyeliksiz + kilitli üyelikli) + güncel duyurular + sol sidebar
+- `/duyurular` — liste + arama → `/duyurular/:id` detay
+- `/hatlar` / `/ulasim-agi` — hat listesi + ulaşım hub (tablo)
+- `/muhtarliklar` — nüfus sıralı tablo, harf filtresi, telefon
 - `/birimler` — halka açık birim/personel dizini
+- `/kayit` — e-posta ile vatandaş kaydı (doğum/cinsiyet dahil)
 
 ### 2) Vatandaş döngüsü
 
-Giriş: vatandaş hesabı → `/panel`
+Giriş: vatandaş hesabı → `/panel` (canlı özet: açık borç / talep / kart bakiyesi + sidebar)
 
 | Adım | Sayfa | Ne gösterilir |
 |---|---|---|
-| Borç gör / öde | `/borclar` | Seed borç + demo kart ödeme |
-| Talep aç | `/talepler` | Kategori + mesaj → durum zaman çizelgesi |
-| Yazışma | `/talepler/:id` | Vatandaş mesajı |
-| Ulaşım | `/ulasim` | Kart, bakiye, biniş |
-| Mülk | `/mulkler` | Mahalle + isteğe bağlı sokak |
-| Su | `/su` | Abonelik (+ isteğe bağlı mülk bağlama) |
-| Sosyal yardım | `/yardim` | Başvuru / geri çekme |
+| Vezne | `/vezne` | Canlı borç/bakiye özeti + kısayollar |
+| Borç gör / öde | `/borclar` | Durum/tür filtresi, vade uyarısı, kart ödeme |
+| Talep aç | `/talepler` | İki sütun: form + tablo (referans hizmet masası) |
+| Yazışma | `/talepler/:id` | Vatandaş mesajı / personelde şablon + “yanıtla ve çöz” |
+| Ulaşım | `/ulasim` | Kart önerisi, yükleme tutarı, hat arama, son binişler |
+| Biniş sim. | `/binis` | Hat arama, bakiye kontrolü, onay özeti |
+| Mülk | `/mulkler` | Mahalle arama + sokak + özet sayaçları |
+| Su | `/su` | Abone önerisi + mülk bağlama |
+| Sosyal yardım | `/yardim` | Tür şablonu, durum filtresi, kişi başı gelir |
+| Ayarlar | `/ayarlar` | Profil, telefon, parola |
 
 ### 3) Görevli döngüsü
 
-Çıkış → görevli girişi → `/panel`
+Çıkış → görevli girişi → `/panel` (canlı kuyruk: açık talep · yardım · taslak duyuru)
 
 | Adım | Sayfa | Ne gösterilir |
 |---|---|---|
-| Talep masası | `/personel` veya `/talepler` | İncele / çöz / kapat + yazışma |
-| Sosyal yardım | `/personel` | İnceleme / onay / red |
-| Duyuru | `/duyuru-yonetimi` | Taslak → yayın → arşiv |
-| Su borcu | `/su-yonetimi` | Aktif aboneliğe borç kes |
-| Emlak borcu | `/mulk-yonetimi` | Aktif mülke borç kes |
+| Talep masası | `/personel` veya `/talepler` | Sekmeler, arama, durum sayaçları, hızlı aksiyon |
+| Sosyal yardım | `/personel` | Onay/red kuyruğu + filtre |
+| Duyuru | `/duyuru-yonetimi` | Şablon, arama, durum sayaçları, yayın penceresi ipucu |
+| Su borcu | `/su-yonetimi` | Arama, durum sayaçları, hazır tutar, askı/kapat |
+| Emlak borcu | `/mulk-yonetimi` | Arama, tür/mahalle filtresi, hazır emlak tutarı |
+| Birimler (public) | `/birimler` | Arama + birim kartları |
 
 Öneri: vatandaşla talep aç → görevliyle yanıtla/çöz → vatandaşla zaman çizelgesini göster.
 Borç için: vatandaş su/mülk kaydı → görevli borç kes → vatandaş `/borclar` ile öde.
@@ -60,9 +66,9 @@ Yönetici girişi:
 
 | Adım | Sayfa | Ne gösterilir |
 |---|---|---|
-| Coğrafya | `/cografya` | İlçe → mahalle → sokak oluştur |
-| Hatlar | `/hat-yonetimi` | Hat, durak, hareket saati |
-| Birimler | `/birim-yonetimi` | Departman + dizin personeli |
+| Coğrafya | `/cografya` | Sekmeler, arama, nüfus özeti, mahalle/sokak şablonları |
+| Hatlar | `/hat-yonetimi` | Hat şablonu+durak, arama, sefer gün grupları |
+| Birimler | `/birim-yonetimi` | Birim kartları, arama, personel şablonları |
 | (+ görevli yetkileri) | personel / duyuru / su / mülk | Aynı operasyonel masalar |
 
 ## Bilinçli sınırlar (demo)
@@ -71,6 +77,7 @@ Yönetici girişi:
 - HR dizini Identity hesaplarıyla bağlı değildir.
 - Coğrafya düzenleme/silme yok (liste + oluşturma).
 - Emlak/su borçları mülk veya abonelik üzerinden kesilir; genel “serbest borç” UI’sı yoktur.
+- Seed vatandaş hesabında hazır kart (`AK-34-1001`), mülk, su aboneliği ve örnek borçlar vardır (temiz DB’de).
 
 ## Daha fazla
 

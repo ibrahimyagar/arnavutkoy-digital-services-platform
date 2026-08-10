@@ -32,11 +32,11 @@ Hazır olduğunda:
 
 Seed varsayılan olarak açıktır (`DATABASE_SEED_ON_STARTUP=true`). Kurgusal hesaplar:
 
-| Rol | T.C. Kimlik No | Parola |
+| Rol | E-posta | Parola |
 |---|---|---|
-| Citizen | `10000000146` | `Demo!Citizen123` |
-| Officer | `10000000252` | `Demo!Officer123` |
-| Administrator | `10000000368` | `Demo!Admin123` |
+| Citizen | `vatandas@demo.arnavutkoy.local` | `Demo!Citizen123` |
+| Officer | `gorevli@demo.arnavutkoy.local` | `Demo!Officer123` |
+| Administrator | `yonetici@demo.arnavutkoy.local` | `Demo!Admin123` |
 
 Portföy için adım adım tur: [`DEMO_WALKTHROUGH.md`](DEMO_WALKTHROUGH.md).
 

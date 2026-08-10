@@ -22,26 +22,20 @@ Vite, `/api` isteklerini `localhost:8080`'e proxy eder. Doğrudan API adresi iç
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
-## Demo giriş
+## Demo giriş (e-posta)
 
-- Vatandaş: `10000000146` / `Demo!Citizen123`
-- Görevli: `10000000252` / `Demo!Officer123`
-- Yönetici: `10000000368` / `Demo!Admin123`
+- Vatandaş: `vatandas@demo.arnavutkoy.local` / `Demo!Citizen123`
+- Görevli: `gorevli@demo.arnavutkoy.local` / `Demo!Officer123`
+- Yönetici: `yonetici@demo.arnavutkoy.local` / `Demo!Admin123`
 
 Adım adım senaryolar: [`../docs/DEMO_WALKTHROUGH.md`](../docs/DEMO_WALKTHROUGH.md).
 
 ## Özellikler
 
-**Herkese açık:** ana sayfa, duyurular, otobüs hatları, birim/personel dizini
+**Herkese açık:** ana sayfa + sidebar, duyurular, otobüs hatları, muhtarlıklar, birim/personel dizini, kayıt
 
-**Vatandaş:** panel, borç ödeme, talepler + yazışma, ulaşım kartı, mülk, su, sosyal yardım, parola değiştirme
+**Vatandaş:** panel, dijital vezne, borç ödeme (kart formu), talepler + yazışma, ulaşım kartı, biniş simülasyonu, mülk, su, sosyal yardım, hesap ayarları
 
-**Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su borç kesme, emlak borç kesme, parola
+**Görevli:** talep/sosyal yardım masası, duyuru yönetimi, su/emlak borç kesme
 
-**Yönetici:** coğrafya (ilçe/mahalle/sokak), birim yönetimi, hat yönetimi (+ görevli yetkileri), parola
-
-## Bilinçli sınırlar
-
-- Coğrafya düzenleme/silme yok (yalnızca liste + oluşturma)
-- HR dizini Identity hesaplarıyla bağlı değildir
-- Resmi belediye bağlantısı yoktur (portföy demosu)
+**Yönetici:** coğrafya, hat yönetimi, birim yönetimi (+ görevli yetkileri)

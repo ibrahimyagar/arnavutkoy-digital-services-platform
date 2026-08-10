@@ -3,12 +3,44 @@
 > ⚠️ **Bu proje bağımsız bir portföy/demo çalışmasıdır; herhangi bir resmi belediye kurumunu temsil etmez ve onunla bağlantılı değildir.**
 > Tüm vatandaş/personel/işlem verileri kurgusaldır. Kamuya açık coğrafi adlar (ör. mahalle isimleri) dışında gerçek kişisel veri kullanılmamıştır.
 
+<p align="center">
+  <img src="docs/screenshots/home-hero.png" alt="Ana sayfa — oturum açık vatandaş görünümü" width="920" />
+</p>
+
 ## Neden bu proje?
 
 Açık kaynak bir PHP e-belediye referansındaki modül envanterini temel alıp, aynı kavramları
 **.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile **sıfırdan** yeniden tasarlar.
 Amaç satır satır port değil; SQL injection, IDOR, düz metin oturum, N+1 ve yan etkili GET gibi
 sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymaktır.
+
+## Ekran görüntüleri
+
+| Ana sayfa (misafir) | Giriş |
+| :---: | :---: |
+| <img src="docs/screenshots/home-guest.png" alt="Misafir ana sayfa" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
+
+| Vatandaş paneli | Borçlarım |
+| :---: | :---: |
+| <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> | <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> |
+
+| Hizmet masası | Muhtarlıklar |
+| :---: | :---: |
+| <img src="docs/screenshots/hizmet-masasi.png" alt="İki kolonlu hizmet masası" width="420" /> | <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> |
+
+<p align="center">
+  <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="920" />
+  <br />
+  <sub>Ulaşım ağı — hatlar, kart, biniş ve vezne tek hub’da</sub>
+</p>
+
+## Öne çıkanlar
+
+- **Vatandaş portalı** — duyuru, muhtarlık, birim, dijital vezne, borç, hizmet masası, ulaşım kartı / biniş, mülk, su, sosyal yardım
+- **Personel / yönetici** — talep masası, duyuru yönetimi, coğrafya, hat ve İK yönetimi
+- **Kimlik** — e-posta + şifre, JWT access + refresh rotation, rol bazlı yetki
+- **Mimari** — Clean Architecture, CQRS (MediatR), FluentValidation, EF Core + PostgreSQL
+- **Ops** — Docker Compose, health check, Swagger, GitHub Actions, entegrasyon testleri
 
 ## Teknoloji
 
@@ -21,6 +53,7 @@ sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymakt
 | Validasyon | FluentValidation |
 | Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
 | Loglama | Serilog (konsol + opsiyonel Seq) |
+| UI | Vite + React + TypeScript |
 | Test | xUnit, FluentAssertions, NSubstitute, Testcontainers, Coverlet |
 | Ops | Docker Compose, GitHub Actions |
 
@@ -38,7 +71,15 @@ docker compose up --build -d
 | Health | http://localhost:8080/health |
 | Vatandaş UI | `cd web && npm install && npm run dev` → http://localhost:5173 |
 
-Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+### Demo hesaplar
+
+| Rol | E-posta | Şifre |
+|---|---|---|
+| Vatandaş | `vatandas@demo.arnavutkoy.local` | `Demo!Citizen123` |
+| Görevli | `gorevli@demo.arnavutkoy.local` | `Demo!Officer123` |
+| Yönetici | `yonetici@demo.arnavutkoy.local` | `Demo!Admin123` |
+
+Ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 Portföy demo turu → [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md).
 Vatandaş arayüzü → [`web/README.md`](web/README.md).
 
@@ -68,6 +109,7 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 - [x] Faz 10 — Son kontrol (Definition of Done)
 - [x] Yol haritası R1–R6 + vatandaş web paneli
 - [x] Personel operasyon UI + demo walkthrough
+- [x] E-posta giriş + yoğunlaştırılmış vatandaş UX + README vitrin
 
 DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
 

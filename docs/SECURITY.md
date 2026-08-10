@@ -20,7 +20,7 @@ göstermektir.
 | Kontrol | Uygulama |
 |---|---|
 | Parola hash | ASP.NET Core Identity `PasswordHasher` (özel algoritma yok) |
-| Giriş kimliği | T.C. Kimlik No (`UserName`); algoritmik checksum |
+| Giriş kimliği | E-posta (`Email`/`UserName`); TCKN profil alanı |
 | Access token | Kısa ömürlü JWT (varsayılan 15 dk) |
 | Refresh token | Rastgele; **yalnızca SHA-256 hash** DB'de; rotation; revoke |
 | Replay | Kullanılmış refresh token yeniden kullanılamaz |

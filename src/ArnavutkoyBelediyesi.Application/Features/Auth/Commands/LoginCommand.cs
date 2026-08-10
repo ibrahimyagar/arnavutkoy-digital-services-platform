@@ -8,17 +8,15 @@ using MediatR;
 namespace ArnavutkoyBelediyesi.Application.Features.Auth.Commands;
 
 /// <summary>
-/// T.C. Kimlik Numarası ve parola ile giriş yapar; başarılıysa bir JWT erişim token'ı ve
-/// yenileme token'ı çifti üretir. Hesap, art arda başarısız denemeler sonrası Identity'nin
-/// kilitleme (lockout) mekanizmasıyla geçici olarak kilitlenir (bkz. Persistence katmanı).
+/// E-posta ve parola ile giriş yapar; JWT erişim ve yenileme token'ı üretir.
 /// </summary>
-public sealed record LoginCommand(string NationalId, string Password) : IRequest<Result<AuthResultDto>>;
+public sealed record LoginCommand(string Email, string Password) : IRequest<Result<AuthResultDto>>;
 
 public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     public LoginCommandValidator()
     {
-        RuleFor(x => x.NationalId).NotEmpty();
+        RuleFor(x => x.Email).NotEmpty().EmailAddress();
         RuleFor(x => x.Password).NotEmpty();
     }
 }
@@ -29,7 +27,7 @@ public sealed class LoginCommandHandler(IIdentityService identityService, AuthTo
     public async Task<Result<AuthResultDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var credentialsResult = await identityService
-            .ValidateCredentialsAsync(request.NationalId, request.Password, cancellationToken)
+            .ValidateCredentialsAsync(request.Email, request.Password, cancellationToken)
             .ConfigureAwait(false);
 
         if (!credentialsResult.IsSuccess)

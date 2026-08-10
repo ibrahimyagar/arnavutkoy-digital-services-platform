@@ -4,22 +4,27 @@ import { AppShell } from './components/AppShell'
 import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
 import { BusLinesManagePage } from './pages/BusLinesManagePage'
 import { AnnouncementsManagePage } from './pages/AnnouncementsManagePage'
-import { ChangePasswordPage } from './pages/ChangePasswordPage'
+import { BoardingSimulatorPage } from './pages/BoardingSimulatorPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { DebtsPage } from './pages/DebtsPage'
+import { DigitalCashDeskPage } from './pages/DigitalCashDeskPage'
 import { GeographyAdminPage } from './pages/GeographyAdminPage'
+import { HeadmensPage } from './pages/HeadmensPage'
 import { HomePage } from './pages/HomePage'
 import { HrDirectoryPage } from './pages/HrDirectoryPage'
 import { HrManagePage } from './pages/HrManagePage'
 import { LoginPage } from './pages/LoginPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
 import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
-import { AnnouncementsPage } from './pages/PublicPages'
+import { AnnouncementDetailPage, AnnouncementsPage } from './pages/PublicPages'
+import { RegisterPage } from './pages/RegisterPage'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsPage } from './pages/RequestsPage'
 import { SocialAssistancePage } from './pages/SocialAssistancePage'
 import { StaffDeskPage } from './pages/StaffDeskPage'
 import { StaffPropertyPage } from './pages/StaffPropertyPage'
 import { StaffWaterPage } from './pages/StaffWaterPage'
+import { TransportNetworkPage } from './pages/TransportNetworkPage'
 import { TransportPage } from './pages/TransportPage'
 
 export default function App() {
@@ -30,19 +35,26 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route index element={<HomePage />} />
             <Route path="giris" element={<LoginPage />} />
+            <Route path="kayit" element={<RegisterPage />} />
             <Route path="duyurular" element={<AnnouncementsPage />} />
+            <Route path="duyurular/:id" element={<AnnouncementDetailPage />} />
             <Route path="duyuru-yonetimi" element={<AnnouncementsManagePage />} />
             <Route path="hatlar" element={<BusLinesPage />} />
             <Route path="hatlar/:id" element={<BusLineDetailPage />} />
+            <Route path="ulasim-agi" element={<TransportNetworkPage />} />
             <Route path="hat-yonetimi" element={<BusLinesManagePage />} />
+            <Route path="muhtarliklar" element={<HeadmensPage />} />
             <Route path="birimler" element={<HrDirectoryPage />} />
             <Route path="birim-yonetimi" element={<HrManagePage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />
-            <Route path="parola" element={<ChangePasswordPage />} />
+            <Route path="ayarlar" element={<SettingsPage />} />
+            <Route path="parola" element={<Navigate to="/ayarlar" replace />} />
+            <Route path="vezne" element={<DigitalCashDeskPage />} />
             <Route path="borclar" element={<DebtsPage />} />
             <Route path="talepler" element={<RequestsPage />} />
             <Route path="talepler/:id" element={<RequestDetailPage />} />
             <Route path="ulasim" element={<TransportPage />} />
+            <Route path="binis" element={<BoardingSimulatorPage />} />
             <Route path="mulkler" element={<PropertiesPage />} />
             <Route path="su" element={<WaterPage />} />
             <Route path="yardim" element={<SocialAssistancePage />} />
