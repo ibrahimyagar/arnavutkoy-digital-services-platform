@@ -37,6 +37,7 @@ VITE_API_BASE_URL=http://localhost:8080
 - Yönetici coğrafya ekranı (ilçe / mahalle / sokak)
 - Talep UX: durum zaman çizelgesi, Türkçe durumlar, yazışma görünümü, durum filtreleri
 - Mülkte sokak seçimi; su aboneliğinde isteğe bağlı mülk bağlama
+- Personel duyuru yönetimi (taslak / yayın / arşiv)
 
 ## Bilinçli sınırlar
 

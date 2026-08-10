@@ -26,10 +26,19 @@ export function AnnouncementsPage() {
       <div className="stack">
         {items.map((item) => (
           <article key={item.id} className="panel">
-            <h3>{item.title}</h3>
-            <p className="muted">{item.content}</p>
+            <h3 style={{ marginTop: 0 }}>{item.title}</h3>
+            <p className="muted" style={{ marginTop: 0 }}>
+              {item.publishStartUtc
+                ? new Date(item.publishStartUtc).toLocaleString('tr-TR')
+                : new Date(item.createdAtUtc).toLocaleString('tr-TR')}
+              {item.publishEndUtc
+                ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleString('tr-TR')}`
+                : ''}
+            </p>
+            <p style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{item.content}</p>
           </article>
         ))}
+        {items.length === 0 && !error ? <p className="muted">Yayında duyuru yok.</p> : null}
       </div>
     </div>
   )

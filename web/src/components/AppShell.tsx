@@ -30,6 +30,7 @@ export function AppShell() {
                   <>
                     <NavLink to="/personel">Personel</NavLink>
                     <NavLink to="/talepler">Talepler</NavLink>
+                    <NavLink to="/duyuru-yonetimi">Duyuru yönetimi</NavLink>
                   </>
                 ) : null}
                 {admin ? <NavLink to="/cografya">Coğrafya</NavLink> : null}

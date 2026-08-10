@@ -2,6 +2,7 @@ using Asp.Versioning;
 using ArnavutkoyBelediyesi.Api.Controllers.V1.Requests;
 using ArnavutkoyBelediyesi.Application.Features.Announcements.Commands;
 using ArnavutkoyBelediyesi.Application.Features.Announcements.Queries;
+using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -30,6 +31,26 @@ public sealed class AnnouncementsController(ISender sender) : ApiControllerBase
     {
         var result = await sender
             .Send(new GetPublishedAnnouncementsQuery(pageNumber, pageSize), cancellationToken)
+            .ConfigureAwait(false);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Taslak, yayında ve arşiv duyuruları personel için sayfalı listeler.
+    /// </summary>
+    /// <response code="200">Yönetim listesi döndürülür.</response>
+    [HttpGet("managed")]
+    [Authorize(Roles = Roles.OfficerOrAdministrator)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetManagedAnnouncements(
+        [FromQuery] AnnouncementStatus? status,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await sender
+            .Send(new GetManagedAnnouncementsQuery(status, pageNumber, pageSize), cancellationToken)
             .ConfigureAwait(false);
 
         return HandleResult(result);

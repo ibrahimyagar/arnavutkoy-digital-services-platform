@@ -108,7 +108,7 @@ public sealed class AnnouncementsEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task UpdateAnnouncement_AfterPublish_ShouldReturn400_BecauseOnlyDraftsAreEditable()
+    public async Task GetManagedAnnouncements_AsOfficer_ShouldIncludeDrafts()
     {
         var client = factory.CreateClient();
         var officer = await AuthHelper.LoginAsync(client, ApiFactory.DemoUsers.OfficerNationalId, ApiFactory.DemoUsers.OfficerPassword);
@@ -116,19 +116,28 @@ public sealed class AnnouncementsEndpointsTests(ApiFactory factory)
 
         var createResponse = await client.PostAsJsonAsync("/api/v1/announcements", new
         {
-            title = "Yayınlanacak Duyuru",
-            content = "İçerik.",
+            title = "Managed List Draft",
+            content = "Taslak listede görünmeli.",
             publishEndUtc = (DateTime?)null,
         });
+        createResponse.EnsureSuccessStatusCode();
         var created = await createResponse.ReadAsAsync<CreatedIdResponse>();
-        await client.PostAsync($"/api/v1/announcements/{created!.Id}/publish", content: null);
 
-        var updateResponse = await client.PutAsJsonAsync($"/api/v1/announcements/{created.Id}", new
-        {
-            title = "Yayındayken Değiştirilemez",
-            content = "İçerik.",
-        });
+        var response = await client.GetAsync("/api/v1/announcements/managed?status=Draft");
+        response.EnsureSuccessStatusCode();
+        var page = await response.ReadAsAsync<PaginatedList<AnnouncementDto>>();
 
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        page!.Items.Should().Contain(a => a.Id == created!.Id && a.Status == AnnouncementStatus.Draft);
+    }
+
+    [Fact]
+    public async Task GetManagedAnnouncements_AsCitizen_ShouldReturn403()
+    {
+        var client = factory.CreateClient();
+        var auth = await AuthHelper.RegisterAndLoginCitizenAsync(client);
+        AuthHelper.AttachBearerToken(client, auth.AccessToken);
+
+        var response = await client.GetAsync("/api/v1/announcements/managed");
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }
