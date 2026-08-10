@@ -1,46 +1,29 @@
 # Arnavutköy Belediyesi Örnek Dijital Hizmetler Platformu
 
-> ⚠️ **Bu proje bağımsız bir portföy/demo çalışmasıdır, herhangi bir resmi belediye kurumunu temsil etmez ve onunla bağlantılı değildir.**
-> Tüm veriler (mahalle isimleri hariç kamuya açık coğrafi bilgiler) kurgusaldır; gerçek vatandaşlara ait hiçbir kişisel veri içermez.
+> ⚠️ **Bu proje bağımsız bir portföy/demo çalışmasıdır; herhangi bir resmi belediye kurumunu temsil etmez ve onunla bağlantılı değildir.**
+> Tüm vatandaş/personel/işlem verileri kurgusaldır. Kamuya açık coğrafi adlar (ör. mahalle isimleri) dışında gerçek kişisel veri kullanılmamıştır.
 
-## Proje Hakkında
+## Neden bu proje?
 
-Bu depo, açık kaynak bir e-belediye referans projesinden çıkarılan modül envanterini (bkz. [`docs/PRD.md`](docs/PRD.md)) temel alarak, .NET/PostgreSQL ekosisteminde **sıfırdan** tasarlanmış örnek bir dijital belediye hizmetleri platformudur. Amaç; Clean Architecture, CQRS, güvenli kimlik doğrulama ve test edilebilirlik prensiplerini uçtan uca uygulayan bir portföy projesi ortaya koymaktır.
+Açık kaynak bir PHP e-belediye referansındaki modül envanterini temel alıp, aynı kavramları
+**.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile **sıfırdan** yeniden tasarlar.
+Amaç satır satır port değil; SQL injection, IDOR, düz metin oturum, N+1 ve yan etkili GET gibi
+sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymaktır.
 
-## Mimari ve Teknoloji Yığını
+## Teknoloji
 
-| Katman | Teknoloji |
+| Alan | Seçim |
 |---|---|
 | Runtime | .NET 8 (LTS) |
-| API | ASP.NET Core Web API (controller-based) |
-| ORM | Entity Framework Core 8 + Npgsql |
-| Veritabanı | PostgreSQL 16+ |
+| API | ASP.NET Core Web API + Swagger |
+| Veri | EF Core 8 + PostgreSQL 16 |
 | Mimari | Clean Architecture + CQRS (MediatR) |
 | Validasyon | FluentValidation |
-| Kimlik Doğrulama | ASP.NET Core Identity + JWT (access + refresh token) |
-| API Dokümantasyonu | Swagger / OpenAPI |
-| Test | xUnit, FluentAssertions, Testcontainers |
-| Konteynerizasyon | Docker + docker-compose |
-| CI/CD | GitHub Actions |
+| Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
+| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers |
+| Ops | Docker Compose, GitHub Actions |
 
-Geliştirme süreci boyunca alınan mühendislik kararları: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md).  
-Dağıtım / Docker kılavuzu: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
-
-## Proje Durumu
-
-- [x] Faz 0 — Keşif ve modül envanteri
-- [x] Faz 1 — Solution iskeleti ve katman yapısı
-- [x] Faz 2 — Domain katmanı
-- [x] Faz 3 — Persistence katmanı ve migration'lar
-- [x] Faz 4 — Application katmanı (CQRS)
-- [x] Faz 5 — API katmanı
-- [x] Faz 6 — Kimlik doğrulama ve güvenlik
-- [x] Faz 7 — Test kapsamı
-- [x] Faz 8 — Docker ve CI/CD
-- [ ] Faz 9 — Kapsamlı dokümantasyon
-- [ ] Faz 10 — Son kontrol
-
-## Docker ile Çalıştırma (önerilen)
+## Hızlı başlangıç
 
 ```bash
 cd docker
@@ -48,29 +31,46 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-- Swagger: http://localhost:8080/swagger  
-- Health: http://localhost:8080/health  
+| | |
+|---|---|
+| Swagger | http://localhost:8080/swagger |
+| Health | http://localhost:8080/health |
 
-Demo hesaplar ve ortam değişkenleri için [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
-
-## Konteynersiz Lokal Geliştirme
-
-```bash
-dotnet restore
-dotnet build
-dotnet run --project src/ArnavutkoyBelediyesi.Api
-```
-
-JWT imzalama anahtarı ve bağlantı dizesi için `dotnet user-secrets` kullanın (bkz. DEPLOYMENT.md).
-
-## Testler
+Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ```bash
-dotnet test ArnavutkoyBelediyesi.slnx
+dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers)
 ```
 
-Infrastructure ve API entegrasyon testleri Docker gerektirir (Testcontainers → PostgreSQL 16).
+## Dokümantasyon
+
+| Belge | İçerik |
+|---|---|
+| [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı ve modül envanteri |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, referans dersleri |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli ve kontroller |
+| [`docs/TESTING.md`](docs/TESTING.md) | Test stratejisi |
+| [`docs/API.md`](docs/API.md) | v1 uç nokta haritası |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker / sırlar / demo hesaplar |
+| [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) | Mühendislik varsayımları |
+| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Katkı kuralları |
+
+## Proje durumu
+
+- [x] Faz 0–8 — Keşif → domain → application → persistence → API → güvenlik → test → Docker/CI
+- [x] Faz 9 — Kapsamlı dokümantasyon
+- [ ] Faz 10 — Son kontrol (Definition of Done turu)
+
+## Çözüm yapısı (özet)
+
+```
+src/Domain | Application | Persistence | Infrastructure | Api
+tests/*.(Domain|Application|Infrastructure|Api.Integration)Tests
+docker/   docs/   .github/workflows/
+```
+
+Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Lisans
 
-Bu proje bir portföy/demo çalışmasıdır; lisans dosyası dokümantasyon fazında eklenecektir.
+[MIT](LICENSE) — Copyright (c) 2026 ibrahimyagar.

@@ -67,16 +67,15 @@ tutulur.
 
 Seed verisinde Arnavutköy'ün kamuya açık bazı mahalle adları örnek olarak kullanılmıştır (bu bilgi resmi olmayan, herkese açık coğrafi bilgidir). Muhtar adı/telefonu gibi kişisel alanlar **tamamen kurgusaldır**, gerçek bir kişiyle eşleşmesi amaçlanmamıştır.
 
-## A11 — Faz 5'te Yetkilendirmenin Ertelenmesi ("mine" Uç Noktaları)
+## A11 — Faz 5 Ara Durumu: "mine" Uç Noktalarında Sorgu Parametresi (tarihsel)
 
-Faz 5 kapsamı yalnızca API katmanıdır; kimlik doğrulama/JWT (Faz 6) henüz uygulanmamıştır. Bu nedenle
-`GET /citizen-requests/mine` ve `GET /debts/mine` gibi "geçerli kullanıcıya özel" uç noktalar, şu an
-için `citizenUserId` / `debtorUserId` değerini bir sorgu parametresi olarak alır. `ICurrentUserService`
-arayüzü zaten Application katmanında tanımlıdır ve Faz 6'da JWT claim'lerinden okuyan bir implementasyon
-Infrastructure katmanına eklenecek; bu noktada söz konusu uç noktalar sorgu parametresini kaldırıp
-`ICurrentUserService.UserId` kullanacak şekilde güncellenecektir. Bu ara durum, Faz 5 sonunda
-Swagger üzerinden tüm akışların (kategori listeleme, talep oluşturma, mesajlaşma, borç görüntüleme/ödeme)
-uçtan uca test edilebilir olmasını sağlamak için bilinçli bir tercihtir.
+> **Durum:** A14 ile geçersiz kılınmıştır. Aşağıdaki metin, Faz 5 anındaki bilinçli ara durumu
+> kayıt altına almak için tutulur.
+
+Faz 5 kapsamında kimlik doğrulama (Faz 6) henüz yokken `GET /citizen-requests/mine` ve
+`GET /debts/mine` geçici olarak kullanıcı kimliğini sorgu parametresi olarak alıyordu; böylece
+Swagger üzerinden akışlar test edilebiliyordu. Faz 6'da bu alanlar kaldırılıp JWT'den okunur hâle
+getirilmiştir (bkz. A14).
 
 ## A12 — Swagger'ın Üretim Ortamında Varsayılan Olarak Açık Bırakılması
 
