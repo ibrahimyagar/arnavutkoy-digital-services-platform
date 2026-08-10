@@ -45,7 +45,7 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 | Su Aboneliği | `UtilitySubscriptions` | ✅ R3 |
 | Belediye Personelleri / Departmanlar | `Hr` | ✅ R4 |
 | Sosyal Yardım Başvurusu | `SocialAssistance` | ✅ R5 |
-| Dijital Vezne — Ulaşım Kartı | `Transportation` | R6 |
+| Dijital Vezne — Ulaşım Kartı | `Transportation` | ✅ R6 |
 
 ## 4. Faz 1 Kapsamındaki Modüllerin Detaylı Gereksinimleri
 
@@ -93,6 +93,11 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 ### 4.9. SocialAssistance
 - Sabit alanlar (tür, hane, gelir, özet) + isteğe bağlı JSON esnek alan.
 - Durum: Submitted → UnderReview → Approved/Rejected; vatandaş Submitted/UnderReview iken çekebilir.
+
+### 4.10. Transportation
+- `BusLine` (hat kodu, güzergah özeti, taban ücret) — anonim liste; Administrator ekler.
+- `TransportCard` — vatandaş kart çıkarır, bakiye yükler, hatta biner (biniş simülasyonu `BoardingRecord`).
+- Yetersiz bakiyede domain exception → Result failure.
 
 ## 5. Referans Projeden Öğrenilen ve Bilinçli Olarak Düzeltilen Noktalar
 

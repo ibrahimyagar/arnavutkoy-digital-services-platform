@@ -10,7 +10,7 @@ Talimatta önce .NET 10 belirtilmiş, ardından .NET 8'e güncellenmiştir. Geli
 
 Referans projede 11 modül/tablo grubu gözlemlenmiştir (bkz. `PRD.md`). Tümünü ilk sürümde eş zamanlı ve **yüzeysel** biçimde uygulamak, Clean Architecture + CQRS + tam test kapsamı hedefiyle çelişir: her modül için Domain kuralı, Application handler'ı, validasyon, entegrasyon testi ve API endpoint'i gerektiği düşünülürse, 11 modülün tümü aynı kalite çubuğunda tek seferde teslim edilemez.
 
-**Karar:** İlk sürümde 5 bounded context **tam derinlikte** uygulanır. Yol haritası R1–R5 tamamlandı; kalan `Transportation` (R6) aynı derinlikle eklenir.
+**Karar:** Faz 1'deki 5 bounded context tam derinlikte uygulandı. Yol haritası R1–R6 (Street, Properties, UtilitySubscriptions, Hr, SocialAssistance, Transportation) aynı derinlikle tamamlandı.
 
 Bu, mimariyi kökten değiştirecek bir karar değildir (yeni modül eklemek mevcut yapıyı bozmaz), bu nedenle onay beklenmeden uygulanmıştır. İstenirse ilerleyen bir fazda kalan modüller aynı desenle eklenebilir.
 

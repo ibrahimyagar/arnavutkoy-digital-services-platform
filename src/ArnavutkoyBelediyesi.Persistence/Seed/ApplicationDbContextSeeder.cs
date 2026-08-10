@@ -4,6 +4,7 @@ using ArnavutkoyBelediyesi.Domain.Common;
 using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Hr;
 using ArnavutkoyBelediyesi.Domain.Payments;
+using ArnavutkoyBelediyesi.Domain.Transportation;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ public static class ApplicationDbContextSeeder
         await SeedRequestCategoriesAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedAnnouncementsAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedHrAsync(context, cancellationToken).ConfigureAwait(false);
+        await SeedTransportationAsync(context, cancellationToken).ConfigureAwait(false);
         await SeedDebtsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
 
         _ = districtId;
@@ -272,6 +274,24 @@ public static class ApplicationDbContextSeeder
         };
 
         await context.StaffMembers.AddRangeAsync(staff, cancellationToken).ConfigureAwait(false);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private static async Task SeedTransportationAsync(ApplicationDbContext context, CancellationToken cancellationToken)
+    {
+        if (await context.BusLines.AnyAsync(cancellationToken).ConfigureAwait(false))
+        {
+            return;
+        }
+
+        var lines = new[]
+        {
+            BusLine.Create("36AS", "Hadımköy - Metro", "Hadımköy → Taşoluk → Metro", 17.50m),
+            BusLine.Create("336", "Boğazköy Ring", "Boğazköy merkez ring", 12.00m),
+            BusLine.Create("78YB", "Yeşilbayır Express", "Yeşilbayır → Merkez", 15.00m)
+        };
+
+        await context.BusLines.AddRangeAsync(lines, cancellationToken).ConfigureAwait(false);
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 

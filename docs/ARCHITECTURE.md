@@ -88,9 +88,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | UtilitySubscriptions | WaterSubscription | Active/Suspended/Closed; su borcu üretimi |
 | Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
 | SocialAssistance | SocialAssistanceApplication | Sabit alan + JSONB; durum makinesi |
+| Transportation | TransportCard, BusLine, BoardingRecord | Bakiye, hat ücreti, biniş simülasyonu |
 
-Yol haritası kalanı (`Transportation`) `PRD.md`'de;
-mimari `Features/<Yeni>` eklenerek genişlemeye uygundur.
+Yol haritası R1–R6 tamamlandı.
 
 ## 6. Kalıcılık Desenleri
 

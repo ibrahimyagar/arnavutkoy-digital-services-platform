@@ -104,6 +104,19 @@ Taban yol: `/api/v1`
 | POST | `/social-assistance/{id}/decide` | Officer/Administrator | Onayla/reddet |
 | POST | `/social-assistance/{id}/withdraw` | Citizen (sahip) | Geri çek |
 
+## Transportation
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
+| GET | `/bus-lines` | Anonim | Hatlar |
+| POST | `/bus-lines` | Administrator | Hat ekle |
+| GET | `/transport-cards/mine` | Authenticated | Kartlarım |
+| GET | `/transport-cards/mine/boardings` | Authenticated | Binişlerim |
+| GET | `/transport-cards/{id}` | Sahip veya personel | Kart detayı |
+| POST | `/transport-cards` | Citizen | Kart çıkar |
+| POST | `/transport-cards/{id}/top-up` | Citizen (sahip) | Bakiye yükle |
+| POST | `/transport-cards/{id}/board` | Citizen (sahip) | Biniş simülasyonu |
+
 ## Operasyonel
 
 | Metot | Yol | Auth | Açıklama |
