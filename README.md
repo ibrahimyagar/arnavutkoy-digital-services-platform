@@ -36,8 +36,9 @@ docker compose up --build -d
 |---|---|
 | Swagger | http://localhost:8080/swagger |
 | Health | http://localhost:8080/health |
+| Vatandaş UI | `cd web && npm install && npm run dev` → http://localhost:5173 |
 
-Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Demo kullanıcılar ve ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Vatandaş arayüzü → [`web/README.md`](web/README.md).
 
 ```bash
 dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers)
@@ -62,6 +63,7 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 - [x] Faz 0–8 — Keşif → domain → application → persistence → API → güvenlik → test → Docker/CI
 - [x] Faz 9 — Kapsamlı dokümantasyon
 - [x] Faz 10 — Son kontrol (Definition of Done)
+- [x] Yol haritası R1–R6 + vatandaş web paneli (faz 1)
 
 DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
 
@@ -70,7 +72,7 @@ DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md
 ```
 src/Domain | Application | Persistence | Infrastructure | Api
 tests/*.(Domain|Application|Infrastructure|Api.Integration)Tests
-docker/   docs/   .github/workflows/
+web/      docker/   docs/   .github/workflows/
 ```
 
 Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).

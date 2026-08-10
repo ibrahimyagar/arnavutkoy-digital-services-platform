@@ -1,0 +1,124 @@
+.home-hero {
+  position: relative;
+  min-height: min(78vh, 720px);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(10, 50, 46, 0.08), transparent 40%),
+    linear-gradient(120deg, #0a322e 0%, #0f4c45 48%, #1b6a5f 100%);
+  color: #f4f8f6;
+  margin-top: -2rem;
+  padding-top: 2rem;
+}
+
+.home-hero-glow {
+  position: absolute;
+  inset: auto -10% -30% 40%;
+  height: 70%;
+  background: radial-gradient(circle at center, rgba(196, 163, 90, 0.35), transparent 60%);
+  animation: drift 12s ease-in-out infinite alternate;
+}
+
+.home-hero-copy {
+  position: relative;
+  padding: 5rem 0 4rem;
+  max-width: 42rem;
+}
+
+.home-kicker {
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  color: var(--accent-soft);
+}
+
+.home-hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 9vw, 6.4rem);
+  font-weight: 650;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+.home-lead {
+  margin: 1.25rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: rgba(244, 248, 246, 0.84);
+  max-width: 28rem;
+}
+
+.home-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.home-hero .btn-ghost {
+  color: #f4f8f6;
+  border-color: rgba(244, 248, 246, 0.28);
+}
+
+.home-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.home-strip article {
+  padding: 1.4rem 1.2rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line);
+  animation: rise 700ms ease both;
+}
+
+.home-strip article:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.home-strip article:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.home-strip h2 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-4%, -3%, 0) scale(1.08);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 860px) {
+  .home-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero {
+    min-height: 70vh;
+  }
+}
