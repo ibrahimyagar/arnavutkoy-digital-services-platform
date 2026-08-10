@@ -45,5 +45,10 @@ Bu, "manuel tarayıcı testi yeter" yaklaşımına karşı bilinçli bir karşı
 
 ## Kapsam Notu
 
-Coverlet coverage raporu CI'ya bağlanmamıştır; öncelik anlamlı senaryo kapsamıdır.
-Coverage eşiği istenirse Faz 10 sertleştirme adımında eklenebilir.
+CI, Coverlet ile Cobertura raporu üretir (`coverage/` artifact). Zorunlu yüzde eşiği
+yoktur; birincil kalite kapısı anlamlı senaryo kapsamı ve yeşil test suite'tir.
+Yerel rapor:
+
+```bash
+dotnet test ArnavutkoyBelediyesi.slnx -c Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+```

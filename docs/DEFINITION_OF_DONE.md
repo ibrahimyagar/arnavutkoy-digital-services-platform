@@ -52,6 +52,12 @@ doğrulanmıştır. Tarih: 2026-08-10.
 
 ## Bilinçli kapsam dışı (dürüst borç)
 
-- Redis / Seq / Coverlet eşiği — ihtiyaç doğunca (`ASSUMPTIONS` A8, `TESTING.md`)
+- Redis — ihtiyaç doğunca (`ASSUMPTIONS` A8)
+- Coverlet zorunlu yüzde eşiği — CI rapor üretir, eşik yok (`TESTING.md`)
 - `Street` entity — yol haritası
 - Gerçek ödeme PSP entegrasyonu — demo kart doğrulama
+
+## Sonraki sertleştirme (Faz 11+)
+
+- Serilog konsol + opsiyonel Seq (`Serilog:Seq:ServerUrl`)
+- CI Coverlet Cobertura artifact

@@ -43,15 +43,16 @@ Referans projede T.C. kimlik no / sicil no / telefon ile giriş vardı. Bu proje
 
 Referans projede sayfa her açıldığında borç cezası yeniden hesaplanıp veritabanına yazılıyordu (yan etkili GET). Bu projede ceza, `Debt` entity'sinin salt okunur bir domain metodunda (`CalculateOverdueInterest(DateTime asOfUtc)`) hesaplanır; kalıcı yazma yalnızca ödeme işlemi (`PayDebtCommand`) sırasında, hesaplanan nihai tutarla birlikte gerçekleşir.
 
-## A8 — Redis / Seq Kapsamı
+## A8 — Redis / Seq / Serilog Kapsamı
 
-Redis ve Seq, proje talimatında opsiyonel bağımlılıklar olarak geçmektedir. Faz 8'de
-`docker-compose` bilinçli olarak **yalnızca API + PostgreSQL** ile sınırlandırılmıştır: Faz 1
-kapsamındaki 5 modülde henüz `IDistributedCache` gerektiren bir okuma yolu yoktur ve kullanılmayan
-bir Redis konteyneri operasyonel gürültü + saldırı yüzeyi üretir (erken optimizasyondan kaçınma).
-Cache ihtiyacı doğduğunda (ör. sık okunan `Geography` referans verisi) Redis,
-`IDistributedCache` arkasında soyutlanarak compose'a eklenecektir. Seq/ELK sink'i de aynı
-şekilde Serilog yapılandırmasına bağlandığında opsiyonel bir servis olarak eklenebilir.
+**Serilog** (Faz 11): API konsola yapılandırılmış Serilog kullanır; HTTP request logging
+(`/health` Debug seviyesinde) açıktır. `Serilog:Seq:ServerUrl` (veya
+`SERILOG__SEQ__SERVERURL`) doluysa Seq sink eklenir — Seq konteyneri compose'a varsayılan
+olarak eklenmez (opsiyonel bağımlılık).
+
+**Redis:** Faz 1 kapsamındaki 5 modülde henüz `IDistributedCache` gerektiren bir okuma yolu
+yoktur; kullanılmayan Redis konteyneri operasyonel gürültü + saldırı yüzeyi üretir. Cache
+ihtiyacı doğduğunda `IDistributedCache` arkasında soyutlanarak compose'a eklenecektir.
 
 ## A10 — Identity Entity'lerinin Persistence Katmanında Tutulması
 

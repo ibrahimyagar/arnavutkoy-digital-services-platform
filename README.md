@@ -20,7 +20,8 @@ sorunları bilinçli olarak düzelten, test edilebilir bir örnek ortaya koymakt
 | Mimari | Clean Architecture + CQRS (MediatR) |
 | Validasyon | FluentValidation |
 | Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
-| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers |
+| Loglama | Serilog (konsol + opsiyonel Seq) |
+| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers, Coverlet |
 | Ops | Docker Compose, GitHub Actions |
 
 ## Hızlı başlangıç

@@ -52,6 +52,7 @@ veya orchestrator secret'ları kullanılır; lokal `dotnet run` için `dotnet us
 | `DISABLE_HTTPS_REDIRECTION` | Docker'da Evet | Konteyner HTTP dinler; TLS ters vekilde sonlanır |
 | `Swagger__Enabled` | Hayır | Varsayılan `true` (portföy demosu) |
 | `Cors__AllowedOrigins__0` | Production'da | Development dışında whitelist zorunlu |
+| `Serilog__Seq__ServerUrl` | Hayır | Doluysa Seq sink açılır (ör. `http://seq:5341`) |
 
 ## Konteynersiz Lokal Geliştirme
 

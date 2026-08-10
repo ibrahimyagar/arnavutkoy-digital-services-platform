@@ -151,8 +151,9 @@ Referans PHP e-belediye projesinde gözlemlenen anti-pattern'ler ve bu projedeki
 
 ## 11. Bilinçli Ertelemeler
 
-- **Redis / Seq:** Kullanılmayan bağımlılık eklenmedi (`ASSUMPTIONS` A8).
-- **Serilog structured sinks:** Konsol yeterliliği; Seq sink ihtiyaçta.
+- **Serilog:** Konsol (+ isteğe bağlı Seq via `Serilog:Seq:ServerUrl`). Request logging
+  `/health` gürültüsünü Debug'a düşürür; hassas alanlar şablona alınmaz.
+- **Redis:** Kullanılmayan bağımlılık eklenmedi (`ASSUMPTIONS` A8).
 - **Payment gateway:** Demo kart doğrulama; gerçek PCI kapsamı yok — kart tam numarası/CVV asla persist edilmez.
 
 ## 12. İlgili Belgeler

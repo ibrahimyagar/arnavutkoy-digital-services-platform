@@ -72,7 +72,8 @@ tokenizasyonu kullanılmalıdır.
   SameSite/antiforgery ayrıca tasarlanmalıdır.
 - Dağıtık rate limit: tek instance bellek içi limiter; yatay ölçekte Redis-backed limiter gerekir.
 - Swagger varsayılan açık (portföy görünürlüğü); kurumsal prod'da kapatılmalı veya korunmalı.
-- Serilog/Seq merkezi log henüz yok; konteyner stdout yeterli kabul edilmiştir.
+- Merkezi log: Serilog konsola yazar; Seq opsiyonel (`Serilog:Seq:ServerUrl`). Redis-backed
+  dağıtık rate limit yatay ölçekte ayrıca gerekir.
 
 ## 8. İlgili Kod Noktaları
 

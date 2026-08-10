@@ -83,7 +83,7 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 2. **CSRF + şifre değişikliğinde eski şifre kontrolü yoksu** → şifre değişikliği eski şifre doğrulaması gerektirir; JWT tabanlı API'de CSRF riski cookie tabanlı oturumlara göre zaten düşüktür, ayrıca `SameSite`/`HttpOnly` uygulanır.
 3. **"Beni hatırla" şifreyi düz metin/base64 cookie'de saklıyordu** → refresh token, veritabanında yalnızca hash'i tutulan, rotasyonlu, süreli bir token'dır; şifre hiçbir zaman cookie/localStorage'a yazılmaz.
 4. **Path traversal / whitelist'siz include** → API'de dosya include kavramı yok (controller/endpoint routing), bu sınıf açık yapısal olarak imkânsız.
-5. **Ham `mysqli_error()` istemciye sızdırılıyordu** → global exception middleware, `ProblemDetails` ile yalnızca güvenli, genel hata mesajı döner; teknik detay yalnızca sunucu loglarına (`ILogger`) yazılır.
+5. **Ham `mysqli_error()` istemciye sızdırılıyordu** → global exception middleware, `ProblemDetails` ile yalnızca güvenli, genel hata mesajı döner; teknik detay yalnızca Serilog sunucu loglarına yazılır.
 6. **N+1 query riski** (ör. talepler + mesajlar ayrı ayrı sorgulanıyordu) → EF Core `Include`/projeksiyon sorguları ile tek sorguda getirilir.
 7. **Sayfa render sırasında yan etkili `UPDATE` (borç cezası)** → ceza hesaplama salt okunur bir domain hesaplama fonksiyonuna taşındı, kalıcı yazma yalnızca ödeme anında yapılır.
 8. **Validasyon eksikliği / tutarsız escaping** → tüm giriş noktaları FluentValidation ile doğrulanır, tek bir tutarlı strateji.
