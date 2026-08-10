@@ -6,6 +6,8 @@ import { AnnouncementsManagePage } from './pages/AnnouncementsManagePage'
 import { DebtsPage } from './pages/DebtsPage'
 import { GeographyAdminPage } from './pages/GeographyAdminPage'
 import { HomePage } from './pages/HomePage'
+import { HrDirectoryPage } from './pages/HrDirectoryPage'
+import { HrManagePage } from './pages/HrManagePage'
 import { LoginPage } from './pages/LoginPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
 import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="duyuru-yonetimi" element={<AnnouncementsManagePage />} />
             <Route path="hatlar" element={<BusLinesPage />} />
             <Route path="hatlar/:id" element={<BusLineDetailPage />} />
+            <Route path="birimler" element={<HrDirectoryPage />} />
+            <Route path="birim-yonetimi" element={<HrManagePage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />
             <Route path="borclar" element={<DebtsPage />} />
             <Route path="talepler" element={<RequestsPage />} />

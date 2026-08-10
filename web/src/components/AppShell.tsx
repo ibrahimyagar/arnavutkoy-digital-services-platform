@@ -52,6 +52,7 @@ export function AppShell() {
             <nav className="shell-nav" aria-label="Ana menü">
               <NavLink to="/duyurular">Duyurular</NavLink>
               <NavLink to="/hatlar">Hatlar</NavLink>
+              <NavLink to="/birimler">Birimler</NavLink>
               {isAuthenticated ? <NavLink to="/panel">Panel</NavLink> : null}
               {staff ? <NavLink to="/personel">Personel</NavLink> : null}
               {admin ? <NavLink to="/cografya">Coğrafya</NavLink> : null}

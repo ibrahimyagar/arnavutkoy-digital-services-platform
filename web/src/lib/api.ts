@@ -80,6 +80,23 @@ export type Street = {
   name: string
 }
 
+export type Department = {
+  id: string
+  name: string
+  description: string
+  isActive: boolean
+}
+
+export type StaffMember = {
+  id: string
+  departmentId: string
+  fullName: string
+  title: string
+  email: string
+  phoneNumber: string
+  isActive: boolean
+}
+
 export type CitizenProperty = {
   id: string
   ownerUserId: string

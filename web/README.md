@@ -43,8 +43,10 @@ VITE_API_BASE_URL=http://localhost:8080
 - Sade üst menü + mobil açılır navigasyon
 - Personel su abonelik yönetimi ve borç kesme
 - Personel mülk yönetimi ve emlak vergisi borcu kesme
+- Halka açık birim/personel dizini + yönetici birim yönetimi
 
 ## Bilinçli sınırlar
 
 - Coğrafya düzenleme/silme yok (yalnızca liste + oluşturma)
+- HR dizini Identity hesaplarıyla bağlı değildir
 - Resmi belediye bağlantısı yoktur (portföy demosu)

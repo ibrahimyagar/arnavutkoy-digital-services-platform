@@ -36,6 +36,12 @@ export function HomePage() {
           <h2>Ulaşım kartı</h2>
           <p className="muted">Bakiye yükleyin, hatlara binin, geçmişi izleyin.</p>
         </article>
+        <article>
+          <h2>Birimler</h2>
+          <p className="muted">
+            <Link to="/birimler">Departman ve iletişim dizinini</Link> herkese açık görün.
+          </p>
+        </article>
       </section>
     </div>
   )
