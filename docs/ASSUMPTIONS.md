@@ -36,7 +36,13 @@ Referans projede sayfa her açıldığında borç cezası yeniden hesaplanıp ve
 
 ## A8 — Redis / Seq Kapsamı
 
-Redis, `IDistributedCache` arkasında soyutlanmış opsiyonel bir bağımlılık olarak `docker-compose.yml`'e eklenmiştir ancak Faz 1'deki 5 modülde henüz aktif bir cache senaryosu (örn. sık okunan `Geography` referans verisi) haricinde yoğun kullanılmamıştır — bu, gerçek düşük trafikli bir belediye API'si için makul bir mühendislik kararıdır (erken optimizasyondan kaçınma).
+Redis ve Seq, proje talimatında opsiyonel bağımlılıklar olarak geçmektedir. Faz 8'de
+`docker-compose` bilinçli olarak **yalnızca API + PostgreSQL** ile sınırlandırılmıştır: Faz 1
+kapsamındaki 5 modülde henüz `IDistributedCache` gerektiren bir okuma yolu yoktur ve kullanılmayan
+bir Redis konteyneri operasyonel gürültü + saldırı yüzeyi üretir (erken optimizasyondan kaçınma).
+Cache ihtiyacı doğduğunda (ör. sık okunan `Geography` referans verisi) Redis,
+`IDistributedCache` arkasında soyutlanarak compose'a eklenecektir. Seq/ELK sink'i de aynı
+şekilde Serilog yapılandırmasına bağlandığında opsiyonel bir servis olarak eklenebilir.
 
 ## A10 — Identity Entity'lerinin Persistence Katmanında Tutulması
 
@@ -128,16 +134,25 @@ Uygulama, `Jwt:SigningKey` değeri boş veya 256 bitten (32 bayt) kısa ise **ba
 (`InvalidOperationException`). Bu bilinçli bir tercihtir: zayıf veya eksik bir imzalama anahtarıyla
 sessizce ayağa kalkıp çalışma zamanında güvensiz token'lar üretmek, üretimde fark edilmesi güç bir
 güvenlik açığına dönüşebilir. Dev ortamında `dotnet user-secrets set "Jwt:SigningKey" "..."`,
-prod'da `Jwt__SigningKey` ortam değişkeni ile sağlanmalıdır (bkz. docs/DEPLOYMENT.md — Faz 9'da yazılacak).
+prod'da `Jwt__SigningKey` ortam değişkeni ile sağlanmalıdır (bkz. docs/DEPLOYMENT.md).
 
-## A19 — Seed Verisinin Uygulama Başlangıcında Otomatik Çalıştırılmaması
+## A19 — Seed Verisinin Uygulama Başlangıcında Çalıştırılması
 
-`ApplicationDbContextSeeder.SeedAsync`, Faz 3'te yazılmış olup roller/demo kullanıcılar/referans
-verilerini oluşturur, ancak `Program.cs` içinden henüz çağrılmamaktadır. Bunun bilinçli olarak
-Faz 8'e (Docker & CI/CD) bırakılmasının nedeni, `docker-compose up` sonrası "tek komutla çalışan,
-seed'lenmiş bir ortam" hedefinin doğal olarak konteyner başlatma/orkestrasyon adımıyla birlikte ele
-alınmasıdır; Faz 7'deki entegrasyon testleri ise `SeedAsync`'i kendi Testcontainers fixture'ları
-içinde bağımsız olarak çağıracaktır.
+`ApplicationDbContextSeeder.SeedAsync`, uygulama başlangıcında
+(`DatabaseStartupExtensions.InitializeDatabaseAsync`) çağrılır; davranış
+`Database:SeedOnStartup` (varsayılan: `true`) ile kontrol edilir. Seed idempotent'tir
+(mevcut roller/kullanıcılar/referans veri yeniden oluşturulmaz). `Testing` ortamında
+(WebApplicationFactory) bu adım atlanır; entegrasyon testleri kendi Testcontainers
+fixture'larında seed'i bağımsız yönetir. Docker Compose varsayılanı
+`DATABASE_SEED_ON_STARTUP=true` ile "tek komutla çalışan, seed'lenmiş demo ortamı"
+hedefini karşılar (bkz. `docs/DEPLOYMENT.md`).
+
+## A20 — Docker'da HTTPS Yönlendirmesinin Kapatılması
+
+API konteyneri yalnızca HTTP (`ASPNETCORE_URLS=http://+:8080`) dinler; TLS'nin ters vekil
+(nginx, Traefik, bulut load balancer) arkasında sonlandırılması beklenir. Bu nedenle
+compose ortamında `DISABLE_HTTPS_REDIRECTION=true` set edilir. Yerel `dotnet run` /
+Development'ta HTTPS yönlendirmesi varsayılan davranışını korur.
 
 ## A13 — API Sürüm Stratejisi
 

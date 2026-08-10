@@ -18,17 +18,15 @@ Bu depo, açık kaynak bir e-belediye referans projesinden çıkarılan modül e
 | Mimari | Clean Architecture + CQRS (MediatR) |
 | Validasyon | FluentValidation |
 | Kimlik Doğrulama | ASP.NET Core Identity + JWT (access + refresh token) |
-| Loglama | Serilog |
 | API Dokümantasyonu | Swagger / OpenAPI |
 | Test | xUnit, FluentAssertions, Testcontainers |
 | Konteynerizasyon | Docker + docker-compose |
 | CI/CD | GitHub Actions |
 
-Geliştirme süreci boyunca alınan mühendislik kararları ve gerekçeleri için [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) dosyasına bakınız. Katman diyagramı ve mimari gerekçeler (`docs/ARCHITECTURE.md`), dokümantasyon fazında eklenecektir.
+Geliştirme süreci boyunca alınan mühendislik kararları: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md).  
+Dağıtım / Docker kılavuzu: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Proje Durumu
-
-Proje kademeli fazlar halinde geliştirilmektedir; her faz ayrı commit(ler) ile kayda geçer. Şu ana kadar tamamlanan fazlar:
 
 - [x] Faz 0 — Keşif ve modül envanteri
 - [x] Faz 1 — Solution iskeleti ve katman yapısı
@@ -37,23 +35,41 @@ Proje kademeli fazlar halinde geliştirilmektedir; her faz ayrı commit(ler) ile
 - [x] Faz 4 — Application katmanı (CQRS)
 - [x] Faz 5 — API katmanı
 - [x] Faz 6 — Kimlik doğrulama ve güvenlik
-- [ ] Faz 7 — Test kapsamı
-- [ ] Faz 8 — Docker ve CI/CD
+- [x] Faz 7 — Test kapsamı
+- [x] Faz 8 — Docker ve CI/CD
 - [ ] Faz 9 — Kapsamlı dokümantasyon
 - [ ] Faz 10 — Son kontrol
 
-## Lokal Geliştirme
+## Docker ile Çalıştırma (önerilen)
 
 ```bash
-# Bağımlılıkları geri yükle ve derle
+cd docker
+cp .env.example .env
+docker compose up --build -d
+```
+
+- Swagger: http://localhost:8080/swagger  
+- Health: http://localhost:8080/health  
+
+Demo hesaplar ve ortam değişkenleri için [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+## Konteynersiz Lokal Geliştirme
+
+```bash
 dotnet restore
 dotnet build
-
-# API'yi çalıştır (kullanıcı sırları ile JWT imzalama anahtarı ve bağlantı dizesi gerekir)
 dotnet run --project src/ArnavutkoyBelediyesi.Api
 ```
 
-Swagger arayüzü, uygulama ayağa kalktığında `/swagger` yolunda erişilebilir olacaktır.
+JWT imzalama anahtarı ve bağlantı dizesi için `dotnet user-secrets` kullanın (bkz. DEPLOYMENT.md).
+
+## Testler
+
+```bash
+dotnet test ArnavutkoyBelediyesi.slnx
+```
+
+Infrastructure ve API entegrasyon testleri Docker gerektirir (Testcontainers → PostgreSQL 16).
 
 ## Lisans
 
