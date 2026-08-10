@@ -1,6 +1,7 @@
 import { Navigate, Link } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { isAdmin, isStaff } from '../lib/roles'
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
@@ -8,22 +9,21 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return children
 }
 
-function isStaff(roles: string[] | undefined) {
-  return Boolean(roles?.includes('Officer') || roles?.includes('Administrator'))
-}
-
 export function PanelPage() {
   const { user } = useAuth()
   const staff = isStaff(user?.roles)
+  const admin = isAdmin(user?.roles)
 
   return (
     <div className="container stack">
       <div>
         <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Merhaba, {user?.fullName}</h1>
         <p className="muted">
-          {staff
-            ? 'Personel olarak talepleri ve başvuruları yönetebilirsiniz.'
-            : 'Hizmetlerinize buradan devam edin.'}
+          {admin
+            ? 'Yönetici olarak coğrafya ve personel işlemlerini yönetebilirsiniz.'
+            : staff
+              ? 'Personel olarak talepleri ve başvuruları yönetebilirsiniz.'
+              : 'Hizmetlerinize buradan devam edin.'}
         </p>
       </div>
 
@@ -34,7 +34,22 @@ export function PanelPage() {
           gap: '1rem',
         }}
       >
-        {staff ? (
+        {admin ? (
+          <>
+            <Link className="panel" to="/cografya">
+              <h3>Coğrafya</h3>
+              <p className="muted">İlçe, mahalle ve sokak yönetimi</p>
+            </Link>
+            <Link className="panel" to="/personel">
+              <h3>Personel masası</h3>
+              <p className="muted">Talep ve sosyal yardım değerlendirme</p>
+            </Link>
+            <Link className="panel" to="/duyurular">
+              <h3>Duyurular</h3>
+              <p className="muted">Yayımlanan duyuruları gör</p>
+            </Link>
+          </>
+        ) : staff ? (
           <>
             <Link className="panel" to="/personel">
               <h3>Personel masası</h3>

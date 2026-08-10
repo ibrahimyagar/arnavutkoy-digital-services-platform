@@ -7,11 +7,8 @@ import {
   type Paginated,
   type SocialAssistanceApplication,
 } from '../lib/api'
+import { isStaff } from '../lib/roles'
 import { RequireAuth } from './PanelPage'
-
-function isStaff(roles: string[]) {
-  return roles.includes('Officer') || roles.includes('Administrator')
-}
 
 function StaffDeskContent() {
   const [requests, setRequests] = useState<CitizenRequestSummary[]>([])

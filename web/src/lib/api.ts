@@ -59,6 +59,12 @@ export type RequestCategory = {
   name: string
 }
 
+export type District = {
+  id: string
+  name: string
+  neighborhoodCount: number
+}
+
 export type Neighborhood = {
   id: string
   districtId: string
@@ -66,6 +72,12 @@ export type Neighborhood = {
   headmanFullName: string
   headmanPhoneNumber: string
   population: number
+}
+
+export type Street = {
+  id: string
+  neighborhoodId: string
+  name: string
 }
 
 export type CitizenProperty = {

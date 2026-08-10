@@ -1,14 +1,12 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { isAdmin, isStaff } from '../lib/roles'
 import './shell.css'
-
-function isStaff(roles: string[] | undefined) {
-  return Boolean(roles?.includes('Officer') || roles?.includes('Administrator'))
-}
 
 export function AppShell() {
   const { user, isAuthenticated, logout } = useAuth()
   const staff = isStaff(user?.roles)
+  const admin = isAdmin(user?.roles)
 
   return (
     <div className="shell">
@@ -28,12 +26,9 @@ export function AppShell() {
             {isAuthenticated ? (
               <>
                 <NavLink to="/panel">Panel</NavLink>
-                {staff ? (
-                  <>
-                    <NavLink to="/personel">Personel</NavLink>
-                    <NavLink to="/talepler">Talepler</NavLink>
-                  </>
-                ) : (
+                {staff ? <NavLink to="/personel">Personel</NavLink> : null}
+                {admin ? <NavLink to="/cografya">Coğrafya</NavLink> : null}
+                {!staff ? (
                   <>
                     <NavLink to="/borclar">Borçlar</NavLink>
                     <NavLink to="/talepler">Talepler</NavLink>
@@ -42,7 +37,7 @@ export function AppShell() {
                     <NavLink to="/su">Su</NavLink>
                     <NavLink to="/yardim">Yardım</NavLink>
                   </>
-                )}
+                ) : null}
               </>
             ) : null}
           </nav>

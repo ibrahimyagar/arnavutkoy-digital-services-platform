@@ -32,7 +32,7 @@ export function LoginPage() {
     <div className="container" style={{ maxWidth: 460 }}>
       <div className="panel stack">
         <div>
-          <h2>Vatandaş girişi</h2>
+          <h2>Hesap girişi</h2>
           <p className="muted">T.C. kimlik numarası ve şifrenizle giriş yapın.</p>
         </div>
 
@@ -40,6 +40,8 @@ export function LoginPage() {
           Vatandaş: <code>10000000146</code> / <code>Demo!Citizen123</code>
           <br />
           Görevli: <code>10000000252</code> / <code>Demo!Officer123</code>
+          <br />
+          Yönetici: <code>10000000368</code> / <code>Demo!Admin123</code>
         </div>
 
         {error ? <div className="error-box">{error}</div> : null}

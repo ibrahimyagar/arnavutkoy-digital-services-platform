@@ -24,6 +24,7 @@ VITE_API_BASE_URL=http://localhost:8080
 
 - Vatandaş: `10000000146` / `Demo!Citizen123`
 - Görevli: `10000000252` / `Demo!Officer123`
+- Yönetici: `10000000368` / `Demo!Admin123`
 
 ## Bu fazda olanlar
 
@@ -33,8 +34,9 @@ VITE_API_BASE_URL=http://localhost:8080
 - Duyurular, hat listesi + hat detayı (durak/saat)
 - Mülk, su aboneliği, sosyal yardım
 - Personel masası (talep durumu + sosyal yardım onay/red)
+- Yönetici coğrafya ekranı (ilçe / mahalle / sokak)
 
 ## Bilinçli sınırlar
 
-- Tam admin coğrafya/yönetim UI yok
+- Coğrafya düzenleme/silme yok (yalnızca liste + oluşturma)
 - Resmi belediye bağlantısı yoktur (portföy demosu)

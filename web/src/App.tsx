@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { AppShell } from './components/AppShell'
 import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
 import { DebtsPage } from './pages/DebtsPage'
+import { GeographyAdminPage } from './pages/GeographyAdminPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="su" element={<WaterPage />} />
             <Route path="yardim" element={<SocialAssistancePage />} />
             <Route path="personel" element={<StaffDeskPage />} />
+            <Route path="cografya" element={<GeographyAdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
