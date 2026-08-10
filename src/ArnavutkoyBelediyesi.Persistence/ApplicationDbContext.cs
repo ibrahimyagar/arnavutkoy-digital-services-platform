@@ -2,6 +2,7 @@ using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Payments;
+using ArnavutkoyBelediyesi.Domain.Properties;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<Neighborhood> Neighborhoods => Set<Neighborhood>();
 
     public DbSet<Street> Streets => Set<Street>();
+
+    public DbSet<CitizenProperty> CitizenProperties => Set<CitizenProperty>();
 
     public DbSet<Announcement> Announcements => Set<Announcement>();
 

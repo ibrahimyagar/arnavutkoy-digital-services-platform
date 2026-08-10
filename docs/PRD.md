@@ -36,15 +36,16 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 | Hizmet Masası | Vatandaş Talebi (CitizenRequest) + Talep Mesajı (RequestMessage), durum makinesi | `CitizenRequests` |
 | Dijital Vezne — Borç Ödeme | Borç (Debt) + Ödeme (Payment), gecikme faizi hesaplama domain kuralı | `Payments` |
 
-### 3.2. Yol Haritası (bu sürümde uygulanmaz, PRD'de tasarımı hazır tutulur)
+### 3.2. Yol Haritası (sırayla tamamlanıyor)
 
-| Referans Modül | Planlanan Bounded Context | Not |
+| Referans Modül | Bounded Context | Durum |
 |---|---|---|
-| Sosyal Yardım Başvurusu | `SocialAssistance` | Dinamik form şeması yerine sabit alan seti + `JSONB` esnek alan önerilir |
-| Dijital Vezne — Ulaşım Kartı | `Transportation` | Kart, hat, tarife, biniş işlemi ayrı bir bounded context olmalı |
-| Mülkler | `Properties` | `Geography` context'ine bağımlı |
-| Belediye Personelleri / Departmanlar | `Hr` (İnsan Kaynakları) | `Identity`'deki Officer rolünden ayrı, halka açık personel dizini |
-| Su Aboneliği | `UtilitySubscriptions` | `Payments` ile ilişkili borç kaynağı |
+| Sokak (Geography genişlemesi) | `Geography` / Street | ✅ R1 |
+| Mülkler | `Properties` | ✅ R2 |
+| Su Aboneliği | `UtilitySubscriptions` | R3 |
+| Belediye Personelleri / Departmanlar | `Hr` | R4 |
+| Sosyal Yardım Başvurusu | `SocialAssistance` | R5 |
+| Dijital Vezne — Ulaşım Kartı | `Transportation` | R6 |
 
 ## 4. Faz 1 Kapsamındaki Modüllerin Detaylı Gereksinimleri
 
@@ -74,6 +75,11 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 - Borç türleri: su, emlak, diğer (genişletilebilir enum).
 - Vade tarihi geçen borçlara belediye faiz oranı üzerinden günlük gecikme faizi otomatik hesaplanır (**domain kuralı**, referans projedeki gibi sayfa render sırasında yan etkili `UPDATE` yerine, ödeme anında veya sorgu anında **yan etkisiz** hesaplanır — bkz. `ARCHITECTURE.md` → *Referans Projeden Öğrenilen Dersler*).
 - Ödeme, borcu `Paid` durumuna geçirir ve bir `Payment` kaydı oluşturur (idempotent — aynı borç iki kez ödenemez).
+
+### 4.6. Properties (Mülkler)
+- Vatandaş, mahalle ve isteğe bağlı sokak bağlayarak kendi mülkünü kaydeder (`OwnerUserId` JWT'den).
+- Türler: konut, ticari, arsa. Ada/parsel ve kapı no tutulur (tapu entegrasyonu yok; demo veri).
+- Sahip kendi mülklerini listeler/günceller/pasife alır; personel tümünü okuyabilir.
 
 ## 5. Referans Projeden Öğrenilen ve Bilinçli Olarak Düzeltilen Noktalar
 

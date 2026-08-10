@@ -84,8 +84,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Announcements | Announcement | Draft → Published → Archived; taslak anonime kapalı |
 | CitizenRequests | CitizenRequest + RequestMessage | Pending → UnderReview → Resolved/Closed; Closed'a mesaj yok |
 | Payments | Debt + Payment | Gecikme faizi salt okunur hesap; ödeme idempotent; kart maskeli |
+| Properties | CitizenProperty | Mahalle/sokak bağlama; sahip JWT; pasife alma |
 
-Yol haritası modülleri (`SocialAssistance`, `Transportation`, …) `PRD.md`'de envanterlenmiştir;
+Yol haritası kalanı (`UtilitySubscriptions`, `Hr`, `SocialAssistance`, `Transportation`) `PRD.md`'de;
 mimari `Features/<Yeni>` eklenerek genişlemeye uygundur.
 
 ## 6. Kalıcılık Desenleri

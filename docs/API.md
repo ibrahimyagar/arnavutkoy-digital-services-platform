@@ -58,6 +58,12 @@ Taban yol: `/api/v1`
 | POST | `/neighborhoods` | Administrator | Mahalle ekle |
 | GET | `/streets` | Anonim | Sokaklar (`neighborhoodId` opsiyonel) |
 | POST | `/streets` | Administrator | Sokak ekle |
+| GET | `/properties/mine` | Authenticated | Kendi mülklerim |
+| GET | `/properties` | Officer/Administrator | Tüm mülkler (filtre: `ownerUserId`, `neighborhoodId`) |
+| GET | `/properties/{id}` | Sahip veya personel | Mülk detayı |
+| POST | `/properties` | Citizen | Mülk kaydı |
+| PUT | `/properties/{id}/address` | Sahip veya Administrator | Adres güncelle |
+| POST | `/properties/{id}/deactivate` | Sahip veya Administrator | Pasife al |
 
 ## Operasyonel
 

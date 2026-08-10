@@ -59,7 +59,8 @@ doğrulanmıştır. Tarih: 2026-08-10.
 ## Yol haritası (R1–R6)
 
 - ~~R1 Street (Geography)~~ — tamamlandı
-- R2 Properties · R3 UtilitySubscriptions · R4 Hr · R5 SocialAssistance · R6 Transportation
+- ~~R2 Properties~~ — tamamlandı
+- R3 UtilitySubscriptions · R4 Hr · R5 SocialAssistance · R6 Transportation
 
 ## Sonraki sertleştirme (Faz 11+)
 
