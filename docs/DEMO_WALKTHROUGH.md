@@ -6,7 +6,7 @@ Bağımsız demo; gerçek belediye ile bağlantısı yoktur. Aşağıdaki akış
 
 1. API: `cd docker && docker compose up --build -d` → http://localhost:8080
 2. UI: `cd web && npm install && npm run dev` → http://localhost:5173
-3. Node **20.19+** önerilir (`web/.nvmrc`).
+3. Node **20.19+** (önerilen: 24 LTS; `web/.nvmrc`).
 
 ## Demo hesaplar
 

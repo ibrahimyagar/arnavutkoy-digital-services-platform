@@ -14,7 +14,7 @@ npm run dev
 
 Tarayıcı: `http://localhost:5173`
 
-Node.js **20.19+** (veya 22.12+) önerilir; Vite 7 bunu bekler. `web/.nvmrc` dosyası `20.19.0` işaret eder.
+Node.js **20.19+** (veya 22.12+ / 24 LTS) önerilir; Vite 7 bunu bekler. `web/.nvmrc` dosyası `24.19.0` işaret eder.
 
 Vite, `/api` isteklerini `localhost:8080`'e proxy eder. Doğrudan API adresi için `.env`:
 
