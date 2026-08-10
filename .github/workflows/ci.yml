@@ -36,10 +36,28 @@ jobs:
       - name: Build
         run: dotnet build ArnavutkoyBelediyesi.slnx -c Release --no-restore
 
-      - name: Test
-        # Testcontainers, GitHub Actions runner üzerindeki Docker daemon'ını kullanır
-        # (Domain/Application birim + Infrastructure/API entegrasyon testleri).
-        run: dotnet test ArnavutkoyBelediyesi.slnx -c Release --no-build --verbosity normal
+      - name: Test with coverage
+        # Testcontainers, GitHub Actions runner üzerindeki Docker daemon'ını kullanır.
+        # Coverlet (XPlat Code Coverage) Cobertura raporu üretir; eşik zorunlu değildir —
+        # anlamlı senaryo kapsamı birincil kalite kapısıdır (bkz. docs/TESTING.md).
+        run: >
+          dotnet test ArnavutkoyBelediyesi.slnx
+          -c Release
+          --no-build
+          --verbosity normal
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-cobertura
+          path: coverage/**
+          if-no-files-found: warn
+          retention-days: 14
 
   docker-image:
     name: Docker Image

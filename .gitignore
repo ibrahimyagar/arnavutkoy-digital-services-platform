@@ -57,3 +57,7 @@ node_modules/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Coverage
+coverage/
+**/coverage.cobertura.xml
