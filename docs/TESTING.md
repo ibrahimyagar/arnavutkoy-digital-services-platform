@@ -11,7 +11,7 @@ dotnet test tests/ArnavutkoyBelediyesi.Domain.Tests
 dotnet test tests/ArnavutkoyBelediyesi.Application.Tests
 ```
 
-CI: `.github/workflows/ci.yml` — `ubuntu-latest` üzerinde restore → build → test → Docker image build.
+CI: `.github/workflows/ci.yml` — `ubuntu-latest` üzerinde .NET restore → build → test, paralel `web` `npm ci` + build, ardından Docker image build.
 
 ## Katmanlar
 
