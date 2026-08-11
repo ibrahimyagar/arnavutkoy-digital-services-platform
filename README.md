@@ -23,20 +23,21 @@ tam ekran manzara hero ve tutarlı e-Belediye deneyimi.
 
 ## Ekran görüntüleri
 
-
-| Vatandaş paneli | Borçlarım |
+| Ana sayfa (hero) | Giriş |
 | :---: | :---: |
-| <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> | <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> |
+| <img src="docs/screenshots/home-guest.png" alt="Güncel ana sayfa hero" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
 
-| Hizmet masası | Muhtarlıklar |
+| E-Belediye | Vatandaş paneli |
 | :---: | :---: |
-| <img src="docs/screenshots/hizmet-masasi.png" alt="İki kolonlu hizmet masası" width="420" /> | <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> |
+| <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> | <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> |
 
-<p align="center">
-  <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="920" />
-  <br />
-  <sub>Ulaşım ağı — hatlar, kart, biniş ve vezne tek hub’da</sub>
-</p>
+| Borçlarım | Hizmet masası |
+| :---: | :---: |
+| <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> | <img src="docs/screenshots/hizmet-masasi.png" alt="Hizmet masası talepleri" width="420" /> |
+
+| Muhtarlıklar | Ulaşım ağı |
+| :---: | :---: |
+| <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> | <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> |
 
 ## Öne çıkanlar
 
