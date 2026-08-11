@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { PageHeader } from '../components/ui/PageChrome'
 import { apiFetch, type Announcement, type Paginated } from '../lib/api'
 
 function excerpt(text: string, max = 160) {
@@ -43,10 +44,7 @@ export function AnnouncementsPage() {
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Duyurular</h1>
-        <p className="muted">Yayımlanmış belediye duyuruları — detay için başlığa tıklayın.</p>
-      </div>
+      <PageHeader title="Duyurular" description="Yayımlanmış belediye duyuruları." />
 
       <div className="field" style={{ maxWidth: 420 }}>
         <label htmlFor="ann-q">Duyuru ara</label>
@@ -62,17 +60,17 @@ export function AnnouncementsPage() {
 
       <div className="stack">
         {filtered.map((item) => (
-          <article key={item.id} className="panel announcement-card">
-            <p className="muted" style={{ margin: '0 0 0.35rem', fontSize: '0.85rem' }}>
+          <article key={item.id} className="list-row">
+            <p className="muted list-row-meta" style={{ margin: 0 }}>
               {publishedLabel(item)}
               {item.publishEndUtc
                 ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleDateString('tr-TR')}`
                 : ''}
             </p>
-            <h3 style={{ margin: '0 0 0.5rem', fontFamily: 'var(--font-display)' }}>
+            <h3 style={{ margin: 0 }}>
               <Link to={`/duyurular/${item.id}`}>{item.title}</Link>
             </h3>
-            <p style={{ margin: 0, color: 'var(--ink-soft)', lineHeight: 1.55 }}>
+            <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
               {excerpt(item.content)}
             </p>
             <Link className="announcement-more" to={`/duyurular/${item.id}`}>

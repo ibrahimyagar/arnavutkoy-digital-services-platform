@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { StaffGate } from '../components/RoleGates'
+import { EmptyState, PageHeader } from '../components/ui/PageChrome'
 import {
   apiFetch,
   type CitizenRequestSummary,
@@ -134,14 +135,20 @@ function StaffDeskContent() {
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Personel masası</h1>
-        <p className="muted">
-          Talepleri ve sosyal yardım başvurularını tek yerden yönetin. Su / emlak borç kesimi için{' '}
-          <Link to="/su-yonetimi">su</Link> ve <Link to="/mulk-yonetimi">mülk</Link> panellerine
-          gidin.
-        </p>
-      </div>
+      <PageHeader
+        title="Personel masası"
+        description="Talepler ve sosyal yardım başvuruları."
+        actions={
+          <>
+            <Link className="btn btn-ghost" to="/su-yonetimi">
+              Su yönetimi
+            </Link>
+            <Link className="btn btn-ghost" to="/mulk-yonetimi">
+              Mülk yönetimi
+            </Link>
+          </>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
@@ -181,11 +188,9 @@ function StaffDeskContent() {
 
       {tab === 'requests' ? (
         <section className="stack">
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: '1.35rem' }}>
-              Açık işler
-            </h2>
-            <Link className="btn btn-ghost" to="/talepler" style={{ padding: '0.55rem 0.95rem' }}>
+          <div className="row-between" style={{ flexWrap: 'wrap' }}>
+            <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Açık işler</h2>
+            <Link className="btn btn-ghost" to="/talepler">
               Tam liste
             </Link>
           </div>
@@ -213,16 +218,16 @@ function StaffDeskContent() {
           </div>
 
           {filteredRequests.map((item) => (
-            <article key={item.id} className="panel stack">
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+            <article key={item.id} className="list-row">
+              <div className="list-row-top">
                 <div>
-                  <p className="muted" style={{ margin: '0 0 0.25rem', fontSize: '0.85rem' }}>
+                  <p className="muted list-row-meta" style={{ margin: 0 }}>
                     {categoryMap.get(item.categoryId) ?? 'Kategori'}
                   </p>
-                  <h3 style={{ margin: 0 }}>
+                  <h3>
                     <Link to={`/talepler/${item.id}`}>#{item.id.slice(0, 8)}</Link>
                   </h3>
-                  <p className="muted" style={{ marginBottom: 0 }}>
+                  <p className="muted list-row-meta">
                     {new Date(item.createdAtUtc).toLocaleString('tr-TR')}
                   </p>
                 </div>
@@ -230,12 +235,8 @@ function StaffDeskContent() {
                   {requestStatusLabel(item.status)}
                 </span>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <Link
-                  className="btn btn-ghost"
-                  to={`/talepler/${item.id}`}
-                  style={{ padding: '0.55rem 0.95rem' }}
-                >
+              <div className="list-row-actions">
+                <Link className="btn btn-ghost" to={`/talepler/${item.id}`}>
                   Yazışma
                 </Link>
                 {item.status === 'Pending' ? (
@@ -305,19 +306,15 @@ function StaffDeskContent() {
             </article>
           ))}
           {filteredRequests.length === 0 ? (
-            <div className="panel stack">
-              <h3 style={{ margin: 0 }}>Bu görünümde talep yok</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Vatandaş hesabıyla örnek talep açıp burada değerlendirebilirsiniz.
-              </p>
-            </div>
+            <EmptyState
+              title="Bu görünümde talep yok"
+              description="Vatandaş hesabıyla örnek talep açıp burada değerlendirebilirsiniz."
+            />
           ) : null}
         </section>
       ) : (
         <section className="stack">
-          <h2 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: '1.35rem' }}>
-            Sosyal yardım kuyruğu
-          </h2>
+          <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Sosyal yardım kuyruğu</h2>
 
           <div className="request-stats" aria-label="Başvuru özeti">
             <button
@@ -342,11 +339,11 @@ function StaffDeskContent() {
           </div>
 
           {filteredAid.map((app) => (
-            <article key={app.id} className="panel stack">
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+            <article key={app.id} className="list-row">
+              <div className="list-row-top">
                 <div>
-                  <h3 style={{ margin: 0 }}>{aidTypeLabels[app.type] ?? app.type}</h3>
-                  <p className="muted" style={{ marginBottom: 0 }}>
+                  <h3>{aidTypeLabels[app.type] ?? app.type}</h3>
+                  <p className="muted list-row-meta">
                     {app.householdSize} kişi · ₺{app.monthlyIncome.toFixed(0)} ·{' '}
                     {new Date(app.submittedAtUtc).toLocaleDateString('tr-TR')}
                   </p>
@@ -357,7 +354,7 @@ function StaffDeskContent() {
               </div>
               <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{app.householdSummary}</p>
               {app.reviewNote ? <p className="muted">Not: {app.reviewNote}</p> : null}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div className="list-row-actions">
                 {app.status === 'Submitted' ? (
                   <button
                     type="button"
@@ -434,12 +431,10 @@ function StaffDeskContent() {
             </article>
           ))}
           {filteredAid.length === 0 ? (
-            <div className="panel stack">
-              <h3 style={{ margin: 0 }}>Bu görünümde başvuru yok</h3>
-              <p className="muted" style={{ margin: 0 }}>
-                Vatandaş hesabıyla `/yardim` üzerinden örnek başvuru açabilirsiniz.
-              </p>
-            </div>
+            <EmptyState
+              title="Bu görünümde başvuru yok"
+              description="Vatandaş hesabıyla /yardim üzerinden örnek başvuru açabilirsiniz."
+            />
           ) : null}
         </section>
       )}

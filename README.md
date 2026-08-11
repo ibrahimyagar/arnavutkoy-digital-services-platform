@@ -4,7 +4,11 @@
 > Tüm vatandaş/personel/işlem verileri kurgusaldır. Kamuya açık coğrafi adlar (ör. mahalle isimleri) dışında gerçek kişisel veri kullanılmamıştır.
 
 <p align="center">
-  <img src="docs/screenshots/home-hero.png" alt="Ana sayfa — oturum açık vatandaş görünümü" width="920" />
+  <img src="docs/arnavutkoy-showcase.png" alt="Arnavutköy Dijital Hizmetler — ana sayfa hero ve modern belediye portalı arayüzü" width="960" />
+</p>
+
+<p align="center">
+  <sub>Modern teal/navy belediye portalı — tam ekran hero, cam efektli hızlı erişim ve e-Belediye girişi</sub>
 </p>
 
 ## Neden bu proje?
@@ -13,6 +17,9 @@ Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış por
 **.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile vatandaş ve personel akışlarını
 tek üründe birleştirir: güvenli kimlik, borç / vezne, hizmet masası, ulaşım, coğrafya ve operasyon panelleri.
 Odak; okunabilir mimari, test edilebilir API ve gerçekçi bir demo deneyimi.
+
+UI tarafında hero odaklı modern kurumsal dil kullanılır: lacivert / turkuaz palet, glassmorphism kartlar,
+tam ekran manzara hero ve tutarlı e-Belediye deneyimi.
 
 ## Ekran görüntüleri
 
@@ -38,6 +45,7 @@ Odak; okunabilir mimari, test edilebilir API ve gerçekçi bir demo deneyimi.
 
 - **Vatandaş portalı** — duyuru, haber, etkinlik, kültür, faaliyet, hizmet rehberi, dijital vezne, borç, hizmet masası, ulaşım, mülk, su, sosyal yardım
 - **E-Belediye** — belge başvurusu / takip, nikah randevu, imar durumu & harç hesabı, spor tesisi randevu, iletişim
+- **Modern portal UI** — tam ekran hero, glassmorphism hızlı erişim, teal/navy kurumsal kabuk
 - **Personel / yönetici** — talep masası, duyuru yönetimi, coğrafya, hat ve İK yönetimi
 - **Kimlik** — e-posta + şifre, JWT access + refresh rotation, rol bazlı yetki
 - **Mimari** — Clean Architecture, CQRS (MediatR), FluentValidation, EF Core + PostgreSQL
@@ -111,6 +119,7 @@ dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers
 - [x] Yol haritası R1–R6 + vatandaş web paneli
 - [x] Personel operasyon UI + demo walkthrough
 - [x] E-posta giriş + yoğunlaştırılmış vatandaş UX + README vitrin
+- [x] Hero odaklı modern belediye portal UI (teal/navy + glassmorphism)
 
 DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
 

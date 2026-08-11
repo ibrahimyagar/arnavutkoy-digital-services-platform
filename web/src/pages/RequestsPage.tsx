@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { PageHeader } from '../components/ui/PageChrome'
 import {
   apiFetch,
   type CitizenRequestSummary,
@@ -140,16 +141,14 @@ function RequestsContent() {
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>
-          {staff ? 'Hizmet talepleri' : 'Hizmet masası'}
-        </h1>
-        <p className="muted">
-          {staff
-            ? 'Tüm vatandaş taleplerini inceleyin; detayda yanıtlayın ve durum güncelleyin.'
-            : 'Sol: yeni talep · Sağ: talepleriniz — referans hizmet masası düzeni.'}
-        </p>
-      </div>
+      <PageHeader
+        title={staff ? 'Hizmet talepleri' : 'Hizmet masası'}
+        description={
+          staff
+            ? 'Vatandaş taleplerini inceleyin, yanıtlayın ve durum güncelleyin.'
+            : 'Yeni talep oluşturun veya mevcut taleplerinizi takip edin.'
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CardPaymentForm, type CardPaymentValues } from '../components/CardPaymentForm'
+import { EmptyState, PageHeader, StatRow } from '../components/ui/PageChrome'
 import { apiFetch, type Debt, type Paginated } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
@@ -120,45 +121,28 @@ function DebtsContent() {
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Borçlarım</h1>
-        <p className="muted">
-          Dijital vezne üzerinden kart ile ödeme. <Link to="/vezne">Vezne hub</Link>
-        </p>
-      </div>
+      <PageHeader
+        title="Borçlarım"
+        description="Dijital vezne üzerinden kart ile ödeme."
+        actions={
+          <Link className="btn btn-ghost" to="/vezne">
+            Vezne hub
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
-      {loading ? (
-        <div className="stats-strip stats-strip--skeleton" aria-busy="true">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index}>
-              <span className="skeleton-line skeleton-line--sm" />
-              <span className="skeleton-line skeleton-line--lg" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="stats-strip" aria-label="Borç özeti">
-          <div>
-            <span className="muted">Açık</span>
-            <strong>{counts.Unpaid}</strong>
-          </div>
-          <div>
-            <span className="muted">Ödenecek</span>
-            <strong>{money(counts.unpaidTotal)}</strong>
-          </div>
-          <div>
-            <span className="muted">Vadesi geçmiş</span>
-            <strong>{counts.overdue}</strong>
-          </div>
-          <div>
-            <span className="muted">Ödenen</span>
-            <strong>{counts.Paid}</strong>
-          </div>
-        </div>
-      )}
+      <StatRow
+        loading={loading}
+        items={[
+          { id: 'unpaid', label: 'Açık', value: String(counts.Unpaid), tone: 'warn' },
+          { id: 'total', label: 'Ödenecek', value: money(counts.unpaidTotal), tone: 'accent' },
+          { id: 'overdue', label: 'Vadesi geçmiş', value: String(counts.overdue), tone: 'warn' },
+          { id: 'paid', label: 'Ödenen', value: String(counts.Paid), tone: 'ok' },
+        ]}
+      />
 
       <div className="desk-tabs" role="tablist" aria-label="Durum filtresi">
         {(
@@ -204,7 +188,7 @@ function DebtsContent() {
 
       {payingId && selected ? (
         <div className="panel stack">
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'start' }}>
+          <div className="row-between" style={{ alignItems: 'start' }}>
             <div>
               <h3 style={{ margin: 0 }}>
                 Ödeme — {typeLabels[selected.type] ?? selected.type}
@@ -230,27 +214,23 @@ function DebtsContent() {
         {filtered.map((debt) => {
           const overdue = isOverdue(debt)
           return (
-            <article key={debt.id} className="panel" style={{ display: 'grid', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+            <article key={debt.id} className="list-row">
+              <div className="list-row-top">
                 <div>
-                  <h3 style={{ margin: 0 }}>{typeLabels[debt.type] ?? debt.type}</h3>
-                  <p className="muted" style={{ marginBottom: 0 }}>
+                  <h3>{typeLabels[debt.type] ?? debt.type}</h3>
+                  <p className="muted list-row-meta">
                     Vade: {new Date(debt.dueDateUtc).toLocaleDateString('tr-TR')}
                     {debt.paidAtUtc
                       ? ` · Ödeme: ${new Date(debt.paidAtUtc).toLocaleDateString('tr-TR')}`
                       : ''}
+                    {overdue ? ' · vadesi geçmiş' : ''}
                   </p>
-                  {overdue ? (
-                    <p className="muted" style={{ margin: '0.25rem 0 0', color: 'var(--brand)' }}>
-                      Vadesi geçmiş — gecikme faizi toplamda.
-                    </p>
-                  ) : null}
                 </div>
                 <span className={statusBadge(debt.status)}>
                   {statusLabels[debt.status] ?? debt.status}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: '1rem', flexWrap: 'wrap' }}>
+              <div className="list-row-foot">
                 <div>
                   <div className="muted">Asıl: {money(debt.principalAmount)}</div>
                   <div className="muted">Faiz: {money(debt.overdueInterest)}</div>
@@ -274,11 +254,17 @@ function DebtsContent() {
           )
         })}
         {!loading && filtered.length === 0 ? (
-          <p className="muted">
-            Bu filtrede borç yok. Personel{' '}
-            <Link to="/su-yonetimi">su</Link> veya <Link to="/mulk-yonetimi">mülk</Link>{' '}
-            yönetiminden borç kesebilir (görevli hesabı gerekir).
-          </p>
+          <EmptyState
+            title="Bu filtrede borç yok"
+            description="Personel su veya mülk yönetiminden borç kesebilir."
+            action={
+              <p className="muted" style={{ margin: 0 }}>
+                <Link to="/su-yonetimi">Su yönetimi</Link>
+                {' · '}
+                <Link to="/mulk-yonetimi">Mülk yönetimi</Link>
+              </p>
+            }
+          />
         ) : null}
       </div>
     </div>

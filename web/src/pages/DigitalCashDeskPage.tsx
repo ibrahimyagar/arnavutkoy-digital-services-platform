@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  ActionCard,
+  ActionCardGrid,
+  PageHeader,
+  StatRow,
+} from '../components/ui/PageChrome'
+import {
   apiFetch,
   type Debt,
   type Paginated,
@@ -53,44 +59,42 @@ function CashDeskContent() {
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Dijital vezne</h1>
-        <p className="muted">
-          Borç tahsilatı ve ulaşım kartı bakiye yükleme. Kart formu demo PSP üzerinden işlenir.
-        </p>
-      </div>
+      <PageHeader
+        title="Dijital vezne"
+        description="Borç ödeme ve ulaşım kartı bakiye işlemleri — demo ödeme altyapısı."
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
 
-      {loading ? (
-        <div className="stats-strip stats-strip--skeleton" aria-busy="true" aria-label="Vezne özeti">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index}>
-              <span className="skeleton-line skeleton-line--sm" />
-              <span className="skeleton-line skeleton-line--lg" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="stats-strip" aria-label="Vezne özeti">
-          <div>
-            <span className="muted">Açık borç</span>
-            <strong>{openDebts}</strong>
-          </div>
-          <div>
-            <span className="muted">Ödenecek</span>
-            <strong>{money(debtTotal)}</strong>
-          </div>
-          <div>
-            <span className="muted">Vadesi geçmiş</span>
-            <strong>{overdueCount}</strong>
-          </div>
-          <div>
-            <span className="muted">Kart bakiyesi</span>
-            <strong>{money(balance)}</strong>
-          </div>
-        </div>
-      )}
+      <StatRow
+        loading={loading}
+        items={[
+          {
+            id: 'open',
+            label: 'Açık borç',
+            value: String(openDebts),
+            tone: openDebts > 0 ? 'warn' : 'ok',
+          },
+          {
+            id: 'total',
+            label: 'Ödenecek',
+            value: money(debtTotal),
+            tone: 'accent',
+          },
+          {
+            id: 'overdue',
+            label: 'Vadesi geçmiş',
+            value: String(overdueCount),
+            tone: overdueCount > 0 ? 'warn' : 'brand',
+          },
+          {
+            id: 'balance',
+            label: 'Kart bakiyesi',
+            value: money(balance),
+            tone: 'info',
+          },
+        ]}
+      />
 
       {!loading && openDebts > 0 ? (
         <div className="notice">
@@ -103,43 +107,32 @@ function CashDeskContent() {
 
       {!loading && openDebts === 0 ? (
         <div className="notice">
-          Açık borç yok. Su / emlak borcu için personelin kayıt kesmesi gerekir; kart bakiyesi için{' '}
-          <Link to="/ulasim">ulaşım</Link> ekranına gidin.
+          Açık borç yok. Kart bakiyesi için <Link to="/ulasim">ulaşım</Link> ekranına gidin.
         </div>
       ) : null}
 
-      <div className="panel-link-grid">
-        <Link
+      <ActionCardGrid>
+        <ActionCard
           to="/borclar"
-          className={`panel panel-link${openDebts > 0 ? ' is-highlight' : ''}`}
-        >
-          <h3>Su / emlak borcu öde</h3>
-          <p className="muted">Gecikme faizi dahil tutarı kart ile kapatın.</p>
-          <strong className="panel-link-meta">
-            {loading ? '…' : `${openDebts} açık · ${money(debtTotal)}`}
-          </strong>
-        </Link>
-        <Link to="/ulasim" className="panel panel-link">
-          <h3>Kart bakiyesi yükle</h3>
-          <p className="muted">Ulaşım kartınıza tutar tanımlayın.</p>
-          <strong className="panel-link-meta">
-            {loading ? '…' : `${cards} kart · ${money(balance)}`}
-          </strong>
-        </Link>
-        <Link to="/binis" className="panel panel-link">
-          <h3>Biniş simülasyonu</h3>
-          <p className="muted">Hat seçip kartla biniş deneyin.</p>
-          <strong className="panel-link-meta">Hat → kart → onay</strong>
-        </Link>
-        <Link to="/panel" className="panel panel-link">
-          <h3>Panele dön</h3>
-          <p className="muted">Canlı borç ve bakiye özetine git.</p>
-        </Link>
-      </div>
-
-      <div className="notice">
-        Referans projedeki “dijital vezne” akışının karşılığıdır. Gerçek banka / 3D Secure yoktur.
-      </div>
+          title="Su / emlak borcu öde"
+          description="Gecikme faizi dahil tutarı kart ile kapatın."
+          meta={loading ? '…' : `${openDebts} açık · ${money(debtTotal)}`}
+          highlight={openDebts > 0}
+        />
+        <ActionCard
+          to="/ulasim"
+          title="Kart bakiyesi yükle"
+          description="Ulaşım kartınıza tutar tanımlayın."
+          meta={loading ? '…' : `${cards} kart · ${money(balance)}`}
+        />
+        <ActionCard
+          to="/binis"
+          title="Biniş simülasyonu"
+          description="Hat seçip kartla biniş deneyin."
+          meta="Hat → kart → onay"
+        />
+        <ActionCard to="/panel" title="Panele dön" description="Borç ve bakiye özetine git." />
+      </ActionCardGrid>
     </div>
   )
 }

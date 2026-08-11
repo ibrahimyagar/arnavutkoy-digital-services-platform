@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { apiFetch, type BusLine } from '../lib/api'
 import { moduleVisual, type ModuleTile } from '../lib/modules'
-import '../pages/home.css'
+import '../styles/module-tiles.css'
 
 const HUB_TILES: ModuleTile[] = [
   {

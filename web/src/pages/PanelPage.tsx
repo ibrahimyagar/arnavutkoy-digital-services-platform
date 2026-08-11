@@ -2,12 +2,21 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import {
+  QuickActions,
+  RecentActivity,
+  ServiceStatus,
+  SummaryCards,
+  money,
+  type ActivityItem,
+  type QuickItem,
+  type StatusItem,
+  type SummaryItem,
+} from '../components/dashboard/DashboardWidgets'
+import {
   apiFetch,
   type Announcement,
-  type CitizenProperty,
   type CitizenRequestSummary,
   type Debt,
-  type District,
   type Neighborhood,
   type Paginated,
   type SocialAssistanceApplication,
@@ -22,131 +31,49 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   return children
 }
 
-type PanelLink = {
-  to: string
-  title: string
-  description: string
-  meta?: string
-  highlight?: boolean
+function requestStatusLabel(status: string) {
+  switch (status) {
+    case 'Pending':
+      return 'Bekliyor'
+    case 'UnderReview':
+      return 'İncelemede'
+    case 'Resolved':
+      return 'Çözüldü'
+    case 'Closed':
+      return 'Kapandı'
+    default:
+      return status
+  }
 }
 
-type CitizenSnapshot = {
+function debtTypeLabel(type: string) {
+  switch (type) {
+    case 'Water':
+      return 'Su borcu'
+    case 'Property':
+      return 'Emlak borcu'
+    default:
+      return type
+  }
+}
+
+type CitizenData = {
   openDebts: number
   debtTotal: number
   openRequests: number
-  cards: number
   balance: number
-  properties: number
-  water: number
   aidOpen: number
+  recentDebts: Debt[]
+  recentRequests: CitizenRequestSummary[]
 }
 
-type StaffSnapshot = {
+type StaffData = {
   openRequests: number
   aidQueue: number
   draftAnnouncements: number
   activeWater: number
-  districts?: number
-  neighborhoods?: number
-}
-
-function money(value: number) {
-  return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-}
-
-function PanelLinks({ links }: { links: PanelLink[] }) {
-  return (
-    <div className="panel-link-grid">
-      {links.map((link) => (
-        <Link
-          key={link.to + link.title}
-          className={`panel panel-link${link.highlight ? ' is-highlight' : ''}`}
-          to={link.to}
-        >
-          <h3>{link.title}</h3>
-          <p className="muted">{link.description}</p>
-          {link.meta ? <strong className="panel-link-meta">{link.meta}</strong> : null}
-        </Link>
-      ))}
-    </div>
-  )
-}
-
-function StatsSkeleton({ label }: { label: string }) {
-  return (
-    <div className="stats-strip stats-strip--skeleton" aria-busy="true" aria-label={label}>
-      {Array.from({ length: 4 }, (_, index) => (
-        <div key={index}>
-          <span className="skeleton-line skeleton-line--sm" />
-          <span className="skeleton-line skeleton-line--lg" />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function CitizenOps({ snapshot, loading }: { snapshot: CitizenSnapshot | null; loading: boolean }) {
-  if (loading || !snapshot) {
-    return <StatsSkeleton label="Vatandaş özeti yükleniyor" />
-  }
-
-  return (
-    <div className="stats-strip" aria-label="Vatandaş özeti">
-      <div>
-        <span className="muted">Açık borç</span>
-        <strong>{snapshot.openDebts}</strong>
-      </div>
-      <div>
-        <span className="muted">Ödenecek</span>
-        <strong>{money(snapshot.debtTotal)}</strong>
-      </div>
-      <div>
-        <span className="muted">Açık talep</span>
-        <strong>{snapshot.openRequests}</strong>
-      </div>
-      <div>
-        <span className="muted">Kart bakiyesi</span>
-        <strong>{money(snapshot.balance)}</strong>
-      </div>
-    </div>
-  )
-}
-
-function StaffOps({
-  snapshot,
-  loading,
-  admin,
-}: {
-  snapshot: StaffSnapshot | null
-  loading: boolean
-  admin: boolean
-}) {
-  if (loading || !snapshot) {
-    return <StatsSkeleton label="Operasyon özeti yükleniyor" />
-  }
-
-  return (
-    <div className="stats-strip" aria-label="Operasyon özeti">
-      <div>
-        <span className="muted">Açık talep</span>
-        <strong>{snapshot.openRequests}</strong>
-      </div>
-      <div>
-        <span className="muted">Yardım kuyruğu</span>
-        <strong>{snapshot.aidQueue}</strong>
-      </div>
-      <div>
-        <span className="muted">Taslak duyuru</span>
-        <strong>{snapshot.draftAnnouncements}</strong>
-      </div>
-      <div>
-        <span className="muted">{admin ? 'Mahalle' : 'Aktif su'}</span>
-        <strong>
-          {admin ? (snapshot.neighborhoods ?? 0) : snapshot.activeWater}
-        </strong>
-      </div>
-    </div>
-  )
+  neighborhoods: number
+  recentRequests: CitizenRequestSummary[]
 }
 
 export function PanelPage() {
@@ -154,8 +81,8 @@ export function PanelPage() {
   const staff = isStaff(user?.roles)
   const admin = isAdmin(user?.roles)
 
-  const [citizenSnap, setCitizenSnap] = useState<CitizenSnapshot | null>(null)
-  const [staffSnap, setStaffSnap] = useState<StaffSnapshot | null>(null)
+  const [citizen, setCitizen] = useState<CitizenData | null>(null)
+  const [staffData, setStaffData] = useState<StaffData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -163,7 +90,7 @@ export function PanelPage() {
     let cancelled = false
 
     async function loadCitizen() {
-      const [debts, requests, cards, properties, water, aid] = await Promise.all([
+      const [debts, requests, cards, aid] = await Promise.all([
         apiFetch<Paginated<Debt>>('/api/v1/debts/mine?pageSize=50', {}, true),
         apiFetch<Paginated<CitizenRequestSummary>>(
           '/api/v1/citizen-requests/mine?pageSize=50',
@@ -171,12 +98,6 @@ export function PanelPage() {
           true,
         ),
         apiFetch<TransportCard[]>('/api/v1/transport-cards/mine', {}, true),
-        apiFetch<Paginated<CitizenProperty>>('/api/v1/properties/mine?pageSize=50', {}, true),
-        apiFetch<Paginated<WaterSubscription>>(
-          '/api/v1/water-subscriptions/mine?pageSize=50',
-          {},
-          true,
-        ),
         apiFetch<Paginated<SocialAssistanceApplication>>(
           '/api/v1/social-assistance/mine?pageSize=50',
           {},
@@ -187,21 +108,23 @@ export function PanelPage() {
       const openDebts = debts.items.filter((d) => d.status !== 'Paid')
       const openRequests = requests.items.filter(
         (r) => r.status === 'Pending' || r.status === 'UnderReview',
-      ).length
-      const aidOpen = aid.items.filter(
-        (a) => a.status === 'Submitted' || a.status === 'UnderReview',
-      ).length
+      )
 
       return {
         openDebts: openDebts.length,
         debtTotal: openDebts.reduce((sum, d) => sum + d.totalPayable, 0),
-        openRequests,
-        cards: cards.length,
+        openRequests: openRequests.length,
         balance: cards.reduce((sum, c) => sum + c.balance, 0),
-        properties: properties.items.filter((p) => p.isActive).length,
-        water: water.items.filter((w) => w.status === 'Active').length,
-        aidOpen,
-      } satisfies CitizenSnapshot
+        aidOpen: aid.items.filter(
+          (a) => a.status === 'Submitted' || a.status === 'UnderReview',
+        ).length,
+        recentDebts: [...debts.items]
+          .sort((a, b) => +new Date(b.dueDateUtc) - +new Date(a.dueDateUtc))
+          .slice(0, 4),
+        recentRequests: [...requests.items]
+          .sort((a, b) => +new Date(b.createdAtUtc) - +new Date(a.createdAtUtc))
+          .slice(0, 4),
+      } satisfies CitizenData
     }
 
     async function loadStaff() {
@@ -228,29 +151,28 @@ export function PanelPage() {
         ),
       ])
 
-      let districts = 0
       let neighborhoods = 0
       if (admin) {
-        const [districtList, neighborhoodList] = await Promise.all([
-          apiFetch<District[]>('/api/v1/districts'),
-          apiFetch<Neighborhood[]>('/api/v1/neighborhoods'),
-        ])
-        districts = districtList.length
+        const neighborhoodList = await apiFetch<Neighborhood[]>('/api/v1/neighborhoods')
         neighborhoods = neighborhoodList.length
       }
 
+      const openRequests = requests.items.filter(
+        (r) => r.status === 'Pending' || r.status === 'UnderReview',
+      )
+
       return {
-        openRequests: requests.items.filter(
-          (r) => r.status === 'Pending' || r.status === 'UnderReview',
-        ).length,
+        openRequests: openRequests.length,
         aidQueue: aid.items.filter(
           (a) => a.status === 'Submitted' || a.status === 'UnderReview',
         ).length,
         draftAnnouncements: announcements.items.filter((a) => a.status === 'Draft').length,
         activeWater: water.totalCount || water.items.length,
-        districts,
         neighborhoods,
-      } satisfies StaffSnapshot
+        recentRequests: [...requests.items]
+          .sort((a, b) => +new Date(b.createdAtUtc) - +new Date(a.createdAtUtc))
+          .slice(0, 5),
+      } satisfies StaffData
     }
 
     setLoading(true)
@@ -258,8 +180,8 @@ export function PanelPage() {
     void (staff ? loadStaff() : loadCitizen())
       .then((snap) => {
         if (cancelled) return
-        if (staff) setStaffSnap(snap as StaffSnapshot)
-        else setCitizenSnap(snap as CitizenSnapshot)
+        if (staff) setStaffData(snap as StaffData)
+        else setCitizen(snap as CitizenData)
       })
       .catch((err: unknown) => {
         if (cancelled) return
@@ -274,186 +196,230 @@ export function PanelPage() {
     }
   }, [staff, admin])
 
-  const citizenLinks = useMemo((): PanelLink[] => {
-    const snap = citizenSnap
+  const summaryItems = useMemo((): SummaryItem[] => {
+    if (staff) {
+      const snap = staffData
+      return [
+        {
+          id: 'req',
+          label: 'Açık talep',
+          value: snap ? String(snap.openRequests) : '—',
+          tone: snap && snap.openRequests > 0 ? 'warn' : 'default',
+        },
+        {
+          id: 'aid',
+          label: 'Yardım kuyruğu',
+          value: snap ? String(snap.aidQueue) : '—',
+          tone: snap && snap.aidQueue > 0 ? 'warn' : 'default',
+        },
+        {
+          id: 'draft',
+          label: 'Taslak duyuru',
+          value: snap ? String(snap.draftAnnouncements) : '—',
+        },
+        {
+          id: 'extra',
+          label: admin ? 'Mahalle' : 'Aktif su',
+          value: snap ? String(admin ? snap.neighborhoods : snap.activeWater) : '—',
+        },
+      ]
+    }
+
+    const snap = citizen
     return [
       {
-        to: '/vezne',
-        title: 'Dijital vezne',
-        description: 'Borç ödeme ve bakiye yükleme hub’ı',
-        meta: snap ? `${snap.openDebts} açık borç` : undefined,
-        highlight: Boolean(snap && snap.openDebts > 0),
+        id: 'debts',
+        label: 'Açık borç',
+        value: snap ? String(snap.openDebts) : '—',
+        tone: snap && snap.openDebts > 0 ? 'warn' : 'ok',
       },
       {
-        to: '/borclar',
-        title: 'Borçlarım',
-        description: 'Ödeme ve gecikme faizini görüntüle',
-        meta: snap ? money(snap.debtTotal) : undefined,
-        highlight: Boolean(snap && snap.debtTotal > 0),
+        id: 'payable',
+        label: 'Ödenecek',
+        value: snap ? money(snap.debtTotal) : '—',
+        tone: snap && snap.debtTotal > 0 ? 'warn' : 'default',
       },
       {
+        id: 'requests',
+        label: 'Açık talep',
+        value: snap ? String(snap.openRequests) : '—',
+        tone: snap && snap.openRequests > 0 ? 'warn' : 'ok',
+      },
+      {
+        id: 'balance',
+        label: 'Kart bakiyesi',
+        value: snap ? money(snap.balance) : '—',
+      },
+    ]
+  }, [staff, admin, citizen, staffData])
+
+  const statusItems = useMemo((): StatusItem[] => {
+    if (staff) {
+      const snap = staffData
+      if (!snap) return []
+      const items: StatusItem[] = [
+        {
+          id: 'queue',
+          title: snap.openRequests > 0 ? 'Bekleyen hizmet talepleri var' : 'Talep kuyruğu sakin',
+          detail:
+            snap.openRequests > 0
+              ? `${snap.openRequests} talep inceleme bekliyor`
+              : 'Açık talep bulunmuyor',
+          to: '/personel',
+          tone: snap.openRequests > 0 ? 'warn' : 'ok',
+        },
+        {
+          id: 'aid',
+          title: snap.aidQueue > 0 ? 'Sosyal yardım başvuruları bekliyor' : 'Yardım kuyruğu boş',
+          detail:
+            snap.aidQueue > 0
+              ? `${snap.aidQueue} başvuru değerlendirme bekliyor`
+              : 'Yeni başvuru yok',
+          to: '/personel',
+          tone: snap.aidQueue > 0 ? 'warn' : 'ok',
+        },
+      ]
+      if (snap.draftAnnouncements > 0) {
+        items.push({
+          id: 'ann',
+          title: 'Yayımlanmayı bekleyen duyurular',
+          detail: `${snap.draftAnnouncements} taslak duyuru`,
+          to: '/duyuru-yonetimi',
+          tone: 'warn',
+        })
+      }
+      return items
+    }
+
+    const snap = citizen
+    if (!snap) return []
+    return [
+      {
+        id: 'debt',
+        title: snap.openDebts > 0 ? 'Ödenmemiş borcunuz var' : 'Borç durumunuz temiz',
+        detail:
+          snap.openDebts > 0
+            ? `${snap.openDebts} kayıt · ${money(snap.debtTotal)}`
+            : 'Açık borç bulunmuyor',
+        to: snap.openDebts > 0 ? '/borclar' : '/vezne',
+        tone: snap.openDebts > 0 ? 'warn' : 'ok',
+      },
+      {
+        id: 'req',
+        title: snap.openRequests > 0 ? 'Devam eden hizmet talebiniz var' : 'Aktif talep yok',
+        detail:
+          snap.openRequests > 0
+            ? `${snap.openRequests} talep süreçte`
+            : 'Yeni talep oluşturabilirsiniz',
         to: '/talepler',
-        title: 'Taleplerim',
-        description: 'Hizmet masası kayıtları',
-        meta: snap ? `${snap.openRequests} açık` : undefined,
-        highlight: Boolean(snap && snap.openRequests > 0),
+        tone: snap.openRequests > 0 ? 'warn' : 'default',
       },
       {
-        to: '/ulasim',
-        title: 'Ulaşım kartım',
-        description: 'Bakiye ve biniş işlemleri',
-        meta: snap ? `${snap.cards} kart · ${money(snap.balance)}` : undefined,
-      },
-      {
-        to: '/binis',
-        title: 'Biniş simülasyonu',
-        description: 'Hat → kart → bin',
-      },
-      {
-        to: '/mulkler',
-        title: 'Mülklerim',
-        description: 'Mahalle bazlı kayıtlar',
-        meta: snap ? `${snap.properties} aktif` : undefined,
-      },
-      {
-        to: '/su',
-        title: 'Su aboneliği',
-        description: 'Abone no ve durum',
-        meta: snap ? `${snap.water} aktif` : undefined,
-      },
-      {
+        id: 'aid',
+        title: snap.aidOpen > 0 ? 'Sosyal yardım başvurunuz inceleniyor' : 'Sosyal yardım',
+        detail:
+          snap.aidOpen > 0
+            ? `${snap.aidOpen} başvuru takipte`
+            : 'İhtiyaç halinde başvuru yapabilirsiniz',
         to: '/yardim',
-        title: 'Sosyal yardım',
-        description: 'Başvuru ve durum takibi',
-        meta: snap ? `${snap.aidOpen} süreçte` : undefined,
-        highlight: Boolean(snap && snap.aidOpen > 0),
-      },
-      {
-        to: '/muhtarliklar',
-        title: 'Muhtarlıklar',
-        description: 'Mahalle ve muhtar dizini',
-      },
-      {
-        to: '/ayarlar',
-        title: 'Hesap ayarları',
-        description: 'Profil, telefon ve parola',
+        tone: snap.aidOpen > 0 ? 'warn' : 'default',
       },
     ]
-  }, [citizenSnap])
+  }, [staff, citizen, staffData])
 
-  const staffLinks = useMemo((): PanelLink[] => {
-    const snap = staffSnap
-    const base: PanelLink[] = [
-      {
-        to: '/personel',
-        title: 'Personel masası',
-        description: 'Talep ve sosyal yardım değerlendirme',
-        meta: snap
-          ? `${snap.openRequests} talep · ${snap.aidQueue} yardım`
-          : undefined,
-        highlight: Boolean(snap && (snap.openRequests > 0 || snap.aidQueue > 0)),
-      },
-      {
-        to: '/su-yonetimi',
-        title: 'Su yönetimi',
-        description: 'Abonelik durumu ve borç kesme',
-        meta: snap ? `${snap.activeWater} aktif abone` : undefined,
-      },
-      {
-        to: '/mulk-yonetimi',
-        title: 'Mülk yönetimi',
-        description: 'Emlak vergisi borcu kesme',
-      },
-      {
-        to: '/duyuru-yonetimi',
-        title: 'Duyuru yönetimi',
-        description: 'Taslak, yayın ve arşiv',
-        meta: snap ? `${snap.draftAnnouncements} taslak` : undefined,
-        highlight: Boolean(snap && snap.draftAnnouncements > 0),
-      },
-      {
-        to: '/talepler',
-        title: 'Talepler',
-        description: 'Tüm hizmet talepleri',
-        meta: snap ? `${snap.openRequests} açık` : undefined,
-      },
-      {
-        to: '/ayarlar',
-        title: 'Hesap ayarları',
-        description: 'Profil, telefon ve parola',
-      },
-    ]
+  const activityItems = useMemo((): ActivityItem[] => {
+    if (staff) {
+      return (staffData?.recentRequests ?? []).map((r) => ({
+        id: r.id,
+        title: `Talep · ${requestStatusLabel(r.status)}`,
+        meta: new Date(r.createdAtUtc).toLocaleString('tr-TR'),
+        to: `/talepler/${r.id}`,
+      }))
+    }
 
-    if (!admin) return base
+    const fromRequests = (citizen?.recentRequests ?? []).map((r) => ({
+      id: `r-${r.id}`,
+      title: `Hizmet talebi · ${requestStatusLabel(r.status)}`,
+      meta: new Date(r.createdAtUtc).toLocaleString('tr-TR'),
+      to: `/talepler/${r.id}`,
+      sort: +new Date(r.createdAtUtc),
+    }))
+    const fromDebts = (citizen?.recentDebts ?? []).map((d) => ({
+      id: `d-${d.id}`,
+      title: `${debtTypeLabel(d.type)} · ${d.status === 'Paid' ? 'Ödendi' : 'Açık'}`,
+      meta: `${money(d.totalPayable)} · vade ${new Date(d.dueDateUtc).toLocaleDateString('tr-TR')}`,
+      to: '/borclar',
+      sort: +new Date(d.dueDateUtc),
+    }))
+
+    return [...fromRequests, ...fromDebts]
+      .sort((a, b) => b.sort - a.sort)
+      .slice(0, 5)
+      .map(({ sort: _sort, ...rest }) => rest)
+  }, [staff, citizen, staffData])
+
+  const quickItems = useMemo((): QuickItem[] => {
+    if (staff) {
+      const items: QuickItem[] = [
+        { id: 'desk', title: 'Personel masası', description: 'Talep ve yardım', to: '/personel' },
+        { id: 'ann', title: 'Duyurular', description: 'Taslak / yayın', to: '/duyuru-yonetimi' },
+        { id: 'water', title: 'Su yönetimi', description: 'Abone ve borç', to: '/su-yonetimi' },
+        { id: 'prop', title: 'Mülk yönetimi', description: 'Emlak vergisi', to: '/mulk-yonetimi' },
+        { id: 'settings', title: 'Hesap', description: 'Profil ve parola', to: '/ayarlar' },
+      ]
+      if (admin) {
+        items.unshift(
+          { id: 'geo', title: 'Coğrafya', description: 'Mahalle / sokak', to: '/cografya' },
+          { id: 'lines', title: 'Hat yönetimi', description: 'Ulaşım hatları', to: '/hat-yonetimi' },
+        )
+      }
+      return items.slice(0, 6)
+    }
 
     return [
-      {
-        to: '/cografya',
-        title: 'Coğrafya',
-        description: 'İlçe, mahalle ve sokak yönetimi',
-        meta: snap
-          ? `${snap.districts ?? 0} ilçe · ${snap.neighborhoods ?? 0} mahalle`
-          : undefined,
-      },
-      {
-        to: '/hat-yonetimi',
-        title: 'Hat yönetimi',
-        description: 'Hat, durak ve hareket saatleri',
-      },
-      {
-        to: '/birim-yonetimi',
-        title: 'Birim yönetimi',
-        description: 'Departman ve dizin personeli',
-      },
-      ...base,
+      { id: 'cash', title: 'Dijital vezne', description: 'Borç öde / bakiye yükle', to: '/vezne' },
+      { id: 'req', title: 'Hizmet masası', description: 'Talep oluştur / takip', to: '/talepler' },
+      { id: 'docs', title: 'Belge başvurusu', description: 'İkametgâh ve belgeler', to: '/basvurular' },
+      { id: 'eb', title: 'E-Belediye', description: 'Nikah, imar, spor', to: '/e-belediye' },
+      { id: 'card', title: 'Ulaşım kartı', description: 'Bakiye ve biniş', to: '/ulasim' },
+      { id: 'settings', title: 'Hesap ayarları', description: 'Profil ve parola', to: '/ayarlar' },
     ]
-  }, [staffSnap, admin])
+  }, [staff, admin])
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Merhaba, {user?.fullName}</h1>
+    <div className="container dash-page">
+      <header className="dash-hero">
+        <h1>Merhaba, {user?.fullName}</h1>
         <p className="muted">
           {admin
-            ? 'Yönetici paneli — kuyruklar ve coğrafya özeti canlıdır.'
+            ? 'Yönetim paneli — kuyruklar ve operasyon özeti'
             : staff
-              ? 'Personel paneli — bekleyen talep ve yardım sayıları canlıdır.'
-              : 'Vatandaş paneli — borç, talep ve kart bakiyeniz özetlenir.'}
+              ? 'Personel paneli — bekleyen işler ve hızlı erişim'
+              : 'Vatandaş paneli — borç, talep ve hizmet özeti'}
         </p>
-      </div>
+      </header>
 
       {error ? <div className="error-box">{error}</div> : null}
 
-      {staff ? (
-        <StaffOps snapshot={staffSnap} loading={loading} admin={admin} />
-      ) : (
-        <CitizenOps snapshot={citizenSnap} loading={loading} />
-      )}
+      <SummaryCards items={summaryItems} loading={loading} />
 
-      {loading ? (
-        <div className="notice notice--skeleton" aria-live="polite">
-          <span className="skeleton-line skeleton-line--xl" />
-        </div>
+      <div className="dash-layout">
+        <ServiceStatus items={loading ? [] : statusItems} />
+        <RecentActivity
+          items={activityItems}
+          loading={loading}
+          emptyText={staff ? 'Henüz listelenecek talep yok.' : 'Henüz işlem kaydı yok.'}
+        />
+      </div>
+
+      <QuickActions items={quickItems} />
+
+      {!staff ? (
+        <p className="muted" style={{ margin: 0, fontSize: '0.88rem' }}>
+          Tüm hizmetler için <Link to="/e-belediye">E-Belediye</Link> veya{' '}
+          <Link to="/">ana sayfa</Link> kataloğuna bakabilirsiniz.
+        </p>
       ) : null}
-
-      {!loading && !staff && citizenSnap && citizenSnap.openDebts > 0 ? (
-        <div className="notice">
-          Ödenecek {money(citizenSnap.debtTotal)} tutarında açık borcunuz var.{' '}
-          <Link to="/borclar">Borçlara git</Link>
-        </div>
-      ) : null}
-
-      {!loading &&
-      staff &&
-      staffSnap &&
-      (staffSnap.openRequests > 0 || staffSnap.aidQueue > 0) ? (
-        <div className="notice">
-          Masada {staffSnap.openRequests} açık talep ve {staffSnap.aidQueue} yardım başvurusu
-          bekliyor. <Link to="/personel">Personel masasına git</Link>
-        </div>
-      ) : null}
-
-      <PanelLinks links={staff ? staffLinks : citizenLinks} />
     </div>
   )
 }

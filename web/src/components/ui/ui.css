@@ -1,0 +1,226 @@
+.ui-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  align-items: end;
+  margin-bottom: 0.35rem;
+}
+
+.ui-page-header-copy {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 42rem;
+}
+
+.ui-page-header h1 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(1.55rem, 2.4vw, 1.9rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.ui-page-header p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.ui-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.ui-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ui-stat-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 1.05rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  min-height: 4.75rem;
+  background: var(--brand-soft);
+}
+
+.ui-stat-card.tone-brand {
+  background: var(--brand-soft);
+}
+
+.ui-stat-card.tone-accent {
+  background: var(--accent-soft);
+}
+
+.ui-stat-card.tone-warn {
+  background: var(--warn-soft);
+}
+
+.ui-stat-card.tone-info {
+  background: var(--info-soft);
+}
+
+.ui-stat-card.tone-ok {
+  background: var(--ok-soft);
+}
+
+.ui-stat-card strong {
+  font-family: var(--font-body);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.ui-stat-row--skeleton .ui-stat-card {
+  align-content: center;
+  gap: 0.55rem;
+  background: #fff;
+  border-color: var(--line);
+}
+
+.ui-empty {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.ui-empty strong {
+  font-size: 1.05rem;
+}
+
+.ui-empty p {
+  margin: 0;
+}
+
+.ui-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.ui-action-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: start;
+  padding: 1.15rem 1.2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.ui-action-card:hover {
+  border-color: rgba(30, 200, 192, 0.4);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.ui-action-card.is-highlight {
+  border-color: rgba(30, 200, 192, 0.28);
+  background: linear-gradient(135deg, var(--brand-soft), rgba(255, 255, 255, 0.92) 55%);
+}
+
+.ui-action-mark {
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: 0.45rem;
+  border-radius: 999px;
+  background: var(--brand);
+}
+
+.ui-action-card.is-highlight .ui-action-mark {
+  background: var(--accent);
+}
+
+.ui-action-copy {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.ui-action-copy strong {
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.ui-action-copy .muted {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ui-action-copy em {
+  font-style: normal;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--brand);
+}
+
+.list-row {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.list-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.list-row-top h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.list-row-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.list-row-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.list-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .ui-stat-row,
+  .ui-action-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ui-stat-row,
+  .ui-action-grid {
+    grid-template-columns: 1fr;
+  }
+}

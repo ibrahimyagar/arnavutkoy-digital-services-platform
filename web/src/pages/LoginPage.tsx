@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { PageHeader } from '../components/ui/PageChrome'
 
 export function LoginPage() {
   const { login, isAuthenticated } = useAuth()
@@ -29,12 +30,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 460 }}>
+    <div className="container page" style={{ maxWidth: 460 }}>
       <div className="panel stack">
-        <div>
-          <h2>Hesap girişi</h2>
-          <p className="muted">E-posta ve şifrenizle giriş yapın.</p>
-        </div>
+        <PageHeader title="Hesap girişi" description="E-posta ve şifrenizle giriş yapın." />
 
         <div className="notice">
           Vatandaş: <code>vatandas@demo.arnavutkoy.local</code> / <code>Demo!Citizen123</code>

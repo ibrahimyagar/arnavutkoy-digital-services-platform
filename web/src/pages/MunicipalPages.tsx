@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { EmptyState, PageHeader } from '../components/ui/PageChrome'
 import {
   apiFetch,
   type DocumentApplication,
@@ -59,10 +60,7 @@ function PortalListPage({
 
   return (
     <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>{title}</h1>
-        <p className="muted">{subtitle}</p>
-      </div>
+      <PageHeader title={title} description={subtitle} />
       <div className="field" style={{ maxWidth: 420 }}>
         <label htmlFor={`q-${kind}`}>Ara</label>
         <input id={`q-${kind}`} value={q} onChange={(e) => setQ(e.target.value)} placeholder="Başlık veya özet" />
@@ -80,7 +78,9 @@ function PortalListPage({
           </Link>
         ))}
       </div>
-      {filtered.length === 0 && !error ? <p className="muted">Kayıt yok.</p> : null}
+      {filtered.length === 0 && !error ? (
+        <EmptyState title="Kayıt yok" description="Bu kategoride içerik bulunamadı." />
+      ) : null}
     </div>
   )
 }

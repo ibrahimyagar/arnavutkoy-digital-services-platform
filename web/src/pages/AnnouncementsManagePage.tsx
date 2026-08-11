@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { StaffGate } from '../components/RoleGates'
+import { PageHeader } from '../components/ui/PageChrome'
 import { apiFetch, type Announcement, type Paginated } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
@@ -218,14 +219,16 @@ function AnnouncementsManageContent() {
   }
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Duyuru yönetimi</h1>
-        <p className="muted">
-          Taslak → yayın → arşiv. Halka açık görünüm:{' '}
-          <Link to="/duyurular">/duyurular</Link>
-        </p>
-      </div>
+    <div className="container stack page">
+      <PageHeader
+        title="Duyuru yönetimi"
+        description="Taslak → yayın → arşiv."
+        actions={
+          <Link className="btn btn-ghost" to="/duyurular">
+            Halka açık liste
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}

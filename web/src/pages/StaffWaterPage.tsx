@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { StaffGate } from '../components/RoleGates'
+import { EmptyState, PageHeader, StatRow } from '../components/ui/PageChrome'
 import { apiFetch, type Neighborhood, type Paginated, type WaterSubscription } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
@@ -150,36 +151,28 @@ function StaffWaterContent() {
   }
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Su abonelik yönetimi</h1>
-        <p className="muted">
-          Abonelik durumunu yönetin; aktif kayıtlara su borcu kesin.{' '}
-          <Link to="/mulk-yonetimi">Mülk yönetimi</Link>
-        </p>
-      </div>
+    <div className="container stack page">
+      <PageHeader
+        title="Su abonelik yönetimi"
+        description="Abonelik durumu ve su borcu kesimi."
+        actions={
+          <Link className="btn btn-ghost" to="/mulk-yonetimi">
+            Mülk yönetimi
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
-      <div className="stats-strip" aria-label="Abonelik özeti">
-        <div>
-          <span className="muted">Toplam</span>
-          <strong>{counts.all}</strong>
-        </div>
-        <div>
-          <span className="muted">Aktif</span>
-          <strong>{counts.Active ?? 0}</strong>
-        </div>
-        <div>
-          <span className="muted">Askıda</span>
-          <strong>{counts.Suspended ?? 0}</strong>
-        </div>
-        <div>
-          <span className="muted">Listelenen</span>
-          <strong>{filtered.length}</strong>
-        </div>
-      </div>
+      <StatRow
+        items={[
+          { id: 'all', label: 'Toplam', value: String(counts.all), tone: 'brand' },
+          { id: 'active', label: 'Aktif', value: String(counts.Active ?? 0), tone: 'ok' },
+          { id: 'suspended', label: 'Askıda', value: String(counts.Suspended ?? 0), tone: 'warn' },
+          { id: 'listed', label: 'Listelenen', value: String(filtered.length), tone: 'info' },
+        ]}
+      />
 
       <div className="field">
         <label htmlFor="water-search">Ara</label>
@@ -235,11 +228,11 @@ function StaffWaterContent() {
         {filtered.map((item) => {
           const busy = busyId === item.id
           return (
-            <article key={item.id} className="panel stack">
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+            <article key={item.id} className="list-row">
+              <div className="list-row-top">
                 <div>
-                  <h3 style={{ margin: 0 }}>{item.subscriptionNumber}</h3>
-                  <p className="muted" style={{ marginBottom: 0 }}>
+                  <h3>{item.subscriptionNumber}</h3>
+                  <p className="muted list-row-meta">
                     {neighborhoodMap.get(item.neighborhoodId) ?? 'Mahalle'}
                     {' · '}
                     {new Date(item.activatedAtUtc).toLocaleDateString('tr-TR')}
@@ -247,8 +240,8 @@ function StaffWaterContent() {
                       ? ` · Kapandı ${new Date(item.closedAtUtc).toLocaleDateString('tr-TR')}`
                       : ''}
                   </p>
-                  <p className="muted" style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>
-                    Abone kimliği: {item.subscriberUserId.slice(0, 8)}…
+                  <p className="muted list-row-meta">
+                    Abone: {item.subscriberUserId.slice(0, 8)}…
                     {item.propertyId ? ` · Mülk ${item.propertyId.slice(0, 8)}…` : ''}
                   </p>
                 </div>
@@ -259,7 +252,7 @@ function StaffWaterContent() {
 
               {debtForId === item.id ? (
                 <form className="stack" onSubmit={(e) => void onCreateDebt(e)}>
-                  <h3 style={{ margin: 0 }}>Su borcu oluştur</h3>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem' }}>Su borcu oluştur</h3>
                   <div className="dept-chip-row" role="group" aria-label="Hazır tutarlar">
                     {DEBT_PRESETS.map((preset) => (
                       <button
@@ -297,7 +290,7 @@ function StaffWaterContent() {
                       />
                     </div>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div className="list-row-actions">
                     <button className="btn btn-primary" type="submit" disabled={busy}>
                       Borç kes
                     </button>
@@ -312,7 +305,7 @@ function StaffWaterContent() {
                   </div>
                 </form>
               ) : (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div className="list-row-actions">
                   {item.status === 'Active' ? (
                     <>
                       <button
@@ -396,9 +389,10 @@ function StaffWaterContent() {
           )
         })}
         {filtered.length === 0 ? (
-          <p className="muted">
-            Bu filtrede abonelik yok. Vatandaşın `/su` üzerinden abonelik açtığından emin olun.
-          </p>
+          <EmptyState
+            title="Bu filtrede abonelik yok"
+            description="Vatandaşın /su üzerinden abonelik açtığından emin olun."
+          />
         ) : null}
       </div>
     </div>

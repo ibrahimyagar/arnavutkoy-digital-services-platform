@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { PageHeader } from '../components/ui/PageChrome'
 import { apiFetch } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
@@ -113,19 +114,21 @@ function SettingsContent() {
 
   return (
     <div className="container stack page" style={{ maxWidth: 640 }}>
-      <div>
-        <p className="muted" style={{ marginTop: 0 }}>
-          <Link to="/panel">← Panel</Link>
-        </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Hesap ayarları</h1>
-        <p className="muted">Profil özeti, telefon ve parola — referans ayarlar ekranının karşılığı.</p>
-      </div>
+      <PageHeader
+        title="Hesap ayarları"
+        description="Profil, telefon ve parola."
+        actions={
+          <Link className="btn btn-ghost" to="/panel">
+            Panele dön
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
       <section className="panel stack">
-        <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.35rem' }}>Profil</h2>
+        <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Profil</h2>
         {!profile ? (
           <p className="muted">Yükleniyor…</p>
         ) : (

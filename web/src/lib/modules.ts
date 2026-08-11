@@ -409,30 +409,11 @@ export const ADMIN_MODULES: ModuleTile[] = [
 const HOME_ITEM: ModuleTile = {
   id: 'home',
   title: 'Ana sayfa',
-  description: 'Modül kataloğu',
+  description: 'Belediye ana sayfası',
   to: '/',
   requiresAuth: false,
   audience: 'public',
 }
-
-const AUTH_ITEMS: ModuleTile[] = [
-  {
-    id: 'login',
-    title: 'Giriş yap',
-    description: 'Hesabınıza giriş',
-    to: '/giris',
-    requiresAuth: false,
-    audience: 'public',
-  },
-  {
-    id: 'register',
-    title: 'Kayıt ol',
-    description: 'Vatandaş hesabı oluştur',
-    to: '/kayit',
-    requiresAuth: false,
-    audience: 'public',
-  },
-]
 
 type SidebarArgs = {
   isAuthenticated: boolean
@@ -441,53 +422,95 @@ type SidebarArgs = {
   isAdmin: boolean
 }
 
-/** Referans sidebar.php yapısı: üyeliksiz → özel / personel / yönetim → üyelik. */
+/** Sidebar: misafir kurumsal menü; vatandaşta + Hizmetlerim; personelde operasyon. */
 export function getSidebarSections({
   isAuthenticated,
   isCitizen,
   isStaff,
   isAdmin,
 }: SidebarArgs): NavSection[] {
-  const sections: NavSection[] = [
-    {
-      id: 'public',
-      title: 'Üyeliksiz işlemler',
-      items: [HOME_ITEM, ...PUBLIC_MODULES.filter((m) => !m.requiresAuth)],
-    },
+  const byId = (pool: ModuleTile[], ids: string[]) =>
+    ids
+      .map((id) => pool.find((m) => m.id === id))
+      .filter((m): m is ModuleTile => Boolean(m))
+
+  if (isAuthenticated && isStaff) {
+    const sections: NavSection[] = [
+      {
+        id: 'ops',
+        title: 'Operasyon',
+        items: byId(STAFF_MODULES, [
+          'staff-panel',
+          'staff-desk',
+          'staff-requests',
+          'staff-announcements',
+          'staff-water',
+          'staff-property',
+        ]),
+      },
+    ]
+    if (isAdmin) {
+      sections.push({
+        id: 'admin',
+        title: 'Yönetim',
+        items: ADMIN_MODULES,
+      })
+    }
+    sections.push({
+      id: 'account',
+      title: 'Hesap',
+      items: byId(STAFF_MODULES, ['staff-settings']),
+    })
+    return sections
+  }
+
+  const municipalNav = [
+    HOME_ITEM,
+    ...byId(PUBLIC_MODULES, [
+      'e-belediye',
+      'announcements',
+      'news',
+      'events',
+      'headmens',
+      'departments',
+      'contact',
+    ]),
   ]
 
   if (isAuthenticated && isCitizen) {
-    sections.push({
-      id: 'citizen',
-      title: 'Özel işlemler',
-      items: CITIZEN_MODULES,
-    })
+    return [
+      {
+        id: 'municipal',
+        title: 'Belediye',
+        items: municipalNav,
+      },
+      {
+        id: 'services',
+        title: 'Hizmetlerim',
+        items: byId(CITIZEN_MODULES, [
+          'panel',
+          'cash-desk-member',
+          'debts',
+          'requests',
+          'transport',
+          'docs-apply',
+        ]),
+      },
+      {
+        id: 'account',
+        title: 'Hesap',
+        items: byId(CITIZEN_MODULES, ['settings']),
+      },
+    ]
   }
 
-  if (isAuthenticated && isStaff) {
-    sections.push({
-      id: 'staff',
-      title: 'Personel',
-      items: STAFF_MODULES,
-    })
-  }
-
-  if (isAuthenticated && isAdmin) {
-    sections.push({
-      id: 'admin',
-      title: 'Yönetim',
-      items: ADMIN_MODULES,
-    })
-  }
-
-  if (!isAuthenticated) {
-    sections.push({
-      id: 'membership',
-      title: 'Üyelik',
-      items: AUTH_ITEMS,
-    })
-  }
-
-  return sections
+  // Misafir: kurumsal menü (Kayıt/Giriş header'da)
+  return [
+    {
+      id: 'municipal',
+      title: 'Menü',
+      items: municipalNav,
+    },
+  ]
 }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { AdminGate } from '../components/RoleGates'
+import { PageHeader } from '../components/ui/PageChrome'
 import { apiFetch, type District, type Neighborhood, type Street } from '../lib/api'
 import { RequireAuth } from './PanelPage'
 
@@ -194,14 +195,16 @@ function GeographyContent() {
   const selectedNeighborhood = neighborhoods.find((n) => n.id === neighborhoodId)
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Coğrafya yönetimi</h1>
-        <p className="muted">
-          İlçe → mahalle → sokak. Halka açık muhtarlık listesi:{' '}
-          <Link to="/muhtarliklar">/muhtarliklar</Link>
-        </p>
-      </div>
+    <div className="container stack page">
+      <PageHeader
+        title="Coğrafya yönetimi"
+        description="İlçe → mahalle → sokak."
+        actions={
+          <Link className="btn btn-ghost" to="/muhtarliklar">
+            Muhtarlık listesi
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}

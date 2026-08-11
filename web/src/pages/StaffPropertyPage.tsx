@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { StaffGate } from '../components/RoleGates'
+import { EmptyState, PageHeader, StatRow } from '../components/ui/PageChrome'
 import {
   apiFetch,
   type CitizenProperty,
@@ -163,36 +164,28 @@ function StaffPropertyContent() {
   }
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Mülk / emlak yönetimi</h1>
-        <p className="muted">
-          Kayıtlı mülkleri süzün; aktif kayıtlara emlak vergisi borcu kesin.{' '}
-          <Link to="/su-yonetimi">Su yönetimi</Link>
-        </p>
-      </div>
+    <div className="container stack page">
+      <PageHeader
+        title="Mülk / emlak yönetimi"
+        description="Mülk kayıtları ve emlak vergisi borcu kesimi."
+        actions={
+          <Link className="btn btn-ghost" to="/su-yonetimi">
+            Su yönetimi
+          </Link>
+        }
+      />
 
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
-      <div className="stats-strip" aria-label="Mülk özeti">
-        <div>
-          <span className="muted">Toplam</span>
-          <strong>{counts.all}</strong>
-        </div>
-        <div>
-          <span className="muted">Aktif</span>
-          <strong>{counts.active}</strong>
-        </div>
-        <div>
-          <span className="muted">Pasif</span>
-          <strong>{counts.inactive}</strong>
-        </div>
-        <div>
-          <span className="muted">Listelenen</span>
-          <strong>{filtered.length}</strong>
-        </div>
-      </div>
+      <StatRow
+        items={[
+          { id: 'all', label: 'Toplam', value: String(counts.all), tone: 'brand' },
+          { id: 'active', label: 'Aktif', value: String(counts.active), tone: 'ok' },
+          { id: 'inactive', label: 'Pasif', value: String(counts.inactive), tone: 'warn' },
+          { id: 'listed', label: 'Listelenen', value: String(filtered.length), tone: 'info' },
+        ]}
+      />
 
       <div className="field">
         <label htmlFor="property-search">Ara</label>
@@ -266,11 +259,11 @@ function StaffPropertyContent() {
 
       <div className="stack">
         {filtered.map((item) => (
-          <article key={item.id} className="panel stack">
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+          <article key={item.id} className="list-row">
+            <div className="list-row-top">
               <div>
-                <h3 style={{ margin: 0 }}>{item.title}</h3>
-                <p className="muted" style={{ marginBottom: 0 }}>
+                <h3>{item.title}</h3>
+                <p className="muted list-row-meta">
                   {typeLabels[item.type] ?? item.type}
                   {' · '}
                   {neighborhoodMap.get(item.neighborhoodId) ?? 'Mahalle'}
@@ -279,9 +272,7 @@ function StaffPropertyContent() {
                   {item.doorNumber}
                   {item.blockParcel ? ` · ${item.blockParcel}` : ''}
                 </p>
-                <p className="muted" style={{ margin: '0.25rem 0 0', fontSize: '0.8rem' }}>
-                  Sahip kimliği: {item.ownerUserId.slice(0, 8)}…
-                </p>
+                <p className="muted list-row-meta">Sahip: {item.ownerUserId.slice(0, 8)}…</p>
               </div>
               <span className={item.isActive ? 'badge badge-ok' : 'badge'}>
                 {item.isActive ? 'Aktif' : 'Pasif'}
@@ -290,7 +281,7 @@ function StaffPropertyContent() {
 
             {debtForId === item.id ? (
               <form className="stack" onSubmit={(e) => void onCreateDebt(e)}>
-                <h3 style={{ margin: 0 }}>Emlak vergisi borcu</h3>
+                <h3 style={{ margin: 0, fontSize: '1.05rem' }}>Emlak vergisi borcu</h3>
                 <div className="dept-chip-row" role="group" aria-label="Hazır tutarlar">
                   {DEBT_PRESETS.map((preset) => (
                     <button
@@ -328,7 +319,7 @@ function StaffPropertyContent() {
                     />
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div className="list-row-actions">
                   <button className="btn btn-primary" type="submit" disabled={busy}>
                     Borç kes
                   </button>
@@ -343,7 +334,7 @@ function StaffPropertyContent() {
                 </div>
               </form>
             ) : item.isActive ? (
-              <div>
+              <div className="list-row-actions">
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -361,9 +352,10 @@ function StaffPropertyContent() {
           </article>
         ))}
         {filtered.length === 0 ? (
-          <p className="muted">
-            Bu filtrede mülk yok. Vatandaşın `/mulkler` üzerinden kayıt oluşturduğundan emin olun.
-          </p>
+          <EmptyState
+            title="Bu filtrede mülk yok"
+            description="Vatandaşın /mulkler üzerinden kayıt oluşturduğundan emin olun."
+          />
         ) : null}
       </div>
     </div>
