@@ -23,9 +23,6 @@ tam ekran manzara hero ve tutarlı e-Belediye deneyimi.
 
 ## Ekran görüntüleri
 
-| Ana sayfa (misafir) | Giriş |
-| :---: | :---: |
-| <img src="docs/screenshots/home-guest.png" alt="Misafir ana sayfa" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
 
 | Vatandaş paneli | Borçlarım |
 | :---: | :---: |
