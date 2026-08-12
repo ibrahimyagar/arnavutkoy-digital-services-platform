@@ -23,29 +23,25 @@ resimli duyuru-haber kartları ve tutarlı `PublicPage` içerik şablonu.
 
 ## Ekran görüntüleri
 
-| Ana sayfa (hero) | Giriş |
+| Ana sayfa (hero) | Duyurular ve Haberler |
 | :---: | :---: |
-| <img src="docs/screenshots/home-guest.png" alt="Ana sayfa hero ve hızlı erişim dock" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
+| <img src="docs/screenshots/home-guest.png" alt="Ana sayfa hero ve hızlı erişim dock" width="420" /> | <img src="docs/screenshots/home-stories.png" alt="Resimli duyuru ve haber kartları" width="420" /> |
 
-| Duyurular ve Haberler | E-Belediye |
+| E-Belediye | Kurumsal |
 | :---: | :---: |
-| <img src="docs/screenshots/home-stories.png" alt="Resimli duyuru ve haber kartları" width="420" /> | <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> |
+| <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> | <img src="docs/screenshots/kurumsal.png" alt="Kurumsal sayfa kapak ve içerik" width="420" /> |
 
-| Kurumsal | Vatandaş paneli |
+| Vatandaş paneli | Borçlarım |
 | :---: | :---: |
-| <img src="docs/screenshots/kurumsal.png" alt="Kurumsal sayfa kapak ve içerik" width="420" /> | <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> |
+| <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> | <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> |
 
-| Borçlarım | Hizmet masası |
+| Hizmet masası | Muhtarlıklar |
 | :---: | :---: |
-| <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> | <img src="docs/screenshots/hizmet-masasi.png" alt="Hizmet masası talepleri" width="420" /> |
+| <img src="docs/screenshots/hizmet-masasi.png" alt="Hizmet masası talepleri" width="420" /> | <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> |
 
-| Muhtarlıklar | Ulaşım kartı |
+| Ulaşım kartı | Ulaşım ağı |
 | :---: | :---: |
-| <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> | <img src="docs/screenshots/ulasim-kart.png" alt="Ulaşım kartı bakiye ve biniş" width="420" /> |
-
-| Ulaşım ağı | Belediye hizmetleri |
-| :---: | :---: |
-| <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> | <img src="docs/screenshots/home-services.png" alt="Ana sayfa hizmet kartları" width="420" /> |
+| <img src="docs/screenshots/ulasim-kart.png" alt="Ulaşım kartı bakiye ve biniş" width="420" /> | <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> |
 
 ## Öne çıkanlar
 
