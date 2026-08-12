@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <sub>Modern teal/navy belediye portalı — tam ekran hero, hızlı erişim dock, resimli içerik ve e-Belediye</sub>
+  <sub>Modern teal/navy belediye portalı — tam ekran hero, hızlı erişim dock, resimli içerik, e-Belediye ve ulaşım kartı</sub>
 </p>
 
 ## Neden bu proje?
@@ -39,9 +39,13 @@ resimli duyuru-haber kartları ve tutarlı `PublicPage` içerik şablonu.
 | :---: | :---: |
 | <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> | <img src="docs/screenshots/hizmet-masasi.png" alt="Hizmet masası talepleri" width="420" /> |
 
-| Muhtarlıklar | Ulaşım ağı |
+| Muhtarlıklar | Ulaşım kartı |
 | :---: | :---: |
-| <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> | <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> |
+| <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> | <img src="docs/screenshots/ulasim-kart.png" alt="Ulaşım kartı bakiye ve biniş" width="420" /> |
+
+| Ulaşım ağı | Belediye hizmetleri |
+| :---: | :---: |
+| <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> | <img src="docs/screenshots/home-services.png" alt="Ana sayfa hizmet kartları" width="420" /> |
 
 ## Öne çıkanlar
 
