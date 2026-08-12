@@ -1,9 +1,12 @@
-import { useEffect, useId, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useId, useMemo, useState } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { apiFetch, type CitizenRequestSummary, type Debt, type Paginated } from '../lib/api'
 import { getSidebarSections } from '../lib/modules'
 import { isAdmin, isStaff } from '../lib/roles'
+import { BrandLogo } from './BrandLogo'
+import { getMegaMenuLayout, MegaMenu } from './MegaMenu'
+import { SiteFooter } from './SiteFooter'
 import './shell.css'
 
 export function AppShell() {
@@ -25,6 +28,18 @@ export function AppShell() {
     isAdmin: admin,
   })
 
+  const mega = useMemo(
+    () =>
+      getMegaMenuLayout({
+        isAuthenticated,
+        isCitizen: citizen,
+        isStaff: staff,
+        isAdmin: admin,
+        sections,
+      }),
+    [isAuthenticated, citizen, staff, admin, sections],
+  )
+
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
@@ -39,14 +54,14 @@ export function AppShell() {
   }, [menuOpen])
 
   useEffect(() => {
-    document.body.classList.toggle('shell-drawer-open', menuOpen)
-    return () => document.body.classList.remove('shell-drawer-open')
-  }, [menuOpen])
-
-  useEffect(() => {
     document.body.classList.toggle('shell-home-landing', onHome)
     return () => document.body.classList.remove('shell-home-landing')
   }, [onHome])
+
+  useEffect(() => {
+    document.body.classList.toggle('shell-menu-lock', menuOpen)
+    return () => document.body.classList.remove('shell-menu-lock')
+  }, [menuOpen])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -103,86 +118,29 @@ export function AppShell() {
     }
   }, [isAuthenticated, staff, location.pathname])
 
+  function openCategory(categoryId: string) {
+    if (categoryId === 'iletisim') {
+      setMenuOpen(false)
+      return
+    }
+    setMenuOpen(true)
+    requestAnimationFrame(() => {
+      document.getElementById(`mega-col-${categoryId}`)?.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      })
+    })
+  }
+
   return (
-    <div className={`shell${onHome ? ' shell--home' : ''}${menuOpen ? ' is-drawer-open' : ''}`}>
-      {!onHome ? (
-        <>
-          <aside
-            id={menuId}
-            className={`shell-sidebar ${menuOpen ? 'is-open' : ''}`}
-            aria-label="Yan menü"
-          >
-            <div className="shell-sidebar-inner">
-              <Link to="/" className="brand brand-sidebar" onClick={() => setMenuOpen(false)}>
-                <span className="brand-mark" aria-hidden />
-                <span>
-                  <strong>Arnavutköy</strong>
-                  <small>Belediyesi</small>
-                </span>
-              </Link>
-
-              <nav className="side-nav" aria-label="Ana menü">
-                {sections.map((section) => (
-                  <div key={section.id} className="side-nav-section">
-                    <p className="side-nav-label">{section.title}</p>
-                    <ul>
-                      {section.items.map((item) => (
-                        <li key={item.id}>
-                          <NavLink
-                            to={item.to}
-                            end={item.to === '/'}
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            {item.title}
-                          </NavLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </nav>
-
-              <div className="side-nav-footer">
-                {isAuthenticated ? (
-                  <p className="side-nav-user">{user?.fullName}</p>
-                ) : (
-                  <p className="side-nav-hint muted">
-                    <Link to="/iletisim">İletişim</Link>
-                  </p>
-                )}
-              </div>
-            </div>
-          </aside>
-
-          {menuOpen ? (
-            <button
-              type="button"
-              className="shell-backdrop"
-              aria-label="Menüyü kapat"
-              onClick={() => setMenuOpen(false)}
-            />
-          ) : null}
-        </>
-      ) : null}
-
+    <div className={`shell${onHome ? ' shell--home' : ''}${menuOpen ? ' is-menu-open' : ''}`}>
       <div className="shell-frame">
         {!onHome ? (
           <header className="shell-header">
             <div className="shell-header-inner">
-              <button
-                type="button"
-                className="shell-menu-toggle"
-                aria-expanded={menuOpen}
-                aria-controls={menuId}
-                onClick={() => setMenuOpen((open) => !open)}
-              >
-                <span className="sr-only">{menuOpen ? 'Menüyü kapat' : 'Menüyü aç'}</span>
-                <span className="shell-menu-icon" aria-hidden data-open={menuOpen} />
-              </button>
-
               <Link to="/" className="brand brand-top">
-                <span className="brand-mark" aria-hidden />
-                <span>
+                <BrandLogo className="brand-mark" />
+                <span className="brand-copy">
                   <strong>Arnavutköy</strong>
                   <small>Belediyesi</small>
                 </span>
@@ -213,7 +171,7 @@ export function AppShell() {
                   </>
                 ) : (
                   <>
-                    <Link className="btn btn-ghost" to="/kayit">
+                    <Link className="btn btn-ghost shell-btn-register" to="/kayit">
                       Kayıt ol
                     </Link>
                     <Link className="btn btn-primary" to="/giris">
@@ -221,25 +179,66 @@ export function AppShell() {
                     </Link>
                   </>
                 )}
+
+                <button
+                  type="button"
+                  className={`shell-menu-toggle${menuOpen ? ' is-open' : ''}`}
+                  aria-expanded={menuOpen}
+                  aria-controls={menuId}
+                  onClick={() => setMenuOpen((open) => !open)}
+                >
+                  <span className="shell-menu-toggle-label">{menuOpen ? 'Kapat' : 'Menü'}</span>
+                  <span className="shell-menu-icon" aria-hidden data-open={menuOpen} />
+                </button>
               </div>
             </div>
+
+            <nav className="shell-cats" aria-label="Kategoriler">
+              <div className="shell-cats-inner">
+                {mega.categories.map((cat) =>
+                  cat.id === 'iletisim' ? (
+                    <Link key={cat.id} to="/iletisim" className="shell-cat">
+                      {cat.title}
+                    </Link>
+                  ) : (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`shell-cat${menuOpen ? ' is-active' : ''}`}
+                      onClick={() => openCategory(cat.id)}
+                    >
+                      {cat.title}
+                    </button>
+                  ),
+                )}
+              </div>
+            </nav>
+
+            <MegaMenu
+              open={menuOpen}
+              menuId={menuId}
+              columns={mega.columns}
+              shortcuts={mega.shortcuts}
+              onClose={() => setMenuOpen(false)}
+            />
           </header>
+        ) : null}
+
+        {menuOpen && !onHome ? (
+          <button
+            type="button"
+            className="shell-veil is-open"
+            aria-label="Menüyü kapat"
+            onClick={() => setMenuOpen(false)}
+          />
         ) : null}
 
         <main className={`shell-main${onHome ? ' shell-main--home' : ''}`}>
           <Outlet />
         </main>
 
-        <footer className="shell-footer">
-          <div className="container">
-            <p>
-              Bağımsız portföy/demo çalışmasıdır; gerçek Arnavutköy Belediyesi ile resmi bağlantısı
-              yoktur. Tüm veriler kurgusaldır.
-            </p>
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </div>
   )
 }
-

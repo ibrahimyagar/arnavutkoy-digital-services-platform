@@ -48,6 +48,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body,
 #root {
@@ -488,7 +492,7 @@ img {
 }
 
 .page {
-  padding-block: 0.5rem 2rem;
+  padding-block: 2rem 3.5rem;
 }
 
 .table-wrap {

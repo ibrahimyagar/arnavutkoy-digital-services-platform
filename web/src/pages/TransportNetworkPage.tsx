@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PublicPage, PublicRelated } from '../components/ui/PublicPage'
 import { apiFetch, type BusLine } from '../lib/api'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 import { moduleVisual, type ModuleTile } from '../lib/modules'
 import '../styles/module-tiles.css'
 
@@ -74,14 +76,12 @@ export function TransportNetworkPage() {
   }, [lines, q])
 
   return (
-    <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Ulaşım ağı</h1>
-        <p className="muted">
-          Referans projedeki ulaşım hub’ı: hatlar, kart, biniş ve vezne tek çatıda.
-        </p>
-      </div>
-
+    <PublicPage
+      eyebrow="Ulaşım"
+      title="Ulaşım ağı"
+      lead="Hatlar, kart, biniş ve vezne tek çatıda — demo hub."
+      cover={COVERS.projects}
+    >
       <div className="module-grid">
         {HUB_TILES.map((mod) => {
           const visual = moduleVisual(mod)
@@ -186,6 +186,7 @@ export function TransportNetworkPage() {
           </tbody>
         </table>
       </div>
-    </div>
+      <PublicRelated items={RELATED.transport} />
+    </PublicPage>
   )
 }

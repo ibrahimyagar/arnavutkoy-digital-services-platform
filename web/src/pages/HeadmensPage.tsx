@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { PublicPage, PublicRelated } from '../components/ui/PublicPage'
 import { apiFetch, type Neighborhood } from '../lib/api'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 
 const LETTERS = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split('')
 
@@ -54,14 +56,12 @@ export function HeadmensPage() {
   )
 
   return (
-    <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Muhtarlıklar</h1>
-        <p className="muted">
-          Mahalle bazlı muhtar, telefon ve nüfus — referans e-belediye dizinine yakın tablo görünümü.
-        </p>
-      </div>
-
+    <PublicPage
+      eyebrow="İlçe"
+      title="Muhtarlıklar"
+      lead="Mahalle bazlı muhtar, telefon ve nüfus — kurgusal demo dizini."
+      cover={COVERS.guide}
+    >
       {error ? <div className="error-box">{error}</div> : null}
 
       {loading ? (
@@ -183,6 +183,7 @@ export function HeadmensPage() {
           </tbody>
         </table>
       </div>
-    </div>
+      <PublicRelated items={RELATED.municipal} />
+    </PublicPage>
   )
 }

@@ -27,13 +27,13 @@
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(6, 20, 32, 0.45) 0%, transparent 28%, transparent 58%, rgba(6, 18, 28, 0.55) 100%),
+    linear-gradient(180deg, rgba(6, 20, 32, 0.45) 0%, transparent 28%, transparent 62%, rgba(6, 18, 28, 0.42) 100%),
     linear-gradient(90deg, rgba(6, 22, 34, 0.55) 0%, rgba(6, 22, 34, 0.18) 42%, transparent 68%);
 }
 
 .hl-nav,
 .hl-body,
-.hl-quick,
+.hl-dock,
 .hl-scroll,
 .hl-drawer {
   position: relative;
@@ -57,13 +57,12 @@
 }
 
 .hl-brand-mark {
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.55rem;
+  height: 2.55rem;
   border-radius: 999px;
-  background:
-    radial-gradient(circle at 30% 30%, #fff 0 14%, transparent 15%),
-    conic-gradient(from 210deg, var(--hl-teal), #3aa0ff, var(--hl-teal-deep), var(--hl-teal));
+  object-fit: cover;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+  background: #0a1f2e;
 }
 
 .hl-brand-text {
@@ -345,61 +344,141 @@
   box-shadow: 0 0 0 10px rgba(30, 200, 192, 0.12), 0 0 36px rgba(30, 200, 192, 0.35);
 }
 
-.hl-quick {
-  display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 0.65rem;
-  padding: 0 clamp(1rem, 3vw, 2.25rem) 0.75rem;
+.hl-dock {
+  padding: 0 clamp(1rem, 3vw, 2.25rem) 0.55rem;
 }
 
-.hl-card {
+.hl-dock-rail {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.15rem;
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: 0.45rem;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
+    rgba(6, 18, 28, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hl-dock-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.hl-dock-item {
+  --i: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-width: 5.5rem;
   display: grid;
   justify-items: center;
-  gap: 0.55rem;
-  min-height: 7.4rem;
-  padding: 1rem 0.55rem 0.75rem;
+  align-content: center;
+  gap: 0.45rem;
+  padding: 0.85rem 0.4rem 0.95rem;
   border-radius: 16px;
   text-decoration: none;
-  color: #fff;
-  background: rgba(10, 24, 36, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  color: rgba(255, 255, 255, 0.92);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hl-dock-in 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(80ms + var(--i) * 45ms);
+  transition: color 160ms ease, background 160ms ease;
 }
 
-.hl-card:hover {
-  transform: translateY(-4px);
-  background: rgba(12, 36, 48, 0.55);
-  border-color: rgba(30, 200, 192, 0.45);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+.hl-dock-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 22%;
+  bottom: 22%;
+  right: -0.08rem;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(255, 255, 255, 0.18) 30%,
+    rgba(255, 255, 255, 0.18) 70%,
+    transparent
+  );
+  pointer-events: none;
 }
 
-.hl-card-icon {
-  width: 2.35rem;
-  height: 2.35rem;
-  color: var(--hl-teal);
+.hl-dock-icon {
+  width: 2.15rem;
+  height: 2.15rem;
   display: grid;
   place-items: center;
-  filter: drop-shadow(0 0 10px rgba(30, 200, 192, 0.35));
+  color: var(--hl-teal);
+  border-radius: 14px;
+  background: rgba(30, 200, 192, 0.1);
+  box-shadow: 0 0 0 1px rgba(30, 200, 192, 0.18);
+  transition: transform 200ms ease, background 200ms ease, box-shadow 200ms ease, color 200ms ease;
 }
 
-.hl-card-icon svg {
-  width: 1.55rem;
-  height: 1.55rem;
+.hl-dock-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
-.hl-card-label {
+.hl-dock-label {
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 650;
+  letter-spacing: 0.01em;
   line-height: 1.25;
+  max-width: 6.5rem;
 }
 
-.hl-card-arrow {
-  opacity: 0.55;
-  font-size: 0.85rem;
+.hl-dock-item::before {
+  content: '';
+  position: absolute;
+  left: 28%;
+  right: 28%;
+  bottom: 0.45rem;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--hl-teal);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.hl-dock-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hl-dock-item:hover .hl-dock-icon {
+  transform: translateY(-3px) scale(1.06);
+  color: #fff;
+  background: linear-gradient(145deg, var(--hl-teal), var(--hl-teal-deep));
+  box-shadow: 0 10px 22px rgba(14, 168, 161, 0.35);
+}
+
+.hl-dock-item:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.hl-dock-item:focus-visible {
+  outline: 2px solid var(--hl-teal);
+  outline-offset: 2px;
+}
+
+@keyframes hl-dock-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hl-scroll {
@@ -470,8 +549,19 @@
 }
 
 @media (max-width: 1100px) {
-  .hl-quick {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .hl-dock-item {
+    min-width: 6.25rem;
+    flex: 0 0 auto;
+  }
+
+  .hl-dock-rail {
+    justify-content: flex-start;
+    gap: 0.2rem;
+    padding: 0.4rem;
+  }
+
+  .hl-dock-item:not(:last-child)::after {
+    display: none;
   }
 }
 
@@ -480,13 +570,17 @@
     display: none;
   }
 
-  .hl-quick {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-bottom: 0.5rem;
+  .hl-dock {
+    padding-bottom: 0.35rem;
   }
 
-  .hl-card {
-    min-height: 6.4rem;
+  .hl-dock-item {
+    min-width: 5.6rem;
+    padding: 0.7rem 0.35rem 0.8rem;
+  }
+
+  .hl-dock-label {
+    font-size: 0.68rem;
   }
 
   .hl-video {
@@ -496,14 +590,20 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hl-btn,
-  .hl-card,
+  .hl-dock-item,
+  .hl-dock-icon,
   .hl-video-play,
   .hl-scroll-mouse::after {
     transition: none;
     animation: none;
   }
 
-  .hl-card:hover,
+  .hl-dock-item {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hl-dock-item:hover .hl-dock-icon,
   .hl-btn:hover {
     transform: none;
   }

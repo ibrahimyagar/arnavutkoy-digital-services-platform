@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <sub>Modern teal/navy belediye portalı — tam ekran hero, cam efektli hızlı erişim ve e-Belediye girişi</sub>
+  <sub>Modern teal/navy belediye portalı — tam ekran hero, hızlı erişim dock, resimli içerik ve e-Belediye</sub>
 </p>
 
 ## Neden bu proje?
@@ -18,18 +18,22 @@ Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış por
 tek üründe birleştirir: güvenli kimlik, borç / vezne, hizmet masası, ulaşım, coğrafya ve operasyon panelleri.
 Odak; okunabilir mimari, test edilebilir API ve gerçekçi bir demo deneyimi.
 
-UI tarafında hero odaklı modern kurumsal dil kullanılır: lacivert / turkuaz palet, glassmorphism kartlar,
-tam ekran manzara hero ve tutarlı e-Belediye deneyimi.
+UI tarafında hero odaklı modern kurumsal dil kullanılır: lacivert / turkuaz palet, üst mega menü,
+resimli duyuru-haber kartları ve tutarlı `PublicPage` içerik şablonu.
 
 ## Ekran görüntüleri
 
 | Ana sayfa (hero) | Giriş |
 | :---: | :---: |
-| <img src="docs/screenshots/home-guest.png" alt="Güncel ana sayfa hero" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
+| <img src="docs/screenshots/home-guest.png" alt="Ana sayfa hero ve hızlı erişim dock" width="420" /> | <img src="docs/screenshots/login.png" alt="E-posta ile giriş" width="420" /> |
 
-| E-Belediye | Vatandaş paneli |
+| Duyurular ve Haberler | E-Belediye |
 | :---: | :---: |
-| <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> | <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> |
+| <img src="docs/screenshots/home-stories.png" alt="Resimli duyuru ve haber kartları" width="420" /> | <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> |
+
+| Kurumsal | Vatandaş paneli |
+| :---: | :---: |
+| <img src="docs/screenshots/kurumsal.png" alt="Kurumsal sayfa kapak ve içerik" width="420" /> | <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> |
 
 | Borçlarım | Hizmet masası |
 | :---: | :---: |
@@ -43,7 +47,7 @@ tam ekran manzara hero ve tutarlı e-Belediye deneyimi.
 
 - **Vatandaş portalı** — duyuru, haber, etkinlik, kültür, faaliyet, hizmet rehberi, dijital vezne, borç, hizmet masası, ulaşım, mülk, su, sosyal yardım
 - **E-Belediye** — belge başvurusu / takip, nikah randevu, imar durumu & harç hesabı, spor tesisi randevu, iletişim
-- **Modern portal UI** — tam ekran hero, glassmorphism hızlı erişim, teal/navy kurumsal kabuk
+- **Modern portal UI** — tam ekran hero, hızlı erişim dock, navy mega menü, AI görselleri ve ortak PublicPage düzeni
 - **Personel / yönetici** — talep masası, duyuru yönetimi, coğrafya, hat ve İK yönetimi
 - **Kimlik** — e-posta + şifre, JWT access + refresh rotation, rol bazlı yetki
 - **Mimari** — Clean Architecture, CQRS (MediatR), FluentValidation, EF Core + PostgreSQL

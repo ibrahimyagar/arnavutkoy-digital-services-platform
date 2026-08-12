@@ -2,14 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { HomeHeroLanding } from '../components/home/HomeHeroLanding'
-import {
-  HomeAnnouncements,
-  HomeFeatureCards,
-  getHomeFeatureModules,
-} from '../components/home/HomeSections'
+import { HomeFeatureCards, getHomeFeatureModules } from '../components/home/HomeSections'
+import { HomeStories } from '../components/home/HomeStories'
 import {
   apiFetch,
-  type Announcement,
   type CitizenRequestSummary,
   type Debt,
   type Paginated,
@@ -23,17 +19,10 @@ export function HomePage() {
   const { isAuthenticated, user } = useAuth()
   const staff = isStaff(user?.roles)
   const admin = isAdmin(user?.roles)
-  const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [opsLine, setOpsLine] = useState<string | null>(null)
   const [opsLoading, setOpsLoading] = useState(false)
 
   const featureModules = getHomeFeatureModules()
-
-  useEffect(() => {
-    void apiFetch<Paginated<Announcement>>('/api/v1/announcements?pageSize=3')
-      .then((page) => setAnnouncements(page.items))
-      .catch(() => setAnnouncements([]))
-  }, [])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -143,18 +132,9 @@ export function HomePage() {
           </div>
         ) : null}
 
-        <HomeFeatureCards modules={featureModules} />
+        <HomeStories />
 
-        <HomeAnnouncements
-          items={announcements.map((item) => ({
-            id: item.id,
-            title: item.title,
-            dateLabel: new Date(item.publishStartUtc ?? item.createdAtUtc).toLocaleDateString(
-              'tr-TR',
-            ),
-            to: `/duyurular/${item.id}`,
-          }))}
-        />
+        <HomeFeatureCards modules={featureModules} />
 
         <section className="container home-place stack">
           <header className="home-section-head">

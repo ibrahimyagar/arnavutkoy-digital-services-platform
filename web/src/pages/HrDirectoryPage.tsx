@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PublicPage, PublicRelated } from '../components/ui/PublicPage'
 import { apiFetch, type Department, type StaffMember } from '../lib/api'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 
 export function HrDirectoryPage() {
   const [departments, setDepartments] = useState<Department[]>([])
@@ -53,15 +55,12 @@ export function HrDirectoryPage() {
     departmentId === 'all' ? null : departmentMap.get(departmentId) ?? null
 
   return (
-    <div className="container stack page">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Birimler ve personel</h1>
-        <p className="muted">
-          Halka açık dizin; kimlik girişi gerektirmez. Kurgusal demo verileridir. Hizmet talebi için{' '}
-          <Link to="/talepler">hizmet masası</Link>na gidin.
-        </p>
-      </div>
-
+    <PublicPage
+      eyebrow="Kurumsal"
+      title="Birimler ve personel"
+      lead="Halka açık dizin; kimlik girişi gerektirmez. Kurgusal demo verileridir."
+      cover={COVERS.mayor}
+    >
       {error ? <div className="error-box">{error}</div> : null}
 
       <div className="request-stats" aria-label="Dizin özeti">
@@ -158,9 +157,7 @@ export function HrDirectoryPage() {
                 </p>
               </div>
               <div className="hr-contact">
-                {member.email ? (
-                  <a href={`mailto:${member.email}`}>{member.email}</a>
-                ) : null}
+                {member.email ? <a href={`mailto:${member.email}`}>{member.email}</a> : null}
                 {member.phoneNumber ? (
                   <a href={`tel:${member.phoneNumber}`}>{member.phoneNumber}</a>
                 ) : null}
@@ -172,14 +169,24 @@ export function HrDirectoryPage() {
           <div className="panel stack">
             <h3 style={{ margin: 0 }}>Sonuç yok</h3>
             <p className="muted" style={{ margin: 0 }}>
-              Filtreyi veya aramayı temizleyip tekrar deneyin.
+              Filtreyi veya aramayı temizleyip tekrar deneyin. Hizmet talebi için{' '}
+              <Link to="/talepler">hizmet masası</Link>.
             </p>
-            <button type="button" className="btn btn-ghost" style={{ justifySelf: 'start' }} onClick={() => { setDepartmentId('all'); setQ('') }}>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ justifySelf: 'start' }}
+              onClick={() => {
+                setDepartmentId('all')
+                setQ('')
+              }}
+            >
               Filtreleri sıfırla
             </button>
           </div>
         ) : null}
       </div>
-    </div>
+      <PublicRelated items={RELATED.municipal} />
+    </PublicPage>
   )
 }

@@ -1,5 +1,6 @@
-import { useId, useState } from 'react'
+import { useId, useState, type CSSProperties } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { BrandLogo } from '../BrandLogo'
 import './home-hero-landing.css'
 
 type HomeHeroLandingProps = {
@@ -111,7 +112,7 @@ export function HomeHeroLanding({ isAuthenticated }: HomeHeroLandingProps) {
 
       <header className="hl-nav">
         <Link to="/" className="hl-brand">
-          <span className="hl-brand-mark" aria-hidden />
+          <BrandLogo className="hl-brand-mark" />
           <span className="hl-brand-text">
             <strong>ARNAVUTKÖY</strong>
             <small>BELEDİYESİ</small>
@@ -222,19 +223,23 @@ export function HomeHeroLanding({ isAuthenticated }: HomeHeroLandingProps) {
         </a>
       </div>
 
-      <div className="hl-quick" aria-label="Hızlı erişim">
-        {QUICK.map((item) => (
-          <Link key={item.to + item.label} to={item.to} className="hl-card">
-            <span className="hl-card-icon">
-              <QuickIcon name={item.icon} />
-            </span>
-            <span className="hl-card-label">{item.label}</span>
-            <span className="hl-card-arrow" aria-hidden>
-              ↓
-            </span>
-          </Link>
-        ))}
-      </div>
+      <nav className="hl-dock" aria-label="Hızlı erişim">
+        <div className="hl-dock-rail">
+          {QUICK.map((item, index) => (
+            <Link
+              key={item.to + item.label}
+              to={item.to}
+              className="hl-dock-item"
+              style={{ '--i': index } as CSSProperties}
+            >
+              <span className="hl-dock-icon" aria-hidden>
+                <QuickIcon name={item.icon} />
+              </span>
+              <span className="hl-dock-label">{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      </nav>
 
       <a className="hl-scroll" href="#home-content">
         <span className="hl-scroll-mouse" aria-hidden />

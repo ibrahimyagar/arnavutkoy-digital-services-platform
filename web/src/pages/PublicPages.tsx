@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { PageHeader } from '../components/ui/PageChrome'
+import { PublicPage, PublicRelated, PublicSection } from '../components/ui/PublicPage'
 import { apiFetch, type Announcement, type Paginated } from '../lib/api'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 
 function excerpt(text: string, max = 160) {
   const normalized = text.replace(/\s+/g, ' ').trim()
@@ -43,9 +44,12 @@ export function AnnouncementsPage() {
   }, [items, q])
 
   return (
-    <div className="container stack page">
-      <PageHeader title="Duyurular" description="Yayımlanmış belediye duyuruları." />
-
+    <PublicPage
+      eyebrow="Güncel"
+      title="Duyurular"
+      lead="Yayımlanmış belediye duyuruları. Arama ile başlık veya metin içinde filtreleyebilirsiniz."
+      cover={COVERS.announcements}
+    >
       <div className="field" style={{ maxWidth: 420 }}>
         <label htmlFor="ann-q">Duyuru ara</label>
         <input
@@ -58,31 +62,37 @@ export function AnnouncementsPage() {
 
       {error ? <div className="error-box">{error}</div> : null}
 
-      <div className="stack">
-        {filtered.map((item) => (
-          <article key={item.id} className="list-row">
-            <p className="muted list-row-meta" style={{ margin: 0 }}>
-              {publishedLabel(item)}
-              {item.publishEndUtc
-                ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleDateString('tr-TR')}`
-                : ''}
+      <PublicSection title="Liste">
+        <div className="stack">
+          {filtered.map((item) => (
+            <article key={item.id} className="list-row">
+              <p className="muted list-row-meta" style={{ margin: 0 }}>
+                {publishedLabel(item)}
+                {item.publishEndUtc
+                  ? ` · Geçerlilik: ${new Date(item.publishEndUtc).toLocaleDateString('tr-TR')}`
+                  : ''}
+              </p>
+              <h3 style={{ margin: 0 }}>
+                <Link to={`/duyurular/${item.id}`}>{item.title}</Link>
+              </h3>
+              <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
+                {excerpt(item.content)}
+              </p>
+              <Link className="announcement-more" to={`/duyurular/${item.id}`}>
+                Devamını oku
+              </Link>
+            </article>
+          ))}
+          {filtered.length === 0 && !error ? (
+            <p className="muted">
+              {q ? 'Aramanızla eşleşen duyuru yok.' : 'Yayında duyuru yok.'}
             </p>
-            <h3 style={{ margin: 0 }}>
-              <Link to={`/duyurular/${item.id}`}>{item.title}</Link>
-            </h3>
-            <p className="muted" style={{ margin: 0, lineHeight: 1.55 }}>
-              {excerpt(item.content)}
-            </p>
-            <Link className="announcement-more" to={`/duyurular/${item.id}`}>
-              Devamını oku
-            </Link>
-          </article>
-        ))}
-        {filtered.length === 0 && !error ? (
-          <p className="muted">{q ? 'Aramanızla eşleşen duyuru yok.' : 'Yayında duyuru yok.'}</p>
-        ) : null}
-      </div>
-    </div>
+          ) : null}
+        </div>
+      </PublicSection>
+
+      <PublicRelated items={RELATED.media} />
+    </PublicPage>
   )
 }
 
@@ -103,8 +113,13 @@ export function AnnouncementDetailPage() {
   }, [id])
 
   return (
-    <div className="container stack page" style={{ maxWidth: 720 }}>
-      <p className="muted" style={{ marginTop: 0 }}>
+    <PublicPage
+      eyebrow="Duyuru"
+      title={item?.title ?? 'Duyuru'}
+      lead={undefined}
+      cover={COVERS.announcements}
+    >
+      <p className="muted" style={{ margin: 0 }}>
         <Link to="/duyurular">← Tüm duyurular</Link>
       </p>
 
@@ -112,24 +127,22 @@ export function AnnouncementDetailPage() {
       {!item && !error ? <p className="muted">Yükleniyor…</p> : null}
 
       {item ? (
-        <article className="panel stack announcement-detail">
-          <div>
-            <p className="muted" style={{ margin: '0 0 0.5rem', fontSize: '0.85rem' }}>
+        <>
+          <PublicSection tone="soft">
+            <p className="muted" style={{ margin: '0 0 0.75rem', fontSize: '0.85rem' }}>
               {publishedLabel(item)}
               {item.publishEndUtc
                 ? ` · Geçerlilik sonu: ${new Date(item.publishEndUtc).toLocaleString('tr-TR')}`
                 : ''}
             </p>
-            <h1 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: 'clamp(1.8rem, 4vw, 2.4rem)' }}>
-              {item.title}
-            </h1>
-          </div>
-          <div className="announcement-body">{item.content}</div>
+            <div className="pub-prose announcement-body">{item.content}</div>
+          </PublicSection>
           <div className="notice">
             Bağımsız demo duyurusudur; gerçek Arnavutköy Belediyesi bildirimi değildir.
           </div>
-        </article>
+          <PublicRelated items={RELATED.media} />
+        </>
       ) : null}
-    </div>
+    </PublicPage>
   )
 }

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { PublicPage, PublicRelated, PublicSection } from '../components/ui/PublicPage'
 import { apiFetch, type BusLine, type BusLineDetails } from '../lib/api'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 
 const dayLabels: Record<string, string> = {
   Sunday: 'Pazar',
@@ -55,15 +57,12 @@ export function BusLinesPage() {
     items.length === 0 ? 0 : items.reduce((sum, line) => sum + line.baseFare, 0) / items.length
 
   return (
-    <div className="container stack">
-      <div>
-        <h1 style={{ fontFamily: 'var(--font-display)', margin: 0 }}>Otobüs hatları</h1>
-        <p className="muted">
-          Arnavutköy temalı güzergâhlar. Biniş için <Link to="/binis">simülasyon</Link> veya{' '}
-          <Link to="/ulasim">ulaşım kartı</Link>.
-        </p>
-      </div>
-
+    <PublicPage
+      eyebrow="Ulaşım"
+      title="Otobüs hatları"
+      lead="Arnavutköy temalı güzergâhlar — demo hat verisi."
+      cover={COVERS.projects}
+    >
       {error ? <div className="error-box">{error}</div> : null}
 
       {loading ? (
@@ -111,32 +110,21 @@ export function BusLinesPage() {
         />
       </div>
 
-      <div className="stack">
+      <div className="pub-hub-grid">
         {filtered.map((line) => (
-          <article key={line.id} className="panel stack">
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
-              <div>
-                <h3 style={{ margin: 0 }}>
-                  <Link to={`/hatlar/${line.id}`}>
-                    {line.code} — {line.name}
-                  </Link>
-                </h3>
-                <p className="muted" style={{ marginBottom: 0 }}>
-                  {line.routeSummary || 'Güzergâh özeti yok'}
-                </p>
-              </div>
-              <strong>{money(line.baseFare)}</strong>
-            </div>
-            <div>
-              <Link className="btn btn-ghost" to={`/hatlar/${line.id}`}>
-                Durak / saat
-              </Link>
-            </div>
-          </article>
+          <Link key={line.id} to={`/hatlar/${line.id}`}>
+            <strong>
+              {line.code} — {line.name}
+            </strong>
+            <span>
+              {line.routeSummary || 'Güzergâh özeti yok'} · {money(line.baseFare)}
+            </span>
+          </Link>
         ))}
-        {!loading && filtered.length === 0 ? <p className="muted">Bu aramada hat yok.</p> : null}
       </div>
-    </div>
+      {!loading && filtered.length === 0 ? <p className="muted">Bu aramada hat yok.</p> : null}
+      <PublicRelated items={RELATED.transport} />
+    </PublicPage>
   )
 }
 
@@ -169,59 +157,57 @@ export function BusLineDetailPage() {
   }, [detail])
 
   return (
-    <div className="container stack">
-      <p className="muted">
-        <Link to="/hatlar">← Hatlar</Link>
+    <PublicPage
+      eyebrow="Ulaşım"
+      title={detail ? `${detail.code} — ${detail.name}` : 'Hat detayı'}
+      lead={detail?.routeSummary || 'Güzergâh ve hareket saatleri'}
+      cover={COVERS.projects}
+    >
+      <p className="muted" style={{ margin: 0 }}>
+        <Link to="/hatlar">← Tüm hatlar</Link>
       </p>
       {error ? <div className="error-box">{error}</div> : null}
 
       {loading && !detail ? (
-        <div className="panel stack" aria-busy="true">
-          <span className="skeleton-line skeleton-line--sm" />
-          <span className="skeleton-line skeleton-line--lg" />
-          <span className="skeleton-line skeleton-line--xl" />
-        </div>
+        <PublicSection tone="soft">
+          <div className="stack" aria-busy="true">
+            <span className="skeleton-line skeleton-line--sm" />
+            <span className="skeleton-line skeleton-line--lg" />
+            <span className="skeleton-line skeleton-line--xl" />
+          </div>
+        </PublicSection>
       ) : null}
 
       {detail ? (
         <>
-          <div className="panel stack">
-            <h1 style={{ fontFamily: 'var(--font-display)', margin: 0, fontSize: '2rem' }}>
-              {detail.code} — {detail.name}
-            </h1>
-            <p className="muted" style={{ margin: 0 }}>
-              {detail.routeSummary || 'Güzergâh özeti yok'}
-            </p>
-            <div className="stats-strip" aria-label="Hat detay özeti">
-              <div>
-                <span className="muted">Ücret</span>
-                <strong>{money(detail.baseFare)}</strong>
-              </div>
-              <div>
-                <span className="muted">Durak</span>
-                <strong>{detail.stops.length}</strong>
-              </div>
-              <div>
-                <span className="muted">Sefer</span>
-                <strong>{detail.departures.length}</strong>
-              </div>
-              <div>
-                <span className="muted">Durum</span>
-                <strong>{detail.isActive ? 'Aktif' : 'Pasif'}</strong>
-              </div>
+          <div className="stats-strip" aria-label="Hat detay özeti">
+            <div>
+              <span className="muted">Ücret</span>
+              <strong>{money(detail.baseFare)}</strong>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <Link className="btn btn-primary" to="/binis">
-                Bu hatla bin (simülasyon)
-              </Link>
-              <Link className="btn btn-ghost" to="/ulasim">
-                Ulaşım kartım
-              </Link>
+            <div>
+              <span className="muted">Durak</span>
+              <strong>{detail.stops.length}</strong>
+            </div>
+            <div>
+              <span className="muted">Sefer</span>
+              <strong>{detail.departures.length}</strong>
+            </div>
+            <div>
+              <span className="muted">Durum</span>
+              <strong>{detail.isActive ? 'Aktif' : 'Pasif'}</strong>
             </div>
           </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <Link className="btn btn-primary" to="/binis">
+              Bu hatla bin (simülasyon)
+            </Link>
+            <Link className="btn btn-ghost" to="/ulasim">
+              Ulaşım kartım
+            </Link>
+          </div>
 
-          <section className="panel stack">
-            <h3 style={{ margin: 0 }}>Duraklar</h3>
+          <PublicSection title="Duraklar" tone="soft">
             {detail.stops.length === 0 ? (
               <p className="muted">Bu hat için durak tanımlanmamış.</p>
             ) : (
@@ -235,10 +221,9 @@ export function BusLineDetailPage() {
                   ))}
               </ol>
             )}
-          </section>
+          </PublicSection>
 
-          <section className="panel stack">
-            <h3 style={{ margin: 0 }}>Hareket saatleri</h3>
+          <PublicSection title="Hareket saatleri" tone="soft">
             {departuresByDay.length === 0 ? (
               <p className="muted">Hareket saati yok.</p>
             ) : (
@@ -258,9 +243,10 @@ export function BusLineDetailPage() {
                 ))}
               </div>
             )}
-          </section>
+          </PublicSection>
         </>
       ) : null}
-    </div>
+      <PublicRelated items={RELATED.transport} />
+    </PublicPage>
   )
 }

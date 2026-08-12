@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PUBLIC_MODULES, type ModuleTile } from '../../lib/modules'
+import { coverForModuleId } from '../../lib/contentVisuals'
 import './home-sections.css'
 
 export type QuickLink = {
@@ -30,15 +31,15 @@ const FEATURE_IDS = [
   'mayor',
 ] as const
 
-const FEATURE_ICON: Record<string, string> = {
-  'e-belediye': 'EB',
-  news: 'HB',
-  announcements: 'DY',
-  events: 'ET',
-  projects: 'FY',
-  culture: 'KS',
-  'service-guide': 'HR',
-  mayor: 'BŞ',
+const FEATURE_TONE: Record<string, 'teal' | 'navy' | 'blue' | 'sand'> = {
+  'e-belediye': 'teal',
+  news: 'navy',
+  announcements: 'blue',
+  events: 'teal',
+  projects: 'sand',
+  culture: 'navy',
+  'service-guide': 'blue',
+  mayor: 'teal',
 }
 
 export function getHomeFeatureModules(): ModuleTile[] {
@@ -84,25 +85,32 @@ export function HomeFeatureCards({ modules }: { modules: ModuleTile[] }) {
   return (
     <section className="home-features" aria-label="Öne çıkan hizmetler">
       <div className="container">
-        <header className="home-section-head">
+        <header className="home-section-head home-features-head">
           <h2>Belediye hizmetleri</h2>
           <p className="muted">Kurumsal bilgi ve e-hizmetlere tek noktadan ulaşın</p>
         </header>
         <div className="home-feature-grid">
-          {modules.map((mod) => (
-            <Link key={mod.id} to={mod.to} className="home-feature-card">
-              <span className="home-feature-icon" aria-hidden>
-                {FEATURE_ICON[mod.id] ?? 'AK'}
-              </span>
-              <div className="home-feature-copy">
-                <h3>{mod.title}</h3>
-                <p>{mod.description}</p>
-              </div>
-              <span className="home-feature-arrow" aria-hidden>
-                →
-              </span>
-            </Link>
-          ))}
+          {modules.map((mod) => {
+            const visual = coverForModuleId(mod.id)
+            const tone = FEATURE_TONE[mod.id] ?? 'teal'
+            return (
+              <Link key={mod.id} to={mod.to} className={`home-feature-card tone-${tone}`}>
+                <div className="home-feature-media">
+                  {visual ? (
+                    <img src={visual.src} alt={visual.alt} loading="lazy" decoding="async" />
+                  ) : null}
+                  <span className="home-feature-shade" aria-hidden />
+                </div>
+                <div className="home-feature-copy">
+                  <h3>{mod.title}</h3>
+                  <p>{mod.description}</p>
+                </div>
+                <span className="home-feature-go" aria-hidden>
+                  →
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
