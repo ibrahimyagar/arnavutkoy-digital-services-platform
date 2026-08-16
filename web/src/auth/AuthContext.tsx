@@ -11,6 +11,7 @@ import {
   login as apiLogin,
   logout as apiLogout,
 } from '../lib/api'
+import { markWelcome } from '../components/auth/AuthShell'
 
 type AuthState = {
   fullName: string
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId: auth.userId,
       roles: auth.roles,
     })
+    markWelcome(auth.fullName)
   }, [])
 
   const logout = useCallback(async () => {

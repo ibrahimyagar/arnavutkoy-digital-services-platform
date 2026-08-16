@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { PageHeader } from '../components/ui/PageChrome'
+import {
+  AuthShell,
+  friendlyAuthError,
+  loadRememberedEmail,
+  saveRememberedEmail,
+} from '../components/auth/AuthShell'
 import { safeReturnPath } from '../lib/returnUrl'
 
 export function LoginPage() {
@@ -9,8 +14,10 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const next = safeReturnPath(params.get('next'))
-  const [email, setEmail] = useState('vatandas@demo.arnavutkoy.local')
-  const [password, setPassword] = useState('Demo!Citizen123')
+  const [email, setEmail] = useState(() => loadRememberedEmail())
+  const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(() => Boolean(loadRememberedEmail()))
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -20,68 +27,88 @@ export function LoginPage() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
+    if (busy) return
     setBusy(true)
     setError(null)
     try {
       await login(email.trim(), password)
-      navigate(next)
+      saveRememberedEmail(email.trim(), remember)
+      navigate(next, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Giriş başarısız.')
+      setError(friendlyAuthError(err instanceof Error ? err.message : null))
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="container page" style={{ maxWidth: 460 }}>
-      <div className="panel stack">
-        <PageHeader title="Hesap girişi" description="E-posta ve şifrenizle giriş yapın." />
-
-        <div className="notice">
-          Vatandaş: <code>vatandas@demo.arnavutkoy.local</code> / <code>Demo!Citizen123</code>
-          <br />
-          Görevli: <code>gorevli@demo.arnavutkoy.local</code> / <code>Demo!Officer123</code>
-          <br />
-          Yönetici: <code>yonetici@demo.arnavutkoy.local</code> / <code>Demo!Admin123</code>
-        </div>
-
-        {error ? <div className="error-box">{error}</div> : null}
-
-        <form className="stack" onSubmit={(e) => void onSubmit(e)}>
-          <div className="field">
-            <label htmlFor="email">E-posta</label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="password">Şifre</label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button className="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? 'Giriş yapılıyor…' : 'Giriş yap'}
-          </button>
-        </form>
-
-        <p className="muted">
+    <AuthShell
+      title="Tekrar hoş geldiniz"
+      lead="Arnavutköy360 hesabınızla güvenli şekilde giriş yapın."
+      footer={
+        <>
           Hesabınız yok mu?{' '}
-          <Link to={next === '/panel' ? '/kayit' : `/kayit?next=${encodeURIComponent(next)}`}>Kayıt olun</Link>
+          <Link to={next === '/panel' ? '/kayit' : `/kayit?next=${encodeURIComponent(next)}`}>
+            Yeni hesap oluştur
+          </Link>
           {' · '}
           <Link to="/">Ana sayfa</Link>
+        </>
+      }
+    >
+      {error ? (
+        <p className="ax-error" role="alert">
+          {error}
         </p>
-      </div>
-    </div>
+      ) : null}
+
+      <form className="ax-form" onSubmit={(event) => void onSubmit(event)} noValidate>
+        <div className="field">
+          <label htmlFor="ax-email">E-posta</label>
+          <input
+            id="ax-email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="ax-password">Şifre</label>
+          <div className="ax-pass">
+            <input
+              id="ax-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+              onClick={() => setShowPassword((value) => !value)}
+            >
+              {showPassword ? 'Gizle' : 'Göster'}
+            </button>
+          </div>
+        </div>
+        <div className="ax-row">
+          <label className="ax-check">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+            />
+            Beni hatırla
+          </label>
+          <Link to="/sifremi-unuttum">Şifremi unuttum</Link>
+        </div>
+        <button className="btn btn-primary" type="submit" disabled={busy}>
+          {busy ? 'Giriş yapılıyor…' : 'Giriş yap'}
+        </button>
+      </form>
+    </AuthShell>
   )
 }

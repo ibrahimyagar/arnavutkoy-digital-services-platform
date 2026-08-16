@@ -8,7 +8,10 @@ import { AccountMenu } from './AccountMenu'
 import { BrandLogo } from './BrandLogo'
 import { getMegaMenuLayout, MegaMenu } from './MegaMenu'
 import { SiteFooter } from './SiteFooter'
+import { consumeWelcome } from './auth/AuthShell'
+import { loginPath } from '../lib/returnUrl'
 import './shell.css'
+import '../pages/auth.css'
 
 export function AppShell() {
   const { user, isAuthenticated } = useAuth()
@@ -18,9 +21,16 @@ export function AppShell() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [alertCount, setAlertCount] = useState(0)
+  const [welcome, setWelcome] = useState<string | null>(null)
   const menuId = useId()
   const onPanel = location.pathname === '/panel'
   const onHome = location.pathname === '/'
+  const authNext =
+    location.pathname.startsWith('/giris') ||
+    location.pathname.startsWith('/kayit') ||
+    location.pathname.startsWith('/sifremi-unuttum')
+      ? '/panel'
+      : `${location.pathname}${location.search}` || '/panel'
 
   const sections = getSidebarSections({
     isAuthenticated,
@@ -44,6 +54,19 @@ export function AppShell() {
   useEffect(() => {
     setMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setWelcome(null)
+      return
+    }
+    const name = consumeWelcome()
+    if (!name) return
+    const first = name.trim().split(/\s+/)[0] || 'vatandaş'
+    setWelcome(first)
+    const timer = window.setTimeout(() => setWelcome(null), 4200)
+    return () => window.clearTimeout(timer)
+  }, [isAuthenticated, location.pathname])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -169,10 +192,10 @@ export function AppShell() {
                   </>
                 ) : (
                   <>
-                    <Link className="btn btn-ghost shell-btn-register" to="/kayit">
+                    <Link className="btn btn-ghost shell-btn-register" to={`/kayit?next=${encodeURIComponent(authNext)}`}>
                       Kayıt ol
                     </Link>
-                    <Link className="btn btn-primary" to="/giris">
+                    <Link className="btn btn-primary" to={loginPath(authNext)}>
                       Giriş yap
                     </Link>
                   </>
@@ -234,6 +257,12 @@ export function AppShell() {
         <main className={`shell-main${onHome ? ' shell-main--home' : ''}`}>
           <Outlet />
         </main>
+
+        {welcome ? (
+          <div className="ax-toast" role="status">
+            Hoş geldiniz, {welcome}.
+          </div>
+        ) : null}
 
         <SiteFooter />
       </div>

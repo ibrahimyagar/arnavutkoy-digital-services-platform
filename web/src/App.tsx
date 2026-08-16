@@ -14,6 +14,7 @@ import { HomePage } from './pages/HomePage'
 import { HrDepartmentPage, HrDirectoryPage } from './pages/HrDirectoryPage'
 import { HrManagePage } from './pages/HrManagePage'
 import { LoginPage } from './pages/LoginPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
 import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
 import { AnnouncementDetailPage, AnnouncementsPage } from './pages/PublicPages'
@@ -52,6 +53,7 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="giris" element={<LoginPage />} />
             <Route path="kayit" element={<RegisterPage />} />
+            <Route path="sifremi-unuttum" element={<ForgotPasswordPage />} />
             <Route path="duyurular" element={<AnnouncementsPage />} />
             <Route path="duyurular/:id" element={<AnnouncementDetailPage />} />
             <Route path="duyuru-yonetimi" element={<AnnouncementsManagePage />} />
@@ -71,10 +73,10 @@ export default function App() {
             <Route path="e-belediye" element={<EBelediyeHubPage />} />
             <Route path="iletisim" element={<ContactPage />} />
             <Route path="basvuru-takip" element={<TrackingPage />} />
-            <Route path="basvurular" element={<DocumentApplicationsPage />} />
-            <Route path="nikah" element={<MarriagePage />} />
+            <Route path="basvurular" element={<RequireAuth><DocumentApplicationsPage /></RequireAuth>} />
+            <Route path="nikah" element={<RequireAuth><MarriagePage /></RequireAuth>} />
             <Route path="imar" element={<ZoningPage />} />
-            <Route path="spor-randevu" element={<SportsAppointmentPage />} />
+            <Route path="spor-randevu" element={<RequireAuth><SportsAppointmentPage /></RequireAuth>} />
             <Route path="hatlar" element={<BusLinesPage />} />
             <Route path="hatlar/:id" element={<BusLineDetailPage />} />
             <Route path="ulasim-agi" element={<TransportNetworkPage />} />
