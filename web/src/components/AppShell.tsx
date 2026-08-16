@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { apiFetch, type CitizenRequestSummary, type Debt, type Paginated } from '../lib/api'
 import { getSidebarSections } from '../lib/modules'
@@ -9,6 +9,7 @@ import { BrandLogo } from './BrandLogo'
 import { getMegaMenuLayout, MegaMenu } from './MegaMenu'
 import { SiteFooter } from './SiteFooter'
 import { consumeWelcome } from './auth/AuthShell'
+import { RouteTransitionOutlet } from './ScrollToTop'
 import { loginPath } from '../lib/returnUrl'
 import './shell.css'
 import '../pages/auth.css'
@@ -255,7 +256,7 @@ export function AppShell() {
         ) : null}
 
         <main className={`shell-main${onHome ? ' shell-main--home' : ''}`}>
-          <Outlet />
+          <RouteTransitionOutlet />
         </main>
 
         {welcome ? (

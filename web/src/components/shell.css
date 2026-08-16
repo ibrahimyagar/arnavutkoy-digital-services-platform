@@ -502,6 +502,27 @@
   min-height: 0;
 }
 
+.shell-route-enter {
+  animation: shell-route-enter 180ms ease-out;
+}
+
+@keyframes shell-route-enter {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-route-enter {
+    animation: none;
+  }
+}
+
 .shell-main:not(.shell-main--home) {
   background:
     radial-gradient(ellipse 80% 50% at 10% -10%, rgba(30, 200, 192, 0.07), transparent 55%),
