@@ -67,9 +67,9 @@ public sealed class GetMyDebtsQueryHandler(
             .Where(debt => debt.PaymentId.HasValue)
             .Select(debt => debt.PaymentId!.Value)
             .Distinct()
-            .ToArray();
+            .ToList();
 
-        if (paymentIds.Length == 0)
+        if (paymentIds.Count == 0)
         {
             return new Dictionary<Guid, Payment>();
         }

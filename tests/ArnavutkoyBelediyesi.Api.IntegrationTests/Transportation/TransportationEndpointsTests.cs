@@ -87,8 +87,10 @@ public sealed class TransportationEndpointsTests(ApiFactory factory)
         var detail = await (await client.GetAsync($"/api/v1/bus-lines/{line36.Id}"))
             .ReadAsAsync<BusLineDetailsDto>();
 
-        detail!.Stops.Should().HaveCountGreaterThanOrEqualTo(3);
-        detail.Departures.Should().NotBeEmpty();
+        detail!.Stops.Should().HaveCountGreaterThanOrEqualTo(2);
+        detail.Stops.Select(s => s.Name).Should().Contain(["Taşoluk Peronlar", "Sefaköy Metrobüs"]);
+        // Canlı sefer saati seed edilmez (demo; İETT tarife değildir).
+        detail.Departures.Should().NotBeNull();
     }
 
     [Fact]

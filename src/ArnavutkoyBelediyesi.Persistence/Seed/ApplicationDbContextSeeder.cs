@@ -262,7 +262,8 @@ public static class ApplicationDbContextSeeder
 
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var officialNames = ArnavutkoyNeighborhoods.Select(n => n.Name).ToArray();
+        // List (not array): array.Contains binds to MemoryExtensions(ReadOnlySpan) on newer compilers and breaks EF.
+        var officialNames = ArnavutkoyNeighborhoods.Select(n => n.Name).ToList();
         await context.Neighborhoods
             .IgnoreQueryFilters()
             .Where(n => n.DistrictId == district.Id && !n.IsDeleted && !officialNames.Contains(n.Name))
@@ -964,7 +965,7 @@ public static class ApplicationDbContextSeeder
             ("144M", "Deliklikaya - Mahmutbey Metro", BusRouteBody("Deliklikaya → Mahmutbey Metro", "Deliklikaya", "Normal", "Tek biletli", 78), ["Deliklikaya", "Mahmutbey Metro"]),
         };
 
-        string[] retired = ["78YB", "AK1", "336T", "336MC", "36TC"];
+        var retired = new List<string> { "78YB", "AK1", "336T", "336MC", "36TC" };
         await context.BusLines
             .Where(line => retired.Contains(line.Code))
             .ExecuteUpdateAsync(
