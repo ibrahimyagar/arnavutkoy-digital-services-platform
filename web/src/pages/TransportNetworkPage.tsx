@@ -1,192 +1,259 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PublicPage, PublicRelated } from '../components/ui/PublicPage'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { PublicPage } from '../components/ui/PublicPage'
+import { TransportContinue, TransportNav } from '../components/transport/TransportChrome'
+import { TransportMap } from '../components/transport/TransportMap'
 import { apiFetch, type BusLine } from '../lib/api'
-import { COVERS, RELATED } from '../lib/contentVisuals'
-import { moduleVisual, type ModuleTile } from '../lib/modules'
-import '../styles/module-tiles.css'
+import {
+  CATALOG_CHECKED,
+  parseLineSummary,
+  presentPlaces,
+  searchLine,
+  TRANSFER_POINTS,
+} from '../lib/busLineVisuals'
+import { useAuth } from '../auth/AuthContext'
+import { loginPath } from '../lib/returnUrl'
+import './bus-lines.css'
 
-const HUB_TILES: ModuleTile[] = [
-  {
-    id: 'bus-lines',
-    title: 'Hat listesi',
-    description: 'Güzergâh, durak ve ücret',
-    to: '/hatlar',
-    requiresAuth: false,
-    audience: 'public',
-    visual: 'transit',
-  },
-  {
-    id: 'transport',
-    title: 'Kartlarım',
-    description: 'Kart çıkar, bakiye yükle',
-    to: '/ulasim',
-    requiresAuth: true,
-    audience: 'citizen',
-    visual: 'card',
-  },
-  {
-    id: 'simulator',
-    title: 'Biniş simülasyonu',
-    description: 'Hat → kart → bin',
-    to: '/binis',
-    requiresAuth: true,
-    audience: 'citizen',
-    visual: 'board',
-  },
-  {
-    id: 'cash-desk',
-    title: 'Dijital vezne',
-    description: 'Borç ve bakiye hub',
-    to: '/vezne',
-    requiresAuth: true,
-    audience: 'citizen',
-    visual: 'cash',
-  },
-]
+const NOTICE =
+  'Bu proje portföy demosudur. Canlı İETT / İBB API yoktur. Hat adları resmi RouteDetail sayfalarıyla yoklanmıştır; sefer saati ve İstanbulkart tutarı bu sitede tutulmaz.'
 
-function money(value: number) {
-  return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
-}
-
-/** Referans `transport.php` hub: alt modül kartları + hat tablosu. */
 export function TransportNetworkPage() {
-  const [lines, setLines] = useState<BusLine[]>([])
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { isAuthenticated } = useAuth()
+  const [items, setItems] = useState<BusLine[]>([])
   const [q, setQ] = useState('')
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
-    void apiFetch<BusLine[]>('/api/v1/bus-lines')
-      .then(setLines)
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Hatlar yüklenemedi.')
-      })
-      .finally(() => setLoading(false))
+    let cancelled = false
+    void (async () => {
+      try {
+        const lines = await apiFetch<BusLine[]>('/api/v1/bus-lines')
+        if (!cancelled) setItems(lines)
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Ulaşım verilerine ulaşılamıyor.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
+    if (location.hash !== '#harita' || loading) return
+    document.getElementById('harita')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [location.hash, loading])
+
+  const places = useMemo(() => presentPlaces(items), [items])
+  const suggestions = useMemo(() => {
+    const set = new Set(places)
+    for (const point of TRANSFER_POINTS) set.add(point.label)
+    return [...set].sort((a, b) => a.localeCompare(b, 'tr'))
+  }, [places])
+
+  const preview = useMemo(() => {
     const needle = q.trim().toLocaleLowerCase('tr-TR')
-    const list = [...lines].sort((a, b) => a.code.localeCompare(b.code, 'tr'))
-    if (!needle) return list
-    return list.filter((line) =>
-      `${line.code} ${line.name} ${line.routeSummary}`.toLocaleLowerCase('tr-TR').includes(needle),
-    )
-  }, [lines, q])
+    return items
+      .filter((line) => {
+        if (from && !searchLine(line, from.toLocaleLowerCase('tr-TR'))) return false
+        if (to && !searchLine(line, to.toLocaleLowerCase('tr-TR'))) return false
+        return searchLine(line, needle)
+      })
+      .slice(0, 5)
+  }, [items, q, from, to])
+
+  const knownKind = items.filter((line) => parseLineSummary(line.routeSummary).kind).length
+
+  function plan(event: FormEvent) {
+    event.preventDefault()
+    const params = new URLSearchParams()
+    if (q.trim()) params.set('q', q.trim())
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
+    navigate(`/hatlar?${params.toString()}`)
+  }
 
   return (
-    <PublicPage
-      eyebrow="Ulaşım"
-      title="Ulaşım ağı"
-      lead="Hatlar, kart, biniş ve vezne tek çatıda — demo hub."
-      cover={COVERS.projects}
-    >
-      <div className="module-grid">
-        {HUB_TILES.map((mod) => {
-          const visual = moduleVisual(mod)
-          return (
-            <Link key={mod.id} to={mod.to} className="module-tile">
-              <span className={`module-visual module-visual--${visual}`} aria-hidden>
-                <span className="module-visual-label">{mod.title}</span>
-              </span>
-              <span className={`module-badge ${mod.requiresAuth ? 'is-auth' : 'is-public'}`}>
-                {mod.requiresAuth ? 'Üyelik gerekir' : 'Üyeliksiz'}
-              </span>
-              <h3>{mod.title}</h3>
-              <p>{mod.description}</p>
-            </Link>
-          )
-        })}
-      </div>
+    <PublicPage immersive className="pub--wide" title="Ulaşım merkezi">
+      <div className="tx">
+        <TransportNav />
+        <header className="tx-hero">
+          <p className="tx-kicker">Arnavutköy ulaşım merkezi</p>
+          <h1>Arnavutköy’de ulaşım artık tek ekranda.</h1>
+          <p>
+            Hatları keşfedin, güzergâh uçlarını inceleyin, kartınızı yönetin. Saat ve ücret canlı İETT verisi
+            değildir.
+          </p>
+          <form className="tx-plan" onSubmit={plan}>
+            <label>
+              Ara
+              <input
+                value={q}
+                onChange={(event) => setQ(event.target.value)}
+                placeholder="336, Hadımköy, havalimanı…"
+                list="tx-places"
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              Nereden?
+              <input
+                value={from}
+                onChange={(event) => setFrom(event.target.value)}
+                placeholder="Arnavutköy, Taşoluk…"
+                list="tx-places"
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              Nereye?
+              <input
+                value={to}
+                onChange={(event) => setTo(event.target.value)}
+                placeholder="Eminönü, İstanbul Havalimanı…"
+                list="tx-places"
+                autoComplete="off"
+              />
+            </label>
+            <button className="btn btn-primary" type="submit">
+              Rotayı bul
+            </button>
+            <datalist id="tx-places">
+              {suggestions.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+          </form>
+          <p className="tx-muted">
+            Eşleşme resmi hat adındaki uçlara göredir. Listede yoksa güzergâh uydurulmaz.
+          </p>
+        </header>
 
-      {error ? <div className="error-box">{error}</div> : null}
+        {error ? (
+          <div className="error-box">
+            {error}{' '}
+            <button type="button" className="btn btn-ghost" onClick={() => window.location.reload()}>
+              Tekrar dene
+            </button>
+          </div>
+        ) : null}
 
-      {loading ? (
-        <div className="stats-strip stats-strip--skeleton" aria-busy="true">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index}>
-              <span className="skeleton-line skeleton-line--sm" />
-              <span className="skeleton-line skeleton-line--lg" />
-            </div>
-          ))}
+        <div className="tx-ruler" aria-label="Katalog özeti">
+          <p>
+            <strong>{loading ? '—' : items.length}</strong>
+            <span>Aktif hat</span>
+          </p>
+          <p>
+            <strong>{loading ? '—' : places.length}</strong>
+            <span>Güzergâh ucu</span>
+          </p>
+          <p>
+            <strong>{loading ? '—' : knownKind}</strong>
+            <span>İETT tipi kayıtlı</span>
+          </p>
+          <p>
+            <strong>Demo</strong>
+            <span>Canlı sefer yok</span>
+          </p>
         </div>
-      ) : (
-        <div className="stats-strip" aria-label="Ağ özeti">
-          <div>
-            <span className="muted">Hat</span>
-            <strong>{lines.length}</strong>
-          </div>
-          <div>
-            <span className="muted">Listelenen</span>
-            <strong>{filtered.length}</strong>
-          </div>
-          <div>
-            <span className="muted">Ort. ücret</span>
-            <strong>
-              {lines.length
-                ? money(lines.reduce((sum, line) => sum + line.baseFare, 0) / lines.length)
-                : '—'}
-            </strong>
-          </div>
-          <div>
-            <span className="muted">En düşük</span>
-            <strong>
-              {lines.length ? money(Math.min(...lines.map((line) => line.baseFare))) : '—'}
-            </strong>
-          </div>
-        </div>
-      )}
 
-      <div className="field">
-        <label htmlFor="net-search">Hat ara</label>
-        <input
-          id="net-search"
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="36AS, Durusu, Hadımköy…"
-        />
-      </div>
-
-      <div className="table-wrap">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Hat</th>
-              <th>Güzergâh</th>
-              <th>Ücret</th>
-              <th>Detay</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((line) => (
-              <tr key={line.id}>
-                <td>
-                  <strong>
-                    {line.code} — {line.name}
-                  </strong>
-                </td>
-                <td>{line.routeSummary || '—'}</td>
-                <td>{money(line.baseFare)}</td>
-                <td>
-                  <Link className="btn btn-ghost" to={`/hatlar/${line.id}`}>
-                    Saatler
-                  </Link>
-                </td>
-              </tr>
+        <section className="tx-block" aria-labelledby="tx-hubs-title">
+          <header className="tx-head">
+            <p className="tx-kicker">Aktarma</p>
+            <h2 id="tx-hubs-title">Önemli uçlar</h2>
+          </header>
+          <div className="tx-hubs">
+            {TRANSFER_POINTS.map((point) => (
+              <Link key={point.label} to={`/hatlar?to=${encodeURIComponent(point.label)}`}>
+                <strong>{point.label}</strong>
+                <span>Örnek hat {point.hint}</span>
+              </Link>
             ))}
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="muted">
-                  Bu aramada hat yok.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+          </div>
+        </section>
+
+        <TransportMap title="Aktarma ve önemli noktalar" />
+
+        <section className="tx-block" aria-labelledby="tx-preview-title">
+          <header className="tx-head">
+            <p className="tx-kicker">Önizleme</p>
+            <h2 id="tx-preview-title">{q || from || to ? 'Eşleşen hatlar' : 'Katalogdan beş hat'}</h2>
+          </header>
+          {loading ? <p className="tx-muted">Hatlar yükleniyor…</p> : null}
+          {!loading && preview.length === 0 ? (
+            <div className="tx-empty">
+              <strong>Aramanızla eşleşen hat bulunamadı.</strong>
+              <p>336, Hadımköy veya İstanbul Havalimanı yazın.</p>
+            </div>
+          ) : (
+            <ul className="tx-lines">
+              {preview.map((line) => {
+                const parsed = parseLineSummary(line.routeSummary)
+                return (
+                  <li key={line.id}>
+                    <Link to={`/hatlar/${line.id}`}>
+                      <span className="tx-headsign">{line.code}</span>
+                      <span>
+                        <strong>{line.name}</strong>
+                        <em>{parsed.route || line.name}</em>
+                      </span>
+                      <span className="tx-go">Güzergahı gör</span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          <p>
+            <Link className="btn btn-ghost" to="/hatlar">
+              Tüm katalog →
+            </Link>
+          </p>
+        </section>
+
+        <section className="tx-desk" aria-labelledby="tx-ops-title">
+          <header className="tx-head">
+            <p className="tx-kicker">İşlem</p>
+            <h2 id="tx-ops-title">Kart, biniş, vezne</h2>
+          </header>
+          <ol>
+            <li>
+              <strong>Kartlarım</strong>
+              <span>Demo bakiye yükleyin. Giriş gerekir.</span>
+              <Link to={isAuthenticated ? '/ulasim' : loginPath('/ulasim')}>Aç</Link>
+            </li>
+            <li>
+              <strong>Biniş</strong>
+              <span>Simülasyon ücreti kart bakiyesinden düşer; İETT tarife değildir.</span>
+              <Link to={isAuthenticated ? '/binis' : loginPath('/binis')}>Aç</Link>
+            </li>
+            <li>
+              <strong>Vezne</strong>
+              <span>Borç ve kart yükleme aynı ödeme masasından.</span>
+              <Link to={isAuthenticated ? '/vezne' : loginPath('/vezne')}>Aç</Link>
+            </li>
+          </ol>
+        </section>
+
+        <aside className="tx-notice">
+          <p className="tx-kicker">Kaynak</p>
+          <h2>Veri nereden geliyor?</h2>
+          <p>
+            Kontrol: {CATALOG_CHECKED}. Harita geometrisi ve tam durak sırası bu demoda yoktur; İETT sayfası
+            esastır.
+          </p>
+        </aside>
+
+        <TransportContinue exclude="/ulasim-agi" />
+        <p className="tx-note">{NOTICE}</p>
       </div>
-      <PublicRelated items={RELATED.transport} />
     </PublicPage>
   )
 }

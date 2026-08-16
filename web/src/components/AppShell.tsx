@@ -4,13 +4,14 @@ import { useAuth } from '../auth/AuthContext'
 import { apiFetch, type CitizenRequestSummary, type Debt, type Paginated } from '../lib/api'
 import { getSidebarSections } from '../lib/modules'
 import { isAdmin, isStaff } from '../lib/roles'
+import { AccountMenu } from './AccountMenu'
 import { BrandLogo } from './BrandLogo'
 import { getMegaMenuLayout, MegaMenu } from './MegaMenu'
 import { SiteFooter } from './SiteFooter'
 import './shell.css'
 
 export function AppShell() {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const staff = isStaff(user?.roles)
   const admin = isAdmin(user?.roles)
   const citizen = isAuthenticated && !staff
@@ -149,12 +150,12 @@ export function AppShell() {
               <div className="shell-actions">
                 {isAuthenticated ? (
                   <>
-                    <span className="shell-user">{user?.fullName}</span>
+                    <AccountMenu />
                     <Link
                       className={`shell-notify${alertCount > 0 ? ' has-alerts' : ''}`}
-                      to="/panel"
+                      to={citizen ? '/panel#bildirimler' : '/panel'}
                       aria-label={
-                        alertCount > 0 ? `${alertCount} dikkat gerektiren kayıt` : 'Panele git'
+                        alertCount > 0 ? `${alertCount} dikkat gerektiren kayıt` : 'Bildirimler'
                       }
                     >
                       <span className="shell-notify-dot" aria-hidden />
@@ -165,9 +166,6 @@ export function AppShell() {
                         Panel
                       </Link>
                     ) : null}
-                    <button type="button" className="btn btn-ghost" onClick={() => void logout()}>
-                      Çıkış
-                    </button>
                   </>
                 ) : (
                   <>

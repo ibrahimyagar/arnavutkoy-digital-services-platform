@@ -170,6 +170,34 @@ public sealed class BoardBusCommandHandler(IUnitOfWork unitOfWork, IDateTimeProv
     }
 }
 
+public sealed record DeactivateTransportCardCommand(Guid CardId) : IRequest<Result>;
+
+public sealed class DeactivateTransportCardCommandValidator : AbstractValidator<DeactivateTransportCardCommand>
+{
+    public DeactivateTransportCardCommandValidator() => RuleFor(x => x.CardId).NotEmpty();
+}
+
+public sealed class DeactivateTransportCardCommandHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<DeactivateTransportCardCommand, Result>
+{
+    public async Task<Result> Handle(DeactivateTransportCardCommand request, CancellationToken cancellationToken)
+    {
+        var card = await unitOfWork.Repository<TransportCard>()
+            .GetByIdAsync(request.CardId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (card is null)
+        {
+            return Result.Failure("Kart bulunamadı.");
+        }
+
+        card.Deactivate();
+        unitOfWork.Repository<TransportCard>().Update(card);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return Result.Success();
+    }
+}
+
 public sealed record AddBusLineStopCommand(Guid BusLineId, int Sequence, string Name) : IRequest<Result<Guid>>;
 
 public sealed class AddBusLineStopCommandValidator : AbstractValidator<AddBusLineStopCommand>

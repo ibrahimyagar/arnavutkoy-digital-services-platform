@@ -4,6 +4,8 @@ namespace ArnavutkoyBelediyesi.Application.Features.Payments.Dtos;
 
 /// <summary>
 /// Bir borcun, güncel gecikme faizi dahil hesaplanmış tutarlarla birlikte API görünümü.
+/// Ödenmiş kayıtlarda <see cref="PaidAmount"/> ödeme anındaki tahsilattır; açık borç
+/// toplamına dahil edilmez.
 /// </summary>
 public sealed record DebtDto(
     Guid Id,
@@ -14,7 +16,12 @@ public sealed record DebtDto(
     decimal TotalPayable,
     DateTime DueDateUtc,
     DebtStatus Status,
-    DateTime? PaidAtUtc);
+    DateTime? PaidAtUtc,
+    DateTime CreatedAtUtc,
+    int OverdueDays,
+    Guid? PaymentId,
+    decimal? PaidAmount,
+    string? MaskedCardNumber);
 
 /// <summary>
 /// Bir ödeme kaydının API görünümü.

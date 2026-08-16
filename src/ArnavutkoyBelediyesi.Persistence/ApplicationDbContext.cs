@@ -67,6 +67,8 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
 
     public DbSet<PortalContent> PortalContents => Set<PortalContent>();
 
+    public DbSet<EventRegistration> EventRegistrations => Set<EventRegistration>();
+
     public DbSet<SportsFacility> SportsFacilities => Set<SportsFacility>();
 
     public DbSet<SportsAppointment> SportsAppointments => Set<SportsAppointment>();

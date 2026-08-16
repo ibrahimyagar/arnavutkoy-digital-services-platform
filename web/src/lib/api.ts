@@ -8,6 +8,18 @@ export type AuthResult = {
   refreshTokenExpiresAtUtc: string
 }
 
+export type UserProfile = {
+  userId: string
+  fullName: string
+  email: string
+  nationalId: string
+  phoneNumber: string
+  birthDate: string | null
+  gender: string
+  roles: string[]
+  createdAtUtc: string
+}
+
 export type Paginated<T> = {
   items: T[]
   totalCount: number
@@ -26,6 +38,11 @@ export type Debt = {
   dueDateUtc: string
   status: string
   paidAtUtc: string | null
+  createdAtUtc?: string
+  overdueDays?: number
+  paymentId?: string | null
+  paidAmount?: number | null
+  maskedCardNumber?: string | null
 }
 
 export type CitizenRequestSummary = {
@@ -59,6 +76,29 @@ export type PortalContent = {
   endsAtUtc: string | null
   sortOrder: number
   createdAtUtc: string
+}
+
+export type EventRegistration = {
+  id: string
+  eventId: string
+  eventTitle: string
+  eventLocation: string | null
+  eventCategory: string | null
+  startsAtUtc: string | null
+  endsAtUtc: string | null
+  status: string
+  registeredAtUtc: string
+  cancelledAtUtc: string | null
+}
+
+export type EventRegistrationStatus = {
+  eventId: string
+  isRegistered: boolean
+  registrationId: string | null
+  status: string | null
+  registeredCount: number
+  quota: number | null
+  remaining: number | null
 }
 
 export type SportsFacility = {
@@ -116,6 +156,23 @@ export type TrackingLookup = {
   title: string
   whenUtc: string | null
   detail: string | null
+}
+
+export type ContactReceipt = {
+  id: string
+  trackingCode: string
+  subject: string
+  status: string
+  createdAtUtc: string
+}
+
+export type ContactMessageSummary = {
+  id: string
+  trackingCode: string
+  subject: string
+  status: string
+  preferredReply: string
+  createdAtUtc: string
 }
 
 export type ZoningParcel = {

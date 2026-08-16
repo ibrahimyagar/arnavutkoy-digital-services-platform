@@ -1,11 +1,14 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { apiFetch } from '../lib/api'
+import { safeReturnPath } from '../lib/returnUrl'
 
 export function RegisterPage() {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const next = safeReturnPath(params.get('next'))
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -19,7 +22,7 @@ export function RegisterPage() {
   const [busy, setBusy] = useState(false)
 
   if (isAuthenticated) {
-    return <Navigate to="/panel" replace />
+    return <Navigate to={next} replace />
   }
 
   async function onSubmit(event: FormEvent) {
@@ -53,7 +56,7 @@ export function RegisterPage() {
         }),
       })
       await login(email.trim(), password)
-      navigate('/panel')
+      navigate(next)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Kayıt başarısız.')
     } finally {
@@ -193,7 +196,8 @@ export function RegisterPage() {
         </form>
 
         <p className="muted">
-          Zaten hesabınız var mı? <Link to="/giris">Giriş yapın</Link>
+          Zaten hesabınız var mı?{' '}
+          <Link to={next === '/panel' ? '/giris' : `/giris?next=${encodeURIComponent(next)}`}>Giriş yapın</Link>
         </p>
       </div>
     </div>

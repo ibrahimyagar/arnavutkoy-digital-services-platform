@@ -18,6 +18,7 @@ const COLUMNS = [
       { label: 'Muhtarlıklar', to: '/muhtarliklar' },
       { label: 'Kültür & sanat', to: '/kultur' },
       { label: 'Ulaşım ağı', to: '/ulasim-agi' },
+      { label: 'Hatlar', to: '/hatlar' },
       { label: 'Hizmet rehberi', to: '/hizmet-rehberi' },
     ],
   },

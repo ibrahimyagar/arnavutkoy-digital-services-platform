@@ -2,15 +2,22 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { HomeHeroLanding } from '../components/home/HomeHeroLanding'
-import { HomeFeatureCards, getHomeFeatureModules } from '../components/home/HomeSections'
+import { HomeFeatureCards, HomeAnnouncements, getHomeFeatureModules } from '../components/home/HomeSections'
 import { HomeStories } from '../components/home/HomeStories'
 import {
   apiFetch,
+  type Announcement,
   type CitizenRequestSummary,
   type Debt,
   type Paginated,
   type SocialAssistanceApplication,
 } from '../lib/api'
+import {
+  classifyAnnouncement,
+  excerpt,
+  formatAnnouncementWhen,
+  parseAnnouncementContent,
+} from '../lib/announcementVisuals'
 import { isAdmin, isStaff } from '../lib/roles'
 import './home.css'
 import '../components/home/home-sections.css'
@@ -21,6 +28,17 @@ export function HomePage() {
   const admin = isAdmin(user?.roles)
   const [opsLine, setOpsLine] = useState<string | null>(null)
   const [opsLoading, setOpsLoading] = useState(false)
+  const [homeAnnouncements, setHomeAnnouncements] = useState<
+    {
+      id: string
+      title: string
+      dateLabel: string
+      to: string
+      category: string
+      image: string
+      excerpt: string
+    }[]
+  >([])
 
   const featureModules = getHomeFeatureModules()
 
@@ -87,6 +105,36 @@ export function HomePage() {
     }
   }, [isAuthenticated, staff, admin])
 
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const page = await apiFetch<Paginated<Announcement>>('/api/v1/announcements?pageSize=3')
+        if (cancelled) return
+        setHomeAnnouncements(
+          page.items.map((item) => {
+            const category = classifyAnnouncement(item.title, item.content)
+            const parsed = parseAnnouncementContent(item.content)
+            return {
+              id: item.id,
+              title: item.title,
+              dateLabel: formatAnnouncementWhen(new Date(item.publishStartUtc ?? item.createdAtUtc)),
+              to: `/duyurular/${item.id}`,
+              category: category.label,
+              image: category.cover.src,
+              excerpt: excerpt(parsed.lead || item.content, 110),
+            }
+          }),
+        )
+      } catch {
+        if (!cancelled) setHomeAnnouncements([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   return (
     <div className="home home--landing">
       <HomeHeroLanding isAuthenticated={isAuthenticated} />
@@ -133,6 +181,8 @@ export function HomePage() {
         ) : null}
 
         <HomeStories />
+
+        <HomeAnnouncements items={homeAnnouncements} />
 
         <HomeFeatureCards modules={featureModules} />
 

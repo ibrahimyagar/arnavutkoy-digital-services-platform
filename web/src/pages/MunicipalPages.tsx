@@ -1,534 +1,54 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { EmptyState } from '../components/ui/PageChrome'
 import { PublicPage, PublicRelated, PublicSection } from '../components/ui/PublicPage'
 import {
   apiFetch,
   type DocumentApplication,
   type MarriageBooking,
   type MarriageSlot,
-  type Paginated,
-  type PortalContent,
   type SportsAppointment,
   type SportsFacility,
   type TrackingLookup,
   type ZoningFeeQuote,
   type ZoningParcel,
 } from '../lib/api'
-import { COVERS, coverForPortalKind, RELATED } from '../lib/contentVisuals'
+import { COVERS, RELATED } from '../lib/contentVisuals'
 
 function money(n: number) {
   return n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })
 }
 
-function PortalListPage({
-  kind,
-  title,
-  subtitle,
-  basePath,
-}: {
-  kind: string
-  title: string
-  subtitle: string
-  basePath: string
-}) {
-  const [items, setItems] = useState<PortalContent[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [q, setQ] = useState('')
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const page = await apiFetch<Paginated<PortalContent>>(
-          `/api/v1/portal?kind=${encodeURIComponent(kind)}&pageSize=50`,
-        )
-        setItems(page.items)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'İçerik yüklenemedi.')
-      }
-    })()
-  }, [kind])
-
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLocaleLowerCase('tr-TR')
-    if (!needle) return items
-    return items.filter(
-      (item) =>
-        item.title.toLocaleLowerCase('tr-TR').includes(needle) ||
-        item.summary.toLocaleLowerCase('tr-TR').includes(needle),
-    )
-  }, [items, q])
-
-  return (
-    <PublicPage title={title} lead={subtitle} cover={coverForPortalKind(kind)}>
-      <div className="field" style={{ maxWidth: 420 }}>
-        <label htmlFor={`q-${kind}`}>Ara</label>
-        <input
-          id={`q-${kind}`}
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Başlık veya özet"
-        />
-      </div>
-      {error ? <div className="error-box">{error}</div> : null}
-      <div className="pub-hub-grid">
-        {filtered.map((item) => (
-          <Link key={item.id} to={`${basePath}/${item.id}`}>
-            <strong>{item.title}</strong>
-            <span>
-              {item.category ?? kind}
-              {item.startsAtUtc
-                ? ` · ${new Date(item.startsAtUtc).toLocaleDateString('tr-TR')}`
-                : ''}
-              {item.summary ? ` — ${item.summary}` : ''}
-            </span>
-          </Link>
-        ))}
-      </div>
-      {filtered.length === 0 && !error ? (
-        <EmptyState title="Kayıt yok" description="Bu kategoride içerik bulunamadı." />
-      ) : null}
-      <PublicRelated items={RELATED.media} />
-    </PublicPage>
-  )
-}
-
-function PortalDetailPage({ fallbackTitle }: { fallbackTitle: string }) {
-  const { id } = useParams()
-  const [item, setItem] = useState<PortalContent | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!id) return
-    void (async () => {
-      try {
-        setItem(await apiFetch<PortalContent>(`/api/v1/portal/${id}`))
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Detay yüklenemedi.')
-      }
-    })()
-  }, [id])
-
-  if (error) return <div className="container page"><div className="error-box">{error}</div></div>
-  if (!item) return <div className="container page"><p className="muted">Yükleniyor…</p></div>
-
-  return (
-    <PublicPage
-      eyebrow={fallbackTitle}
-      title={item.title}
-      lead={item.summary || undefined}
-      cover={coverForPortalKind(item.kind)}
-    >
-      <p className="muted" style={{ margin: 0 }}>
-        {item.category}
-        {item.location ? ` · ${item.location}` : ''}
-      </p>
-      {item.startsAtUtc ? (
-        <p className="muted" style={{ margin: 0 }}>
-          {new Date(item.startsAtUtc).toLocaleString('tr-TR')}
-          {item.endsAtUtc ? ` — ${new Date(item.endsAtUtc).toLocaleString('tr-TR')}` : ''}
-        </p>
-      ) : null}
-      <PublicSection tone="soft">
-        <div className="pub-prose">{item.body}</div>
-      </PublicSection>
-      <PublicRelated items={RELATED.media} />
-    </PublicPage>
-  )
-}
-
-export function NewsPage() {
-  return (
-    <PortalListPage
-      kind="News"
-      title="Haberler"
-      subtitle="Güncel belediye haberleri — kurgusal demo içerik."
-      basePath="/haberler"
-    />
-  )
-}
-export function NewsDetailPage() {
-  return <PortalDetailPage fallbackTitle="Haber" />
-}
-
-export function EventsPage() {
-  return (
-    <PortalListPage
-      kind="Event"
-      title="Etkinlikler"
-      subtitle="Kültür, spor ve açık hava etkinlik takvimi."
-      basePath="/etkinlikler"
-    />
-  )
-}
-export function EventsDetailPage() {
-  return <PortalDetailPage fallbackTitle="Etkinlik" />
-}
-
-export function ProjectsPage() {
-  return (
-    <PortalListPage
-      kind="Project"
-      title="Faaliyetler"
-      subtitle="Park, yol ve sosyal proje özetleri."
-      basePath="/faaliyetler"
-    />
-  )
-}
-export function ProjectsDetailPage() {
-  return <PortalDetailPage fallbackTitle="Faaliyet" />
-}
-
-export function CulturePage() {
-  return (
-    <PortalListPage
-      kind="CultureVenue"
-      title="Kültür & sanat"
-      subtitle="Kültürel tesisler ve mekânlar."
-      basePath="/kultur"
-    />
-  )
-}
-export function CultureDetailPage() {
-  return <PortalDetailPage fallbackTitle="Kültür" />
-}
-
-export function ServiceGuidePage() {
-  return (
-    <PortalListPage
-      kind="ServiceGuide"
-      title="Hizmet rehberi"
-      subtitle="Sık kullanılan e-belediye işlemlerine kısa yol."
-      basePath="/hizmet-rehberi"
-    />
-  )
-}
-export function ServiceGuideDetailPage() {
-  return <PortalDetailPage fallbackTitle="Hizmet" />
-}
-
-const CORPORATE_FALLBACK = `Bu sayfa, portföy demosunda belediye organizasyonunun nasıl anlatılacağını gösterir. Gerçek Arnavutköy Belediyesi resmi içeriği değildir.
-
-Vatandaşın kurumsal yapıya, hizmet birimlerine ve mahalle iletişimine tek bakışta ulaşması hedeflenir. Aşağıdaki metinler kurgusal özetlerdir; üretim ortamında CMS veya portal API’sinden beslenir.`
-
-export function MayorPage() {
-  const [item, setItem] = useState<PortalContent | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    void (async () => {
-      try {
-        const page = await apiFetch<Paginated<PortalContent>>('/api/v1/portal?kind=Mayor&pageSize=1')
-        setItem(page.items[0] ?? null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Yüklenemedi.')
-      } finally {
-        setLoading(false)
-      }
-    })()
-  }, [])
-  return (
-    <PublicPage
-      eyebrow="Kurumsal"
-      title="Başkan"
-      lead="Kurumsal mesaj alanı — portföy demosudur, resmi makam değildir."
-      cover={COVERS.mayor}
-    >
-      {error ? <div className="error-box">{error}</div> : null}
-      <PublicSection title={item?.title ?? 'Başkanın mesajı'} tone="soft">
-        {loading && !item ? (
-          <p className="muted">Yükleniyor…</p>
-        ) : (
-          <div className="pub-prose">
-            {item?.body ??
-              'Demo mesaj: İlçemizde hizmetlerin dijitalleşmesi, şeffaf iletişim ve mahalle ölçeğinde erişilebilirlik önceliğimizdir. Bu metin yalnızca arayüz örneğidir.'}
-          </div>
-        )}
-      </PublicSection>
-      <div className="pub-split">
-        <article>
-          <h3>Öncelikler</h3>
-          <p>
-            Dijital başvuru, ulaşım bilgisi ve duyuru kanallarının tek portalda toplanması; vatandaşın
-            bekleme süresini kısaltmak.
-          </p>
-        </article>
-        <article>
-          <h3>İletişim</h3>
-          <p>
-            Talep ve öneriler için iletişim formu veya demo çağrı hattı kullanılabilir. Yanıt süreleri
-            örnek veridir.
-          </p>
-        </article>
-      </div>
-      <PublicRelated items={RELATED.municipal} />
-    </PublicPage>
-  )
-}
-
-export function CorporatePage() {
-  const [item, setItem] = useState<PortalContent | null>(null)
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    void (async () => {
-      try {
-        const page = await apiFetch<Paginated<PortalContent>>('/api/v1/portal?kind=Corporate&pageSize=1')
-        setItem(page.items[0] ?? null)
-      } catch {
-        /* fallback metin kullanılır */
-      } finally {
-        setLoading(false)
-      }
-    })()
-  }, [])
-
-  return (
-    <PublicPage
-      eyebrow="Belediye"
-      title="Kurumsal"
-      lead="Organizasyon özeti, hizmet birimleri ve mahalle iletişimi — kurgusal demo içerik."
-      cover={COVERS.guide}
-    >
-      <div className="pub-facts" aria-label="Özet göstergeler">
-        <div>
-          <strong>38+</strong>
-          <span>Mahalle / muhtarlık erişimi (demo)</span>
-        </div>
-        <div>
-          <strong>12</strong>
-          <span>Örnek hizmet birimi</span>
-        </div>
-        <div>
-          <strong>7/24</strong>
-          <span>Dijital başvuru ve takip (demo)</span>
-        </div>
-      </div>
-
-      <PublicSection title={item?.title ?? 'Kurumsal yapı'} tone="soft">
-        {loading && !item ? (
-          <p className="muted">Yükleniyor…</p>
-        ) : (
-          <div className="pub-prose">{item?.body ?? CORPORATE_FALLBACK}</div>
-        )}
-      </PublicSection>
-
-      <PublicSection title="Misyon ve yaklaşım">
-        <div className="pub-split">
-          <article>
-            <h3>Misyon</h3>
-            <p>
-              Vatandaşa güvenilir, hızlı ve anlaşılır dijital hizmet sunmak; kurumsal süreçleri tek
-              portalda görünür kılmak.
-            </p>
-          </article>
-          <article>
-            <h3>Yaklaşım</h3>
-            <p>
-              Şeffaf duyuru, mahalle ölçeğinde iletişim ve e-belediye işlemlerinin aynı deneyimde
-              birleşmesi. İçerikler örnek amaçlıdır.
-            </p>
-          </article>
-        </div>
-      </PublicSection>
-
-      <PublicSection title="Organizasyon">
-        <nav className="pub-org" aria-label="Organizasyon bağlantıları">
-          <Link to="/baskan">
-            <strong>Başkan</strong>
-            <span>Kurumsal mesaj ve öncelikler</span>
-            <em>İncele →</em>
-          </Link>
-          <Link to="/birimler">
-            <strong>Birimler</strong>
-            <span>Departman ve personel dizini</span>
-            <em>İncele →</em>
-          </Link>
-          <Link to="/muhtarliklar">
-            <strong>Muhtarlıklar</strong>
-            <span>Mahalle nüfus ve iletişim özeti</span>
-            <em>İncele →</em>
-          </Link>
-          <Link to="/hizmet-rehberi">
-            <strong>Hizmet rehberi</strong>
-            <span>Sık kullanılan işlemlere kısa yol</span>
-            <em>İncele →</em>
-          </Link>
-        </nav>
-      </PublicSection>
-
-      <PublicRelated title="Sık kullanılanlar" items={RELATED.eServices} />
-    </PublicPage>
-  )
-}
-
-export function EBelediyeHubPage() {
-  return (
-    <PublicPage
-      eyebrow="Dijital hizmetler"
-      title="E-Belediye"
-      lead="Vergi, başvuru, nikah, imar ve spor işlemleri tek çatıda — demo ortamı."
-      cover={COVERS.eBelediye}
-    >
-      <div className="pub-facts" aria-label="Hizmet özeti">
-        <div>
-          <strong>8</strong>
-          <span>Ana e-hizmet grubu</span>
-        </div>
-        <div>
-          <strong>BV-</strong>
-          <span>Takip kodu ile başvuru sorgusu</span>
-        </div>
-        <div>
-          <strong>Demo</strong>
-          <span>Gerçek ödeme / resmi işlem yok</span>
-        </div>
-      </div>
-
-      <PublicSection title="İşlemler">
-        <div className="pub-hub-grid">
-          <Link to="/vezne">
-            <strong>Vergi ödeme</strong>
-            <span>Dijital vezne</span>
-          </Link>
-          <Link to="/basvuru-takip">
-            <strong>Başvuru & belge takibi</strong>
-            <span>Takip kodu ile sorgula</span>
-          </Link>
-          <Link to="/basvurular">
-            <strong>Yeni belge başvurusu</strong>
-            <span>İkametgâh, borç yoktur…</span>
-          </Link>
-          <Link to="/nikah">
-            <strong>Nikah işlemleri</strong>
-            <span>Salon / saat seç</span>
-          </Link>
-          <Link to="/imar">
-            <strong>İmar durumu & harç</strong>
-            <span>Ada / parsel sorgu</span>
-          </Link>
-          <Link to="/spor-randevu">
-            <strong>Spor randevu</strong>
-            <span>Tesis saatleri</span>
-          </Link>
-          <Link to="/borclar">
-            <strong>Borçlarım</strong>
-            <span>Su / emlak</span>
-          </Link>
-          <Link to="/hizmet-rehberi">
-            <strong>Hizmet rehberi</strong>
-            <span>Kısa yol kartları</span>
-          </Link>
-        </div>
-      </PublicSection>
-
-      <PublicRelated items={RELATED.municipal} />
-    </PublicPage>
-  )
-}
-
-export function ContactPage() {
-  const { user } = useAuth()
-  const [fullName, setFullName] = useState(user?.fullName ?? '')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [subject, setSubject] = useState('')
-  const [body, setBody] = useState('')
-  const [msg, setMsg] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setMsg(null)
-    try {
-      await apiFetch('/api/v1/e-services/contact', {
-        method: 'POST',
-        body: JSON.stringify({ fullName, email, phone: phone || null, subject, body }),
-      })
-      setMsg('Mesajınız alındı. En kısa sürede dönüş yapılacak (demo).')
-      setSubject('')
-      setBody('')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gönderilemedi.')
-    }
-  }
-
-  return (
-    <PublicPage
-      eyebrow="İletişim"
-      title="Bize ulaşın"
-      lead="Demo çağrı merkezi: 0212 600 00 00 · resmi kurum değildir. Mesajlar örnek API’ye yazılır."
-      cover={COVERS.guide}
-    >
-      <div className="pub-split">
-        <article>
-          <h3>Nasıl yardımcı oluruz?</h3>
-          <p>
-            Talep, öneri ve genel sorular için formu kullanın. Başvuru durumu için takip kodunuzu
-            e-belediye üzerinden sorgulayabilirsiniz.
-          </p>
-        </article>
-        <article>
-          <h3>Çalışma saatleri (demo)</h3>
-          <p>
-            Hafta içi 09:00–17:00. Acil durumlar için gerçek belediye kanallarını kullanın; bu site
-            portföy demosudur.
-          </p>
-        </article>
-      </div>
-
-      {msg ? <div className="success-box">{msg}</div> : null}
-      {error ? <div className="error-box">{error}</div> : null}
-
-      <PublicSection title="Mesaj formu">
-        <form className="pub-form" onSubmit={(e) => void onSubmit(e)}>
-          <div className="field">
-            <label>Ad soyad</label>
-            <input required value={fullName} onChange={(e) => setFullName(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>E-posta</label>
-            <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>Telefon</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+90…" />
-          </div>
-          <div className="field">
-            <label>Konu</label>
-            <input required value={subject} onChange={(e) => setSubject(e.target.value)} />
-          </div>
-          <div className="field">
-            <label>Mesaj</label>
-            <textarea required rows={5} value={body} onChange={(e) => setBody(e.target.value)} />
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Gönder
-          </button>
-        </form>
-      </PublicSection>
-
-      <PublicRelated items={RELATED.eServices} />
-    </PublicPage>
-  )
-}
+export { CorporatePage } from './CorporatePage'
+export { MayorPage } from './MayorPage'
+export { ContactPage } from './ContactPage'
 
 export function TrackingPage() {
-  const [code, setCode] = useState('')
+  const [params] = useSearchParams()
+  const initial = params.get('kod')?.trim() ?? ''
+  const [code, setCode] = useState(initial)
   const [result, setResult] = useState<TrackingLookup | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault()
+  async function lookup(value: string) {
     setError(null)
     setResult(null)
+    setResult(
+      await apiFetch<TrackingLookup>(`/api/v1/e-services/tracking/${encodeURIComponent(value)}`),
+    )
+  }
+
+  useEffect(() => {
+    if (!initial) return
+    void lookup(initial).catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : 'Sorgulama başarısız.')
+    })
+  }, [initial])
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
     try {
-      setResult(
-        await apiFetch<TrackingLookup>(
-          `/api/v1/e-services/tracking/${encodeURIComponent(code.trim())}`,
-        ),
-      )
+      await lookup(code.trim())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sorgulama başarısız.')
     }
@@ -538,14 +58,15 @@ export function TrackingPage() {
     <PublicPage
       eyebrow="E-Belediye"
       title="Başvuru & belge takibi"
-      lead="BV- / SP- / NK- takip kodlarıyla durum sorgulayın."
+      lead="BV- / SP- / NK- / ILET- takip kodlarıyla durum sorgulayın."
       cover={COVERS.eBelediye}
     >
       <PublicSection title="Sorgula">
         <form className="pub-form" onSubmit={(e) => void onSubmit(e)}>
           <div className="field">
-            <label>Takip kodu</label>
+            <label htmlFor="track-code">Takip kodu</label>
             <input
+              id="track-code"
               required
               value={code}
               onChange={(e) => setCode(e.target.value)}

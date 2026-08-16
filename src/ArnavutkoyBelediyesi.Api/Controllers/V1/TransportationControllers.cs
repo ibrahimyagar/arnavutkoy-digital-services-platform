@@ -131,6 +131,25 @@ public sealed class TransportCardsController(ISender sender, ICurrentUserService
         return HandleResult(result);
     }
 
+    [HttpPost("{id:guid}/deactivate")]
+    [Authorize(Roles = Roles.Citizen)]
+    public async Task<IActionResult> Deactivate(Guid id, CancellationToken cancellationToken)
+    {
+        var existing = await sender.Send(new GetTransportCardByIdQuery(id), cancellationToken).ConfigureAwait(false);
+        if (!existing.IsSuccess)
+        {
+            return HandleResult(existing);
+        }
+
+        if (existing.Value.OwnerUserId != currentUserService.UserId)
+        {
+            return Forbid();
+        }
+
+        var result = await sender.Send(new DeactivateTransportCardCommand(id), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
     [HttpPost("{id:guid}/board")]
     [Authorize(Roles = Roles.Citizen)]
     public async Task<IActionResult> Board(Guid id, [FromBody] BoardBusRequest request, CancellationToken cancellationToken)

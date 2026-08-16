@@ -72,7 +72,15 @@ public sealed class EServicesController(ISender sender, ICurrentUserService curr
                 request.Subject,
                 request.Body,
                 request.Phone,
+                string.IsNullOrWhiteSpace(request.PreferredReply) ? "Email" : request.PreferredReply,
                 currentUserService.UserId),
+            cancellationToken).ConfigureAwait(false));
+
+    [HttpGet("contact/mine")]
+    [Authorize]
+    public async Task<IActionResult> MyContactMessages(CancellationToken cancellationToken)
+        => HandleResult(await sender.Send(
+            new ListMyContactMessagesQuery(currentUserService.UserId!.Value),
             cancellationToken).ConfigureAwait(false));
 
     [HttpGet("zoning")]
@@ -91,5 +99,11 @@ public sealed class EServicesController(ISender sender, ICurrentUserService curr
 public sealed record BookSportsRequest(Guid FacilityId, DateTime SlotStartUtc);
 public sealed record BookMarriageRequest(Guid SlotId, string PartnerFullName);
 public sealed record SubmitDocumentRequest(DocumentApplicationType Type, string Title, string Description);
-public sealed record ContactRequest(string FullName, string Email, string Subject, string Body, string? Phone);
+public sealed record ContactRequest(
+    string FullName,
+    string Email,
+    string Subject,
+    string Body,
+    string? Phone,
+    string? PreferredReply);
 public sealed record ZoningFeeRequest(string Ada, string Parsel, decimal RequestedAreaSqm);

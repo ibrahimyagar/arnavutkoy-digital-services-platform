@@ -9,14 +9,16 @@ import { SettingsPage } from './pages/SettingsPage'
 import { DebtsPage } from './pages/DebtsPage'
 import { DigitalCashDeskPage } from './pages/DigitalCashDeskPage'
 import { GeographyAdminPage } from './pages/GeographyAdminPage'
-import { HeadmensPage } from './pages/HeadmensPage'
+import { HeadmensDetailPage, HeadmensPage } from './pages/HeadmensPage'
 import { HomePage } from './pages/HomePage'
-import { HrDirectoryPage } from './pages/HrDirectoryPage'
+import { HrDepartmentPage, HrDirectoryPage } from './pages/HrDirectoryPage'
 import { HrManagePage } from './pages/HrManagePage'
 import { LoginPage } from './pages/LoginPage'
 import { PanelPage, RequireAuth } from './pages/PanelPage'
 import { PropertiesPage, WaterPage } from './pages/PropertiesWaterPages'
 import { AnnouncementDetailPage, AnnouncementsPage } from './pages/PublicPages'
+import { EventsDetailPage, EventsPage, MyEventsPage } from './pages/EventsPages'
+import { ProjectsDetailPage, ProjectsPage } from './pages/ProjectsPages'
 import { RegisterPage } from './pages/RegisterPage'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsPage } from './pages/RequestsPage'
@@ -26,27 +28,20 @@ import { StaffPropertyPage } from './pages/StaffPropertyPage'
 import { StaffWaterPage } from './pages/StaffWaterPage'
 import { TransportNetworkPage } from './pages/TransportNetworkPage'
 import { TransportPage } from './pages/TransportPage'
+import { CorporatePage } from './pages/CorporatePage'
+import { MayorPage } from './pages/MayorPage'
+import { NewsDetailPage, NewsPage } from './pages/NewsPages'
+import { CultureDetailPage, CulturePage } from './pages/CulturePages'
+import { EBelediyeHubPage } from './pages/EBelediyePage'
 import {
   ContactPage,
-  CorporatePage,
-  CultureDetailPage,
-  CulturePage,
   DocumentApplicationsPage,
-  EBelediyeHubPage,
-  EventsDetailPage,
-  EventsPage,
   MarriagePage,
-  MayorPage,
-  NewsDetailPage,
-  NewsPage,
-  ProjectsDetailPage,
-  ProjectsPage,
-  ServiceGuideDetailPage,
-  ServiceGuidePage,
   SportsAppointmentPage,
   TrackingPage,
   ZoningPage,
 } from './pages/MunicipalPages'
+import { ServiceGuideDetailPage, ServiceGuidePage } from './pages/ServiceGuidePages'
 
 export default function App() {
   return (
@@ -64,6 +59,7 @@ export default function App() {
             <Route path="haberler/:id" element={<NewsDetailPage />} />
             <Route path="etkinlikler" element={<EventsPage />} />
             <Route path="etkinlikler/:id" element={<EventsDetailPage />} />
+            <Route path="etkinliklerim" element={<RequireAuth><MyEventsPage /></RequireAuth>} />
             <Route path="faaliyetler" element={<ProjectsPage />} />
             <Route path="faaliyetler/:id" element={<ProjectsDetailPage />} />
             <Route path="kultur" element={<CulturePage />} />
@@ -84,7 +80,9 @@ export default function App() {
             <Route path="ulasim-agi" element={<TransportNetworkPage />} />
             <Route path="hat-yonetimi" element={<BusLinesManagePage />} />
             <Route path="muhtarliklar" element={<HeadmensPage />} />
+            <Route path="muhtarliklar/:id" element={<HeadmensDetailPage />} />
             <Route path="birimler" element={<HrDirectoryPage />} />
+            <Route path="birimler/:id" element={<HrDepartmentPage />} />
             <Route path="birim-yonetimi" element={<HrManagePage />} />
             <Route path="panel" element={<RequireAuth><PanelPage /></RequireAuth>} />
             <Route path="ayarlar" element={<SettingsPage />} />

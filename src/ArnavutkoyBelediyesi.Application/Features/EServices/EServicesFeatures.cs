@@ -269,9 +269,32 @@ public sealed class LookupTrackingQueryHandler(IUnitOfWork unitOfWork)
             return Result<TrackingLookupDto>.Success(new TrackingLookupDto("Marriage", marriage.TrackingCode, marriage.Status.ToString(), marriage.PartnerFullName, null, null));
         }
 
+        var contact = await unitOfWork.Repository<ContactMessage>()
+            .Query().FirstOrDefaultAsync(x => x.TrackingCode == code, cancellationToken).ConfigureAwait(false);
+        if (contact is not null)
+        {
+            return Result<TrackingLookupDto>.Success(new TrackingLookupDto(
+                "Contact",
+                contact.TrackingCode,
+                contact.Status.ToString(),
+                contact.Subject,
+                contact.CreatedAtUtc,
+                contact.PreferredReply == "Phone" ? "Geri dönüş: telefon" : "Geri dönüş: e-posta"));
+        }
+
         return Result<TrackingLookupDto>.Failure("Takip kodu bulunamadı.");
     }
 }
+
+public sealed record ContactReceiptDto(Guid Id, string TrackingCode, string Subject, string Status, DateTime CreatedAtUtc);
+
+public sealed record ContactMessageSummaryDto(
+    Guid Id,
+    string TrackingCode,
+    string Subject,
+    string Status,
+    string PreferredReply,
+    DateTime CreatedAtUtc);
 
 public sealed record SubmitContactMessageCommand(
     string FullName,
@@ -279,28 +302,105 @@ public sealed record SubmitContactMessageCommand(
     string Subject,
     string Body,
     string? Phone,
-    Guid? CitizenUserId) : IRequest<Result<Guid>>;
+    string PreferredReply,
+    Guid? CitizenUserId) : IRequest<Result<ContactReceiptDto>>;
 
 public sealed class SubmitContactMessageCommandValidator : AbstractValidator<SubmitContactMessageCommand>
 {
     public SubmitContactMessageCommandValidator()
     {
         RuleFor(x => x.FullName).NotEmpty().MaximumLength(160);
-        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200);
+        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200)
+            .WithMessage("E-posta adresinizi kontrol edin.");
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(200);
-        RuleFor(x => x.Body).NotEmpty().MaximumLength(4000);
+        RuleFor(x => x.Body).NotEmpty().MinimumLength(20).MaximumLength(4000)
+            .WithMessage("Mesaj en az 20 karakter olmalıdır.");
+        RuleFor(x => x.PreferredReply).Must(v => v is "Email" or "Phone")
+            .WithMessage("Geri dönüş yöntemi seçin.");
+        RuleFor(x => x.Phone)
+            .NotEmpty()
+            .When(x => x.PreferredReply == "Phone")
+            .WithMessage("Telefon numarası geçerli değil.");
+        RuleFor(x => x.Phone)
+            .Must(BeValidPhone)
+            .When(x => !string.IsNullOrWhiteSpace(x.Phone))
+            .WithMessage("Telefon numarası geçerli değil.");
+    }
+
+    private static bool BeValidPhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return true;
+        var digits = phone.Where(char.IsDigit).Count();
+        return digits is >= 10 and <= 13;
     }
 }
 
 public sealed class SubmitContactMessageCommandHandler(IUnitOfWork unitOfWork)
-    : IRequestHandler<SubmitContactMessageCommand, Result<Guid>>
+    : IRequestHandler<SubmitContactMessageCommand, Result<ContactReceiptDto>>
 {
-    public async Task<Result<Guid>> Handle(SubmitContactMessageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ContactReceiptDto>> Handle(SubmitContactMessageCommand request, CancellationToken cancellationToken)
     {
-        var entity = ContactMessage.Create(request.FullName, request.Email, request.Subject, request.Body, request.Phone, request.CitizenUserId);
+        string code;
+        var guard = 0;
+        do
+        {
+            code = TrackingCodeFactory.Next("ILET");
+            guard++;
+        }
+        while (guard < 8 &&
+               await unitOfWork.Repository<ContactMessage>().Query()
+                   .AnyAsync(x => x.TrackingCode == code, cancellationToken)
+                   .ConfigureAwait(false));
+
+        if (guard >= 8)
+        {
+            code = $"ILET-{DateTime.UtcNow:yyMMdd}-{Guid.NewGuid().ToString("N")[..4]}".ToUpperInvariant();
+        }
+
+        ContactMessage entity;
+        try
+        {
+            entity = ContactMessage.Create(
+                request.FullName,
+                request.Email,
+                request.Subject,
+                request.Body,
+                code,
+                request.PreferredReply,
+                request.Phone,
+                request.CitizenUserId);
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<ContactReceiptDto>.Failure(ex.Message);
+        }
+
         await unitOfWork.Repository<ContactMessage>().AddAsync(entity, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<Guid>.Success(entity.Id);
+        return Result<ContactReceiptDto>.Success(
+            new ContactReceiptDto(entity.Id, entity.TrackingCode, entity.Subject, entity.Status.ToString(), entity.CreatedAtUtc));
+    }
+}
+
+public sealed record ListMyContactMessagesQuery(Guid CitizenUserId)
+    : IRequest<Result<IReadOnlyList<ContactMessageSummaryDto>>>;
+
+public sealed class ListMyContactMessagesQueryHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<ListMyContactMessagesQuery, Result<IReadOnlyList<ContactMessageSummaryDto>>>
+{
+    public async Task<Result<IReadOnlyList<ContactMessageSummaryDto>>> Handle(
+        ListMyContactMessagesQuery request,
+        CancellationToken cancellationToken)
+    {
+        var items = await unitOfWork.Repository<ContactMessage>()
+            .Query()
+            .Where(x => x.CitizenUserId == request.CitizenUserId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Select(x => new ContactMessageSummaryDto(
+                x.Id, x.TrackingCode, x.Subject, x.Status.ToString(), x.PreferredReply, x.CreatedAtUtc))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        return Result<IReadOnlyList<ContactMessageSummaryDto>>.Success(items);
     }
 }
 

@@ -5,6 +5,7 @@ using ArnavutkoyBelediyesi.Application.Features.Payments.Dtos;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace ArnavutkoyBelediyesi.Application.Features.Payments.Queries;
@@ -46,13 +47,44 @@ public sealed class GetMyDebtsQueryHandler(
 
         var now = dateTimeProvider.UtcNow;
         var dailyRate = paymentOptions.Value.DailyOverdueInterestRatePercent;
+        var paymentsById = await LoadPaymentsAsync(unitOfWork, debtsPage.Items, cancellationToken).ConfigureAwait(false);
 
         var items = debtsPage.Items
-            .Select(debt => DebtMapper.ToDto(debt, now, dailyRate))
+            .Select(debt => DebtMapper.ToDto(debt, now, dailyRate, FindPayment(debt, paymentsById)))
             .ToList();
 
         var page = new PaginatedList<DebtDto>(items, debtsPage.TotalCount, debtsPage.PageNumber, debtsPage.PageSize);
 
         return Result<PaginatedList<DebtDto>>.Success(page);
     }
+
+    internal static async Task<Dictionary<Guid, Payment>> LoadPaymentsAsync(
+        IUnitOfWork unitOfWork,
+        IReadOnlyCollection<Debt> debts,
+        CancellationToken cancellationToken)
+    {
+        var paymentIds = debts
+            .Where(debt => debt.PaymentId.HasValue)
+            .Select(debt => debt.PaymentId!.Value)
+            .Distinct()
+            .ToArray();
+
+        if (paymentIds.Length == 0)
+        {
+            return new Dictionary<Guid, Payment>();
+        }
+
+        var payments = await unitOfWork.Repository<Payment>()
+            .Query()
+            .Where(payment => paymentIds.Contains(payment.Id))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return payments.ToDictionary(payment => payment.Id);
+    }
+
+    internal static Payment? FindPayment(Debt debt, IReadOnlyDictionary<Guid, Payment> paymentsById)
+        => debt.PaymentId is Guid paymentId && paymentsById.TryGetValue(paymentId, out var payment)
+            ? payment
+            : null;
 }

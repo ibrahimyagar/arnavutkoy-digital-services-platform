@@ -221,6 +221,11 @@ namespace ArnavutkoyBelediyesi.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
 
+                    b.Property<string>("PreferredReply")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -231,6 +236,11 @@ namespace ArnavutkoyBelediyesi.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("TrackingCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -238,6 +248,11 @@ namespace ArnavutkoyBelediyesi.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CitizenUserId");
+
+                    b.HasIndex("TrackingCode")
+                        .IsUnique();
 
                     b.ToTable("ContactMessages", (string)null);
                 });
@@ -889,6 +904,56 @@ namespace ArnavutkoyBelediyesi.Persistence.Migrations
                     b.HasIndex("PayerUserId");
 
                     b.ToTable("Payments", (string)null);
+                });
+
+            modelBuilder.Entity("ArnavutkoyBelediyesi.Domain.Portal.EventRegistration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CancelledAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CitizenUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RegisteredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CitizenUserId");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("CitizenUserId", "EventId")
+                        .IsUnique();
+
+                    b.ToTable("EventRegistrations", (string)null);
                 });
 
             modelBuilder.Entity("ArnavutkoyBelediyesi.Domain.Portal.PortalContent", b =>

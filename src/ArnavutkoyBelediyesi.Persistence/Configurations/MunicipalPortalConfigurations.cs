@@ -24,6 +24,20 @@ public sealed class PortalContentConfiguration : IEntityTypeConfiguration<Portal
     }
 }
 
+public sealed class EventRegistrationConfiguration : IEntityTypeConfiguration<EventRegistration>
+{
+    public void Configure(EntityTypeBuilder<EventRegistration> builder)
+    {
+        builder.ToTable("EventRegistrations");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(x => x.EventId);
+        builder.HasIndex(x => x.CitizenUserId);
+        builder.HasIndex(x => new { x.CitizenUserId, x.EventId }).IsUnique();
+        builder.HasQueryFilter(x => !x.IsDeleted);
+    }
+}
+
 public sealed class SportsFacilityConfiguration : IEntityTypeConfiguration<SportsFacility>
 {
     public void Configure(EntityTypeBuilder<SportsFacility> builder)
@@ -106,7 +120,11 @@ public sealed class ContactMessageConfiguration : IEntityTypeConfiguration<Conta
         builder.Property(x => x.Phone).HasMaxLength(40);
         builder.Property(x => x.Subject).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Body).IsRequired().HasMaxLength(4000);
+        builder.Property(x => x.TrackingCode).IsRequired().HasMaxLength(32);
+        builder.Property(x => x.PreferredReply).IsRequired().HasMaxLength(20);
         builder.Property(x => x.Status).HasConversion<string>().HasMaxLength(20);
+        builder.HasIndex(x => x.TrackingCode).IsUnique();
+        builder.HasIndex(x => x.CitizenUserId);
         builder.HasQueryFilter(x => !x.IsDeleted);
     }
 }

@@ -4,6 +4,7 @@ using ArnavutkoyBelediyesi.Application.Common.Options;
 using ArnavutkoyBelediyesi.Application.Features.Payments.Dtos;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace ArnavutkoyBelediyesi.Application.Features.Payments.Queries;
@@ -28,7 +29,20 @@ public sealed class GetDebtByIdQueryHandler(IUnitOfWork unitOfWork, IDateTimePro
             return Result<DebtDto>.Failure($"'{request.DebtId}' kimlikli borç bulunamadı.");
         }
 
-        var dto = DebtMapper.ToDto(debt, dateTimeProvider.UtcNow, paymentOptions.Value.DailyOverdueInterestRatePercent);
+        Payment? payment = null;
+        if (debt.PaymentId is Guid paymentId)
+        {
+            payment = await unitOfWork.Repository<Payment>()
+                .Query()
+                .FirstOrDefaultAsync(item => item.Id == paymentId, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        var dto = DebtMapper.ToDto(
+            debt,
+            dateTimeProvider.UtcNow,
+            paymentOptions.Value.DailyOverdueInterestRatePercent,
+            payment);
 
         return Result<DebtDto>.Success(dto);
     }

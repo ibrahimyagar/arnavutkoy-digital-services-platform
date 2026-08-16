@@ -35,17 +35,17 @@ public sealed class Neighborhood : AuditableEntity
     public string Name { get; private set; }
 
     /// <summary>
-    /// Mahalle muhtarının adı soyadı (kurgusal demo verisi).
+    /// Mahalle muhtarının adı soyadı. Seed verisi Arnavutköy Belediyesi e-Rehber kaydına dayanır.
     /// </summary>
     public string HeadmanFullName { get; private set; }
 
     /// <summary>
-    /// Mahalle muhtarının iletişim telefonu (kurgusal demo verisi).
+    /// Mahalle muhtarının iletişim telefonu (E.164). Kaynak: belediye e-Rehber.
     /// </summary>
     public string HeadmanPhoneNumber { get; private set; }
 
     /// <summary>
-    /// Mahalle nüfusu.
+    /// Mahalle nüfusu. Seed yılı seeder içindeki PopulationYear sabitinde tutulur (TÜİK ADNKS).
     /// </summary>
     public int Population { get; private set; }
 

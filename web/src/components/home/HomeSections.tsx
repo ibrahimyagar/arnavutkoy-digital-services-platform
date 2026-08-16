@@ -120,16 +120,24 @@ export function HomeFeatureCards({ modules }: { modules: ModuleTile[] }) {
 export function HomeAnnouncements({
   items,
 }: {
-  items: { id: string; title: string; dateLabel: string; to: string }[]
+  items: {
+    id: string
+    title: string
+    dateLabel: string
+    to: string
+    category: string
+    image: string
+    excerpt: string
+  }[]
 }) {
   if (items.length === 0) return null
   return (
-    <section className="home-announcements">
+    <section className="home-announcements" aria-labelledby="home-ann-title">
       <div className="container">
         <header className="home-section-head home-section-head--row">
           <div>
-            <h2>Güncel duyurular</h2>
-            <p className="muted">Belediye bildirimleri</p>
+            <h2 id="home-ann-title">Güncel duyurular</h2>
+            <p className="muted">Yayımlanmış resmi bülten — kurgusal demo içerik.</p>
           </div>
           <Link className="btn btn-ghost" to="/duyurular">
             Tümü
@@ -138,8 +146,15 @@ export function HomeAnnouncements({
         <div className="home-announcements-grid">
           {items.map((item) => (
             <Link key={item.id} to={item.to} className="home-announcement">
-              <time className="muted">{item.dateLabel}</time>
-              <strong>{item.title}</strong>
+              <span className="home-announcement-media" aria-hidden>
+                <img src={item.image} alt="" />
+              </span>
+              <span className="home-announcement-copy">
+                <em>{item.category}</em>
+                <time>{item.dateLabel}</time>
+                <strong>{item.title}</strong>
+                <span>{item.excerpt}</span>
+              </span>
             </Link>
           ))}
         </div>

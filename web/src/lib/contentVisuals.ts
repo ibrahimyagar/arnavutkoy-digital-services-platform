@@ -38,6 +38,10 @@ export const COVERS = {
     src: '/home/svc-baskan.jpg',
     alt: 'Başkanlık görseli',
   },
+  institution: {
+    src: '/hero-harbor.jpg',
+    alt: 'Kent ve sahil dokusu — kurumsal tanıtım görseli (demo)',
+  },
   waste: {
     src: '/home/story-waste.jpg',
     alt: 'Çevre ve atık yönetimi görseli',
@@ -80,7 +84,7 @@ export function coverForPortalKind(kind: string): ContentCover {
     case 'Mayor':
       return COVERS.mayor
     case 'Corporate':
-      return COVERS.guide
+      return COVERS.institution
     default:
       return COVERS.eBelediye
   }
@@ -96,33 +100,118 @@ export function coverForModuleId(id: string): ContentCover | undefined {
     culture: COVERS.culture,
     'service-guide': COVERS.guide,
     mayor: COVERS.mayor,
+    corporate: COVERS.institution,
   }
   return map[id]
 }
 
+export type RelatedPage = {
+  to: string
+  label: string
+  hint: string
+  group: string
+}
+
+const RELATED_COVERS: { match: string; cover: ContentCover }[] = [
+  { match: '/haberler', cover: COVERS.news },
+  { match: '/duyurular', cover: COVERS.announcements },
+  { match: '/etkinlikler', cover: COVERS.events },
+  { match: '/faaliyetler', cover: COVERS.projects },
+  { match: '/kultur', cover: COVERS.culture },
+  { match: '/hizmet-rehberi', cover: COVERS.guide },
+  { match: '/e-belediye', cover: COVERS.eBelediye },
+  { match: '/vezne', cover: COVERS.eBelediye },
+  { match: '/basvuru-takip', cover: COVERS.eBelediye },
+  { match: '/basvurular', cover: COVERS.eBelediye },
+  { match: '/baskan', cover: COVERS.mayor },
+  { match: '/kurumsal', cover: COVERS.institution },
+  { match: '/birimler', cover: COVERS.mayor },
+  { match: '/muhtarliklar', cover: COVERS.guide },
+  { match: '/iletisim', cover: COVERS.guide },
+  { match: '/ulasim-agi', cover: COVERS.projects },
+  { match: '/hatlar', cover: COVERS.projects },
+  { match: '/ulasim', cover: COVERS.projects },
+  { match: '/binis', cover: COVERS.projects },
+  { match: '/imar', cover: COVERS.news },
+  { match: '/spor-randevu', cover: COVERS.events },
+  { match: '/yardim', cover: COVERS.guide },
+  { match: '/talepler', cover: COVERS.announcements },
+]
+
+const RELATED_GROUPS: { match: string; group: string }[] = [
+  { match: '/haberler', group: 'Haberler' },
+  { match: '/duyurular', group: 'Duyurular' },
+  { match: '/etkinlikler', group: 'Etkinlikler' },
+  { match: '/faaliyetler', group: 'Faaliyetler' },
+  { match: '/kultur', group: 'Hizmetler' },
+  { match: '/hizmet-rehberi', group: 'Hizmetler' },
+  { match: '/e-belediye', group: 'Vatandaş işlemleri' },
+  { match: '/vezne', group: 'Vatandaş işlemleri' },
+  { match: '/basvuru-takip', group: 'Vatandaş işlemleri' },
+  { match: '/basvurular', group: 'Vatandaş işlemleri' },
+  { match: '/iletisim', group: 'İletişim' },
+  { match: '/baskan', group: 'Kurumsal' },
+  { match: '/kurumsal', group: 'Kurumsal' },
+  { match: '/birimler', group: 'Kurumsal' },
+  { match: '/muhtarliklar', group: 'Kurumsal' },
+  { match: '/ulasim-agi', group: 'Hizmetler' },
+  { match: '/ulasim', group: 'Hizmetler' },
+  { match: '/hatlar', group: 'Hizmetler' },
+  { match: '/binis', group: 'Hizmetler' },
+  { match: '/imar', group: 'Hizmetler' },
+  { match: '/spor-randevu', group: 'Hizmetler' },
+  { match: '/yardim', group: 'Vatandaş işlemleri' },
+  { match: '/talepler', group: 'Vatandaş işlemleri' },
+]
+
+export function coverForRelatedPath(to: string): ContentCover {
+  const found = RELATED_COVERS.find((entry) => to === entry.match || to.startsWith(`${entry.match}/`))
+  return found?.cover ?? COVERS.eBelediye
+}
+
+export function groupForRelatedPath(to: string, fallback?: string): string {
+  if (fallback) return fallback
+  const found = RELATED_GROUPS.find((entry) => to === entry.match || to.startsWith(`${entry.match}/`))
+  return found?.group ?? 'Hizmetler'
+}
+
 export const RELATED = {
   municipal: [
-    { to: '/kurumsal', label: 'Kurumsal', hint: 'Organizasyon özeti' },
-    { to: '/baskan', label: 'Başkan', hint: 'Kurumsal mesaj' },
-    { to: '/birimler', label: 'Birimler', hint: 'Departman dizini' },
-    { to: '/muhtarliklar', label: 'Muhtarlıklar', hint: 'Mahalle iletişimi' },
+    { to: '/kurumsal', label: 'Kurumsal', hint: 'Organizasyon ve birim yapısı', group: 'Kurumsal' },
+    { to: '/baskan', label: 'Başkan', hint: 'Kurumsal mesaj ve iletişim', group: 'Kurumsal' },
+    { to: '/birimler', label: 'Birimler', hint: 'Müdürlük ve daire dizini', group: 'Kurumsal' },
+    { to: '/muhtarliklar', label: 'Muhtarlıklar', hint: 'Mahalle mahalle keşif ve muhtar hattı', group: 'Kurumsal' },
+  ],
+  directory: [
+    { to: '/baskan', label: 'Başkan', hint: 'Kurumsal mesaj ve iletişim', group: 'Kurumsal' },
+    { to: '/kurumsal', label: 'Kurumsal', hint: 'Organizasyon ve birim yapısı', group: 'Kurumsal' },
+    { to: '/hizmet-rehberi', label: 'Hizmetler', hint: 'Başvuru ve işlem kanalları', group: 'Hizmetler' },
+    { to: '/faaliyetler', label: 'Faaliyetler', hint: 'Park, yol ve yatırım defteri', group: 'Faaliyetler' },
+    { to: '/duyurular', label: 'Duyurular', hint: 'Resmi bildirim ve duyurular', group: 'Duyurular' },
+    { to: '/iletisim', label: 'İletişim', hint: 'Çağrı merkezi ve yazışma', group: 'İletişim' },
   ],
   media: [
-    { to: '/haberler', label: 'Haberler', hint: 'Güncel haber akışı' },
-    { to: '/duyurular', label: 'Duyurular', hint: 'Bildirimler' },
-    { to: '/etkinlikler', label: 'Etkinlikler', hint: 'Takvim' },
-    { to: '/faaliyetler', label: 'Faaliyetler', hint: 'Projeler' },
+    { to: '/haberler', label: 'Haberler', hint: 'İlçeden güncel haber akışı', group: 'Haberler' },
+    { to: '/duyurular', label: 'Duyurular', hint: 'Resmi bildirim ve duyurular', group: 'Duyurular' },
+    { to: '/etkinlikler', label: 'Etkinlikler', hint: 'Kültür, spor ve açık hava takvimi', group: 'Etkinlikler' },
+    { to: '/faaliyetler', label: 'Faaliyetler', hint: 'Park, yol ve yatırım defteri', group: 'Faaliyetler' },
+  ],
+  investments: [
+    { to: '/haberler', label: 'Haberler', hint: 'Saha ve açılış haberleri', group: 'Haberler' },
+    { to: '/etkinlikler', label: 'Etkinlikler', hint: 'Açılış ve program duyuruları', group: 'Etkinlikler' },
+    { to: '/ulasim-agi', label: 'Ulaşım ağı', hint: 'Hat, güzergâh ve kart işlemleri', group: 'Hizmetler' },
+    { to: '/hizmet-rehberi', label: 'Hizmet rehberi', hint: 'Başvuru ve işlem kanalları', group: 'Hizmetler' },
   ],
   eServices: [
-    { to: '/e-belediye', label: 'E-Belediye', hint: 'Tüm işlemler' },
-    { to: '/basvuru-takip', label: 'Başvuru takibi', hint: 'Takip kodu' },
-    { to: '/vezne', label: 'Dijital vezne', hint: 'Ödeme' },
-    { to: '/iletisim', label: 'İletişim', hint: 'Destek' },
+    { to: '/e-belediye', label: 'E-Belediye', hint: 'Tüm dijital işlemler tek yerde', group: 'Vatandaş işlemleri' },
+    { to: '/basvuru-takip', label: 'Başvuru takibi', hint: 'Takip kodu ile durum sorgula', group: 'Vatandaş işlemleri' },
+    { to: '/vezne', label: 'Dijital vezne', hint: 'Vergi ve su ödemesi', group: 'Vatandaş işlemleri' },
+    { to: '/iletisim', label: 'İletişim', hint: 'Çağrı merkezi ve yazışma', group: 'İletişim' },
   ],
   transport: [
-    { to: '/hatlar', label: 'Otobüs hatları', hint: 'Güzergâh listesi' },
-    { to: '/ulasim-agi', label: 'Ulaşım ağı', hint: 'Hat ve kart hub' },
-    { to: '/ulasim', label: 'Ulaşım kartı', hint: 'Bakiye' },
-    { to: '/binis', label: 'Biniş simülasyonu', hint: 'Demo biniş' },
+    { to: '/hatlar', label: 'Ulaşım rehberi', hint: 'Hat, güzergâh ve durak uçları', group: 'Hizmetler' },
+    { to: '/ulasim-agi', label: 'Ulaşım ağı', hint: 'Hat ve kart işlem merkezi', group: 'Hizmetler' },
+    { to: '/ulasim', label: 'Ulaşım kartı', hint: 'Bakiye ve kart işlemleri', group: 'Vatandaş işlemleri' },
+    { to: '/binis', label: 'Biniş simülasyonu', hint: 'Demo kart okutma', group: 'Hizmetler' },
   ],
-} as const
+} as const satisfies Record<string, readonly RelatedPage[]>

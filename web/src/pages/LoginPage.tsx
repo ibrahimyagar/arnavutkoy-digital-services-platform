@@ -1,18 +1,21 @@
 import { useState, type FormEvent } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PageHeader } from '../components/ui/PageChrome'
+import { safeReturnPath } from '../lib/returnUrl'
 
 export function LoginPage() {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const next = safeReturnPath(params.get('next'))
   const [email, setEmail] = useState('vatandas@demo.arnavutkoy.local')
   const [password, setPassword] = useState('Demo!Citizen123')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   if (isAuthenticated) {
-    return <Navigate to="/panel" replace />
+    return <Navigate to={next} replace />
   }
 
   async function onSubmit(event: FormEvent) {
@@ -21,7 +24,7 @@ export function LoginPage() {
     setError(null)
     try {
       await login(email.trim(), password)
-      navigate('/panel')
+      navigate(next)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Giriş başarısız.')
     } finally {
@@ -73,7 +76,8 @@ export function LoginPage() {
         </form>
 
         <p className="muted">
-          Hesabınız yok mu? <Link to="/kayit">Kayıt olun</Link>
+          Hesabınız yok mu?{' '}
+          <Link to={next === '/panel' ? '/kayit' : `/kayit?next=${encodeURIComponent(next)}`}>Kayıt olun</Link>
           {' · '}
           <Link to="/">Ana sayfa</Link>
         </p>

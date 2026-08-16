@@ -17,12 +17,28 @@ const defaults: CardPaymentValues = {
 type Props = {
   submitLabel: string
   busy?: boolean
+  busyLabel?: string
   onSubmit: (values: CardPaymentValues) => Promise<void> | void
   extraFields?: ReactNode
+  initialHolder?: string
 }
 
-export function CardPaymentForm({ submitLabel, busy, onSubmit, extraFields }: Props) {
-  const [values, setValues] = useState<CardPaymentValues>(defaults)
+function formatCardNumber(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 19)
+  return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim()
+}
+
+function formatExpiry(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 4)
+  if (digits.length <= 2) return digits
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`
+}
+
+export function CardPaymentForm({ submitLabel, busy, busyLabel, onSubmit, extraFields, initialHolder }: Props) {
+  const [values, setValues] = useState<CardPaymentValues>({
+    ...defaults,
+    cardHolderName: initialHolder ?? '',
+  })
   const [localError, setLocalError] = useState<string | null>(null)
 
   async function handleSubmit(event: FormEvent) {
@@ -71,10 +87,10 @@ export function CardPaymentForm({ submitLabel, busy, onSubmit, extraFields }: Pr
           id="payCardNumber"
           inputMode="numeric"
           value={values.cardNumber}
-          onChange={(e) => setValues((v) => ({ ...v, cardNumber: e.target.value }))}
+          onChange={(e) => setValues((v) => ({ ...v, cardNumber: formatCardNumber(e.target.value) }))}
           required
           autoComplete="cc-number"
-          placeholder="4111111111111111"
+          placeholder="XXXX XXXX XXXX XXXX"
         />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -83,7 +99,7 @@ export function CardPaymentForm({ submitLabel, busy, onSubmit, extraFields }: Pr
           <input
             id="expiry"
             value={values.expiryMonthYear}
-            onChange={(e) => setValues((v) => ({ ...v, expiryMonthYear: e.target.value }))}
+            onChange={(e) => setValues((v) => ({ ...v, expiryMonthYear: formatExpiry(e.target.value) }))}
             required
             placeholder="12/30"
             autoComplete="cc-exp"
@@ -94,7 +110,7 @@ export function CardPaymentForm({ submitLabel, busy, onSubmit, extraFields }: Pr
           <input
             id="cvv"
             value={values.cvv}
-            onChange={(e) => setValues((v) => ({ ...v, cvv: e.target.value }))}
+            onChange={(e) => setValues((v) => ({ ...v, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) }))}
             required
             autoComplete="cc-csc"
             inputMode="numeric"
@@ -102,7 +118,7 @@ export function CardPaymentForm({ submitLabel, busy, onSubmit, extraFields }: Pr
         </div>
       </div>
       <button className="btn btn-primary" type="submit" disabled={busy}>
-        {busy ? 'İşleniyor…' : submitLabel}
+        {busy ? (busyLabel ?? 'İşleniyor…') : submitLabel}
       </button>
     </form>
   )

@@ -8,9 +8,12 @@ namespace ArnavutkoyBelediyesi.Application.Features.Payments.Dtos;
 /// </summary>
 internal static class DebtMapper
 {
-    public static DebtDto ToDto(Debt debt, DateTime asOfUtc, decimal dailyInterestRatePercent)
+    public static DebtDto ToDto(Debt debt, DateTime asOfUtc, decimal dailyInterestRatePercent, Payment? payment = null)
     {
         var interest = debt.CalculateOverdueInterest(asOfUtc, dailyInterestRatePercent);
+        var overdueDays = debt.Status == DebtStatus.Paid || asOfUtc.Date <= debt.DueDateUtc.Date
+            ? 0
+            : (asOfUtc.Date - debt.DueDateUtc.Date).Days;
 
         return new DebtDto(
             debt.Id,
@@ -21,6 +24,11 @@ internal static class DebtMapper
             debt.PrincipalAmount + interest,
             debt.DueDateUtc,
             debt.Status,
-            debt.PaidAtUtc);
+            debt.PaidAtUtc,
+            debt.CreatedAtUtc,
+            overdueDays,
+            debt.PaymentId,
+            payment?.Amount,
+            payment?.MaskedCardNumber);
     }
 }

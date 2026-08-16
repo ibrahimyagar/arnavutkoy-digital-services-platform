@@ -17,6 +17,8 @@ public sealed class ContactMessage : AuditableEntity
         Email = string.Empty;
         Subject = string.Empty;
         Body = string.Empty;
+        TrackingCode = string.Empty;
+        PreferredReply = string.Empty;
     }
 
     public string FullName { get; private set; }
@@ -24,6 +26,8 @@ public sealed class ContactMessage : AuditableEntity
     public string? Phone { get; private set; }
     public string Subject { get; private set; }
     public string Body { get; private set; }
+    public string TrackingCode { get; private set; }
+    public string PreferredReply { get; private set; }
     public ContactMessageStatus Status { get; private set; }
     public Guid? CitizenUserId { get; private set; }
 
@@ -32,6 +36,8 @@ public sealed class ContactMessage : AuditableEntity
         string email,
         string subject,
         string body,
+        string trackingCode,
+        string preferredReply,
         string? phone = null,
         Guid? citizenUserId = null)
     {
@@ -39,6 +45,13 @@ public sealed class ContactMessage : AuditableEntity
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(subject);
         ArgumentException.ThrowIfNullOrWhiteSpace(body);
+        ArgumentException.ThrowIfNullOrWhiteSpace(trackingCode);
+
+        var reply = string.IsNullOrWhiteSpace(preferredReply) ? "Email" : preferredReply.Trim();
+        if (reply is not ("Email" or "Phone"))
+        {
+            throw new ArgumentException("Geri dönüş yöntemi E-posta veya Telefon olmalıdır.", nameof(preferredReply));
+        }
 
         return new ContactMessage
         {
@@ -47,6 +60,8 @@ public sealed class ContactMessage : AuditableEntity
             Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim(),
             Subject = subject.Trim(),
             Body = body.Trim(),
+            TrackingCode = trackingCode.Trim().ToUpperInvariant(),
+            PreferredReply = reply,
             Status = ContactMessageStatus.New,
             CitizenUserId = citizenUserId,
         };

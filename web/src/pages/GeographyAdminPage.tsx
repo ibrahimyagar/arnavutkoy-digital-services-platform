@@ -14,10 +14,12 @@ const STREET_SUGGESTIONS = [
   'Sanayi Caddesi',
 ] as const
 
-const NEIGHBORHOOD_PRESETS = [
-  { name: 'Örnek Mahalle', headman: 'Ayşe Yılmaz', phone: '0212 000 00 01', population: 4200 },
-  { name: 'Demo Köy', headman: 'Mehmet Kaya', phone: '0212 000 00 02', population: 1850 },
-] as const
+const NEIGHBORHOOD_PRESETS: readonly {
+  name: string
+  headman: string
+  phone: string
+  population: number
+}[] = []
 
 type AdminTab = 'districts' | 'neighborhoods' | 'streets'
 
@@ -360,6 +362,7 @@ function GeographyContent() {
                 ) : null}
               </ul>
 
+              {NEIGHBORHOOD_PRESETS.length > 0 ? (
               <div className="dept-chip-row" role="group" aria-label="Mahalle şablonları">
                 {NEIGHBORHOOD_PRESETS.map((preset) => (
                   <button
@@ -376,6 +379,12 @@ function GeographyContent() {
                   </button>
                 ))}
               </div>
+              ) : (
+                <p className="muted">
+                  Halka açık mahalle rehberi 38 resmi mahalleden oluşur. Yeni kayıt yalnızca gerçek bir
+                  mahalle için eklenmelidir.
+                </p>
+              )}
 
               <form className="stack" onSubmit={(e) => void createNeighborhood(e)}>
                 <div className="form-two-col">

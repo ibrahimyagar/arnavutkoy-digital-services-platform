@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import type { ContentCover } from '../../lib/contentVisuals'
+import { Link, useLocation } from 'react-router-dom'
+import { coverForRelatedPath, groupForRelatedPath, type ContentCover } from '../../lib/contentVisuals'
 import './public-page.css'
 
 export function PublicPage({
@@ -9,15 +9,22 @@ export function PublicPage({
   lead,
   cover,
   children,
+  className,
+  immersive = false,
 }: {
   eyebrow?: string
   title: string
   lead?: string
   cover?: ContentCover
   children: ReactNode
+  className?: string
+  /** Hero or article owns the heading; skip the generic intro block. */
+  immersive?: boolean
 }) {
+  const rootClass = ['pub', immersive ? 'pub--immersive' : '', className].filter(Boolean).join(' ')
+
   return (
-    <div className="pub">
+    <div className={rootClass}>
       <div className="pub-canvas">
         {cover ? (
           <div className="pub-cover">
@@ -25,11 +32,13 @@ export function PublicPage({
             <span className="pub-cover-shade" aria-hidden />
           </div>
         ) : null}
-        <header className="pub-intro">
-          {eyebrow ? <p className="pub-eyebrow">{eyebrow}</p> : null}
-          <h1>{title}</h1>
-          {lead ? <p className="pub-lead">{lead}</p> : null}
-        </header>
+        {immersive ? null : (
+          <header className="pub-intro">
+            {eyebrow ? <p className="pub-eyebrow">{eyebrow}</p> : null}
+            <h1>{title}</h1>
+            {lead ? <p className="pub-lead">{lead}</p> : null}
+          </header>
+        )}
         <div className="pub-body">{children}</div>
       </div>
     </div>
@@ -58,20 +67,42 @@ export function PublicRelated({
   items,
 }: {
   title?: string
-  items: readonly { to: string; label: string; hint: string }[]
+  items: readonly { to: string; label: string; hint: string; group?: string }[]
 }) {
+  const { pathname } = useLocation()
+  const visible = items.filter((item) => item.to !== pathname)
+
+  if (visible.length === 0) return null
+
   return (
     <section className="pub-related" aria-label={title}>
-      <h2>{title}</h2>
-      <ul>
-        {items.map((item) => (
-          <li key={item.to}>
-            <Link to={item.to}>
-              <strong>{item.label}</strong>
-              <span>{item.hint}</span>
-            </Link>
-          </li>
-        ))}
+      <header className="pub-related-head">
+        <p className="pub-related-kicker">Keşfet</p>
+        <h2>{title}</h2>
+      </header>
+      <ul data-count={visible.length}>
+        {visible.map((item) => {
+          const cover = coverForRelatedPath(item.to)
+          const group = groupForRelatedPath(item.to, item.group)
+          return (
+            <li key={item.to}>
+              <Link to={item.to} className="pub-related-card">
+                <span className="pub-related-media">
+                  <img src={cover.src} alt="" loading="lazy" decoding="async" />
+                  <span className="pub-related-shade" aria-hidden />
+                  {group.toLocaleLowerCase('tr-TR') !== item.label.toLocaleLowerCase('tr-TR') ? (
+                    <span className="pub-related-cat">{group}</span>
+                  ) : null}
+                </span>
+                <span className="pub-related-copy">
+                  <strong>{item.label}</strong>
+                  <span>{item.hint}</span>
+                  <em>Sayfaya git →</em>
+                </span>
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

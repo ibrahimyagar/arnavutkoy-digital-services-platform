@@ -124,8 +124,8 @@ export function getMegaMenuLayout(args: MegaArgs): {
         'cash-desk-member',
         'debts',
         'requests',
+        'my-events',
         'docs-apply',
-        'settings',
       ]),
     })
   }

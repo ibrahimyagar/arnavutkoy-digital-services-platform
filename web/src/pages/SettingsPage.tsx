@@ -1,20 +1,16 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 import { PageHeader } from '../components/ui/PageChrome'
-import { apiFetch } from '../lib/api'
+import { apiFetch, type UserProfile } from '../lib/api'
+import {
+  DEFAULT_NOTIFY_PREFS,
+  loadNotifyPrefs,
+  saveNotifyPrefs,
+  type NotifyKind,
+  type NotifyPrefs,
+} from '../lib/hubNotices'
 import { RequireAuth } from './PanelPage'
-
-type UserProfile = {
-  userId: string
-  fullName: string
-  email: string
-  nationalId: string
-  phoneNumber: string
-  birthDate: string | null
-  gender: string
-  roles: string[]
-  createdAtUtc: string
-}
 
 const roleLabels: Record<string, string> = {
   Citizen: 'Vatandaş',
@@ -27,7 +23,16 @@ const genderLabels: Record<string, string> = {
   K: 'Kadın',
 }
 
+const notifyLabels: { id: NotifyKind; label: string; hint: string }[] = [
+  { id: 'payment', label: 'Ödeme hatırlatmaları', hint: 'Vadesi yaklaşan borçlar' },
+  { id: 'result', label: 'Başvuru sonuçları', hint: 'Belge ve yardım durumu' },
+  { id: 'announcement', label: 'Belediye duyuruları', hint: 'Yayımlanan resmi duyurular' },
+  { id: 'system', label: 'Sistem bildirimleri', hint: 'Hesap ve oturum uyarıları' },
+]
+
 function SettingsContent() {
+  const { user } = useAuth()
+  const location = useLocation()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [currentPassword, setCurrentPassword] = useState('')
@@ -37,6 +42,9 @@ function SettingsContent() {
   const [info, setInfo] = useState<string | null>(null)
   const [phoneBusy, setPhoneBusy] = useState(false)
   const [passwordBusy, setPasswordBusy] = useState(false)
+  const [prefs, setPrefs] = useState<NotifyPrefs>(() =>
+    user ? loadNotifyPrefs(user.userId) : { ...DEFAULT_NOTIFY_PREFS },
+  )
 
   async function loadProfile() {
     const me = await apiFetch<UserProfile>('/api/v1/auth/me', {}, true)
@@ -49,6 +57,11 @@ function SettingsContent() {
       setError(err instanceof Error ? err.message : 'Profil yüklenemedi.')
     })
   }, [])
+
+  useEffect(() => {
+    if (!location.hash) return
+    document.querySelector(location.hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [location.hash, profile])
 
   async function savePhone(event: FormEvent) {
     event.preventDefault()
@@ -127,7 +140,7 @@ function SettingsContent() {
       {error ? <div className="error-box">{error}</div> : null}
       {info ? <div className="notice">{info}</div> : null}
 
-      <section className="panel stack">
+      <section id="profil" className="panel stack" style={{ scrollMarginTop: '5.5rem' }}>
         <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Profil</h2>
         {!profile ? (
           <p className="muted">Yükleniyor…</p>
@@ -174,8 +187,8 @@ function SettingsContent() {
         </p>
       </section>
 
-      <form className="panel stack" onSubmit={(e) => void savePhone(e)}>
-        <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.35rem' }}>Telefon</h2>
+      <form id="iletisim" className="panel stack" style={{ scrollMarginTop: '5.5rem' }} onSubmit={(e) => void savePhone(e)}>
+        <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.35rem' }}>İletişim</h2>
         <div className="field">
           <label htmlFor="settingsPhone">Telefon numarası</label>
           <input
@@ -192,7 +205,7 @@ function SettingsContent() {
         </button>
       </form>
 
-      <form className="panel stack" onSubmit={(e) => void changePassword(e)}>
+      <form id="parola" className="panel stack" style={{ scrollMarginTop: '5.5rem' }} onSubmit={(e) => void changePassword(e)}>
         <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.35rem' }}>Parola</h2>
         <div className="field">
           <label htmlFor="currentPassword">Mevcut parola</label>
@@ -236,6 +249,33 @@ function SettingsContent() {
           {passwordBusy ? 'Kaydediliyor…' : 'Parolayı güncelle'}
         </button>
       </form>
+
+      <section id="bildirimler" className="panel stack" style={{ scrollMarginTop: '5.5rem' }}>
+        <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Bildirim ayarları</h2>
+        <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
+          Tercihler bu cihazda saklanır; panele yansıyan bildirim türlerini seçersiniz.
+        </p>
+        {notifyLabels.map((item) => (
+          <label key={item.id} style={{ display: 'grid', gap: '0.15rem' }}>
+            <span>
+              <input
+                type="checkbox"
+                checked={prefs[item.id]}
+                onChange={(event) => {
+                  if (!user) return
+                  const next = { ...prefs, [item.id]: event.target.checked }
+                  setPrefs(next)
+                  saveNotifyPrefs(user.userId, next)
+                }}
+              />{' '}
+              {item.label}
+            </span>
+            <span className="muted" style={{ fontSize: '0.82rem' }}>
+              {item.hint}
+            </span>
+          </label>
+        ))}
+      </section>
     </div>
   )
 }

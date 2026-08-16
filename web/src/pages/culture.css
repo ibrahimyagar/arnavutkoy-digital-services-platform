@@ -1,0 +1,651 @@
+.ku {
+  --ku-ink: #1c1410;
+  --ku-wine: #7a2e3a;
+  --ku-gold: #b0894f;
+  --ku-paper: #f6efe4;
+  --ku-card: #fffaf3;
+  --ku-line: rgba(28, 20, 16, 0.12);
+  display: grid;
+  gap: 1.7rem;
+}
+
+.ku-hero {
+  position: relative;
+  min-height: 26rem;
+  overflow: hidden;
+  background: var(--ku-ink);
+}
+
+.ku-hero img {
+  display: block;
+  width: 100%;
+  height: 26rem;
+  object-fit: cover;
+  filter: saturate(0.82) contrast(1.06);
+}
+
+.ku-hero-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(28, 20, 16, 0.82) 12%, rgba(28, 20, 16, 0.18) 70%);
+}
+
+.ku-hero-plate {
+  position: absolute;
+  left: 1.4rem;
+  bottom: 1.4rem;
+  max-width: 28rem;
+  padding: 1.15rem 1.2rem 1.2rem;
+  background: var(--ku-paper);
+  border-left: 4px solid var(--ku-gold);
+}
+
+.ku-kicker,
+.ku-section-head p,
+.ku-label {
+  margin: 0;
+  color: var(--ku-wine);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.ku-hero-plate h1,
+.ku-section-head h2,
+.kud-head h1,
+.ku-stage-copy h2,
+.ku-card-copy h3 {
+  margin: 0.2rem 0 0;
+  color: var(--ku-ink);
+  font-family: var(--font-display);
+  letter-spacing: -0.035em;
+}
+
+.ku-hero-plate h1 {
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.ku-hero-plate p {
+  margin: 0.7rem 0 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.ku-pulse {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--ku-paper);
+}
+
+.ku-pulse div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.9rem 1rem;
+  border-right: 1px solid var(--ku-line);
+}
+
+.ku-pulse div:last-child {
+  border-right: 0;
+}
+
+.ku-pulse strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--ku-ink);
+}
+
+.ku-pulse span,
+.ku-count,
+.ku-meta,
+.ku-notice {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.ku-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+
+.ku-search {
+  width: min(32rem, 100%);
+}
+
+.ku-search-box {
+  position: relative;
+}
+
+.ku-search input {
+  padding-left: 2.65rem;
+  border-radius: 2px;
+}
+
+.ku-search-icon {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: rgba(28, 20, 16, 0.4);
+  pointer-events: none;
+}
+
+.ku-filters {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.ku-chips {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.ku-chip {
+  appearance: none;
+  flex: 0 0 auto;
+  border: 1px solid var(--ku-line);
+  background: transparent;
+  color: var(--ku-ink);
+  padding: 0.38rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ku-chip.is-on,
+.ku-chip:hover {
+  background: var(--ku-ink);
+  border-color: var(--ku-ink);
+  color: #fffaf3;
+}
+
+.ku-chip:focus-visible,
+.ku-atlas-list button:focus-visible,
+.ku-atlas-list a:focus-visible,
+.ku-card:focus-visible,
+.ku-stage:focus-visible,
+.ku-door:focus-visible,
+.ku-back:focus-visible {
+  outline: 2px solid var(--ku-wine);
+  outline-offset: 2px;
+}
+
+.ku-week ol,
+.ku-route ol,
+.ku-atlas-list ul,
+.kud-news ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ku-week ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.ku-week a,
+.kud-news a {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--ku-card);
+  border: 1px solid var(--ku-line);
+}
+
+.ku-week time {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: var(--ku-ink);
+  color: #fffaf3;
+}
+
+.ku-week time strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.ku-week time span,
+.ku-week em,
+.kud-news span {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ku-wine);
+}
+
+.ku-week em {
+  display: block;
+}
+
+.ku-section-head h2 {
+  font-size: 1.65rem;
+}
+
+.ku-stage {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  min-height: 20rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--ku-ink);
+}
+
+.ku-stage-media {
+  min-height: 16rem;
+  overflow: hidden;
+}
+
+.ku-stage-media img,
+.ku-card-media img,
+.kud-cover img,
+.kud-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 420ms ease;
+}
+
+.ku-stage:hover img,
+.ku-card:hover img {
+  transform: scale(1.06);
+}
+
+.ku-stage-copy {
+  display: grid;
+  align-content: end;
+  gap: 0.55rem;
+  padding: 1.4rem 1.3rem;
+  color: #f6efe4;
+}
+
+.ku-stage-copy .ku-label,
+.ku-stage-copy .ku-meta {
+  color: var(--ku-gold);
+}
+
+.ku-stage-copy h2 {
+  color: #fffaf3;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.ku-stage-copy p {
+  margin: 0;
+  color: rgba(246, 239, 228, 0.78);
+  line-height: 1.5;
+}
+
+.ku-go {
+  width: fit-content;
+  font-weight: 700;
+}
+
+.ku-go::after {
+  content: ' →';
+  display: inline-block;
+  transition: transform 240ms ease;
+}
+
+.ku-stage:hover .ku-go::after,
+.ku-card:hover .ku-go::after {
+  transform: translateX(0.28rem);
+}
+
+.ku-atlas {
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  gap: 1rem;
+  min-height: 26rem;
+}
+
+.ku-atlas-list ul {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ku-atlas-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  border-bottom: 1px solid var(--ku-line);
+  padding-bottom: 0.4rem;
+}
+
+.ku-atlas-list button {
+  appearance: none;
+  display: grid;
+  gap: 0.12rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.ku-atlas-list button.is-on {
+  border-left: 3px solid var(--ku-gold);
+  padding-left: 0.55rem;
+}
+
+.ku-atlas-list button.is-on strong {
+  color: var(--ku-wine);
+}
+
+.ku-atlas-list span,
+.ku-atlas-list em {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  font-style: normal;
+}
+
+.ku-atlas-list a {
+  color: var(--ku-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ku-atlas-map,
+.ku-map {
+  min-height: 22rem;
+  background: var(--ku-paper);
+}
+
+.ku-atlas-map iframe,
+.ku-map iframe {
+  width: 100%;
+  height: 22rem;
+  border: 0;
+}
+
+.ku-atlas-map a {
+  display: block;
+  padding: 0.55rem 0.2rem 0;
+  color: var(--ku-ink);
+  font-size: 0.85rem;
+}
+
+.ku-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.ku-card {
+  display: grid;
+  grid-template-rows: 10.5rem minmax(0, 1fr);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  background: var(--ku-card);
+  border: 1px solid var(--ku-line);
+}
+
+.ku-card-copy {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.95rem 1rem 1.05rem;
+}
+
+.ku-card-copy p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ku-route ol {
+  display: grid;
+  gap: 0;
+  border-left: 2px solid var(--ku-gold);
+  padding-left: 1.1rem;
+}
+
+.ku-route li {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0.7rem 0;
+}
+
+.ku-route span {
+  color: var(--ku-gold);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.ku-route a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ku-continue-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.ku-door {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.05rem 1rem 1.1rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--ku-paper);
+  border-top: 3px solid var(--ku-wine);
+}
+
+.ku-door strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ku-ink);
+}
+
+.ku-door p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.ku-empty,
+.ku-notice {
+  margin: 0;
+}
+
+.ku-back {
+  width: fit-content;
+  color: var(--ku-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.kud-head {
+  max-width: 44rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.kud-head h1 {
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.05;
+}
+
+.kud-head p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  line-height: 1.55;
+}
+
+.kud-cover {
+  margin: 0;
+  max-height: 26rem;
+  overflow: hidden;
+}
+
+.kud-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18rem;
+  gap: 1.5rem 1.8rem;
+  align-items: start;
+}
+
+.kud-prose {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 42rem;
+}
+
+.kud-prose p {
+  margin: 0;
+  color: #2b221c;
+  font-size: 1.04rem;
+  line-height: 1.7;
+}
+
+.kud-label {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.1rem 1rem;
+  background: var(--ku-ink);
+  color: #f6efe4;
+}
+
+.kud-label > p {
+  margin: 0;
+  color: var(--ku-gold);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.kud-label dl {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.kud-label dt {
+  color: rgba(246, 239, 228, 0.55);
+  font-size: 0.75rem;
+}
+
+.kud-label dd {
+  margin: 0.15rem 0 0;
+}
+
+.kud-label a {
+  color: #fff;
+}
+
+.kud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.kud-actions .btn {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.kud-share {
+  margin: 0;
+  color: var(--ku-gold);
+  font-size: 0.8rem;
+}
+
+.kud-gallery > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.kud-gallery figure {
+  margin: 0;
+  min-height: 7rem;
+  overflow: hidden;
+}
+
+.kud-news ul {
+  display: grid;
+  gap: 0.55rem;
+}
+
+@media (max-width: 980px) {
+  .ku-pulse,
+  .ku-week ol,
+  .ku-grid,
+  .ku-continue-grid,
+  .kud-gallery > div {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ku-stage,
+  .ku-atlas,
+  .kud-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .ku-pulse,
+  .ku-week ol,
+  .ku-grid,
+  .ku-continue-grid,
+  .kud-gallery > div {
+    grid-template-columns: 1fr;
+  }
+
+  .ku-pulse {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ku-hero,
+  .ku-hero img {
+    min-height: 18rem;
+    height: 18rem;
+  }
+
+  .ku-hero-plate {
+    left: 0.8rem;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    max-width: none;
+  }
+
+  .ku-atlas-map,
+  .ku-map,
+  .ku-atlas-map iframe,
+  .ku-map iframe {
+    min-height: 16rem;
+    height: 16rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ku-stage-media img,
+  .ku-card-media img,
+  .ku-go::after {
+    transition: none;
+    transform: none;
+  }
+}

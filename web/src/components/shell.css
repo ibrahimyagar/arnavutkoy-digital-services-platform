@@ -96,6 +96,89 @@
   white-space: nowrap;
 }
 
+.shell-account {
+  position: relative;
+}
+
+.shell-account-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shell-account-btn[aria-expanded='true'] {
+  border-color: rgba(10, 31, 46, 0.22);
+}
+
+.shell-account-mark {
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.shell-account-name {
+  max-width: 7.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell-account-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 80;
+  display: grid;
+  min-width: 14rem;
+  max-width: min(18rem, calc(100vw - 1.25rem));
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(10, 31, 46, 0.12);
+}
+
+.shell-account-menu a,
+.shell-account-menu button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shell-account-menu a:hover,
+.shell-account-menu button:hover {
+  background: var(--paper);
+}
+
+.shell-account-menu button {
+  color: var(--danger);
+}
+
 .shell-notify {
   position: relative;
   display: inline-flex;
@@ -460,8 +543,21 @@ body.shell-menu-lock {
 
 @media (max-width: 980px) {
   .shell-user,
+  .shell-account-name,
   .shell-btn-register {
     display: none;
+  }
+
+  .shell-account-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .shell-account-menu a,
+  .shell-account-menu button {
+    min-height: 2.7rem;
   }
 
   .shell-menu-toggle-label {
