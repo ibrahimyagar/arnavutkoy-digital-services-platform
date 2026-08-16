@@ -14,10 +14,10 @@
   isolation: isolate;
 }
 
-@supports (width: 100dvw) {
+@media (min-width: 981px) {
   .hl-hero {
-    width: 100dvw;
-    margin-left: calc(50% - 50dvw);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
   }
 }
 
@@ -283,11 +283,13 @@
 
 .hl-title {
   display: block;
+  max-width: 100%;
   font-family: var(--font-sans, 'Sora', sans-serif);
-  font-size: clamp(2.8rem, 8vw, 5.4rem);
+  font-size: clamp(2.25rem, 9vw, 5.4rem);
   font-weight: 750;
   letter-spacing: -0.03em;
   line-height: 0.92;
+  overflow-wrap: anywhere;
   text-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -576,6 +578,33 @@
 @media (max-width: 720px) {
   .hl-nav-actions .hl-btn--ghost {
     display: none;
+  }
+
+  .hl-body,
+  .hl-copy {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .hl-title {
+    font-size: clamp(2.05rem, 11.5vw, 3.1rem);
+  }
+
+  .hl-script {
+    font-size: clamp(1.85rem, 9vw, 2.8rem);
+  }
+
+  .hl-lead {
+    max-width: 100%;
+  }
+
+  .hl-cta {
+    width: 100%;
+  }
+
+  .hl-cta .hl-btn--lg {
+    flex: 1 1 10rem;
+    min-width: 0;
   }
 
   .hl-dock {
