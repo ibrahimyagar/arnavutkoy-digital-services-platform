@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { AppShell } from './components/AppShell'
+import { ScrollToTop } from './components/ScrollToTop'
 import { BusLineDetailPage, BusLinesPage } from './pages/BusLinesPages'
 import { BusLinesManagePage } from './pages/BusLinesManagePage'
 import { AnnouncementsManagePage } from './pages/AnnouncementsManagePage'
