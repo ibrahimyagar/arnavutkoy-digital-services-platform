@@ -1,88 +1,33 @@
-# Arnavutköy Belediyesi Örnek Dijital Hizmetler Platformu
+# Arnavutköy Dijital Hizmetler
 
-> ⚠️ **Bu proje bağımsız bir portföy/demo çalışmasıdır; herhangi bir resmi belediye kurumunu temsil etmez ve onunla bağlantılı değildir.**
-> Tüm vatandaş/personel/işlem verileri kurgusaldır. Kamuya açık coğrafi adlar (ör. mahalle isimleri) dışında gerçek kişisel veri kullanılmamıştır.
+Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış portföy uygulaması. Vatandaş portalı, e-belediye işlemleri, ulaşım rehberi ve personel operasyonlarını tek üründe birleştirir.
+
+> **Bağımsız portföy / demo çalışmasıdır.** Resmi bir belediye kurumunu temsil etmez. Tüm vatandaş, personel ve işlem verileri kurgusaldır.
 
 <p align="center">
-  <img src="docs/arnavutkoy-showcase.png" alt="Arnavutköy Dijital Hizmetler — ana sayfa hero ve modern belediye portalı arayüzü" width="960" />
+  <img src="docs/arnavutkoy-showcase.png" alt="Arnavutköy Dijital Hizmetler — ana sayfa" width="960" />
 </p>
 
 <p align="center">
-  <sub>Modern teal/navy belediye portalı — tam ekran hero, hızlı erişim dock, resimli içerik, e-Belediye ve ulaşım kartı</sub>
+  <a href="https://arnavutkoy-dijital.pages.dev"><img src="https://img.shields.io/badge/Live%20Demo-Cloudflare%20Pages-F38020?style=flat-square" alt="Live Demo" /></a>
+  <img src="https://img.shields.io/badge/.NET-8%20LTS-512BD4?style=flat-square&logo=dotnet" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=flat-square&logo=postgresql" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react" alt="React TypeScript" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Status-Portfolio%20Demo-0E7C7B?style=flat-square" alt="Portfolio Demo" />
 </p>
 
-## Neden bu proje?
-
-Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış portföy uygulaması.
-**.NET 8 + PostgreSQL** üzerinde Clean Architecture + CQRS ile vatandaş ve personel akışlarını
-tek üründe birleştirir: güvenli kimlik, borç / vezne, hizmet masası, ulaşım, coğrafya ve operasyon panelleri.
-Odak; okunabilir mimari, test edilebilir API ve gerçekçi bir demo deneyimi.
-
-UI tarafında hero odaklı modern kurumsal dil kullanılır: lacivert / turkuaz palet, üst mega menü,
-resimli duyuru-haber kartları ve tutarlı `PublicPage` içerik şablonu.
-
-## Ekran görüntüleri
-
-| Ana sayfa (hero) | Duyurular ve Haberler |
-| :---: | :---: |
-| <img src="docs/screenshots/home-guest.png" alt="Ana sayfa hero ve hızlı erişim dock" width="420" /> | <img src="docs/screenshots/home-stories.png" alt="Resimli duyuru ve haber kartları" width="420" /> |
-
-| E-Belediye | Kurumsal |
-| :---: | :---: |
-| <img src="docs/screenshots/e-belediye.png" alt="E-Belediye hizmet hub" width="420" /> | <img src="docs/screenshots/kurumsal.png" alt="Kurumsal sayfa kapak ve içerik" width="420" /> |
-
-| Vatandaş paneli | Borçlarım |
-| :---: | :---: |
-| <img src="docs/screenshots/panel-vatandas.png" alt="Vatandaş paneli özeti" width="420" /> | <img src="docs/screenshots/borclar.png" alt="Borç listesi ve ödeme" width="420" /> |
-
-| Hizmet masası | Muhtarlıklar |
-| :---: | :---: |
-| <img src="docs/screenshots/hizmet-masasi.png" alt="Hizmet masası talepleri" width="420" /> | <img src="docs/screenshots/muhtarliklar.png" alt="Mahalle / muhtar dizini" width="420" /> |
-
-| Ulaşım kartı | Ulaşım ağı |
-| :---: | :---: |
-| <img src="docs/screenshots/ulasim-kart.png" alt="Ulaşım kartı bakiye ve biniş" width="420" /> | <img src="docs/screenshots/ulasim-agi.png" alt="Ulaşım ağı hub" width="420" /> |
-
-## Öne çıkanlar
-
-- **Vatandaş portalı** — duyuru, haber, etkinlik, kültür, faaliyet, hizmet rehberi, dijital vezne, borç, hizmet masası, ulaşım, mülk, su, sosyal yardım
-- **E-Belediye** — belge başvurusu / takip, nikah randevu, imar durumu & harç hesabı, spor tesisi randevu, iletişim
-- **Modern portal UI** — tam ekran hero, hızlı erişim dock, navy mega menü, AI görselleri ve ortak PublicPage düzeni
-- **Personel / yönetici** — talep masası, duyuru yönetimi, coğrafya, hat ve İK yönetimi
-- **Kimlik** — e-posta + şifre, JWT access + refresh rotation, rol bazlı yetki
-- **Mimari** — Clean Architecture, CQRS (MediatR), FluentValidation, EF Core + PostgreSQL
-- **Ops** — Docker Compose, health check, Swagger, GitHub Actions, entegrasyon testleri
-
-## Teknoloji
-
-| Alan | Seçim |
-|---|---|
-| Runtime | .NET 8 (LTS) |
-| API | ASP.NET Core Web API + Swagger |
-| Veri | EF Core 8 + PostgreSQL 16 |
-| Mimari | Clean Architecture + CQRS (MediatR) |
-| Validasyon | FluentValidation |
-| Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
-| Loglama | Serilog (konsol + opsiyonel Seq) |
-| UI | Vite + React + TypeScript |
-| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers, Coverlet |
-| Ops | Docker Compose, GitHub Actions |
-
-## Hızlı başlangıç
-
-```bash
-cd docker
-cp .env.example .env
-docker compose up --build -d
-```
+## Canlı demo
 
 | | |
 |---|---|
-| Swagger | http://localhost:8080/swagger |
-| Health | http://localhost:8080/health |
-| Vatandaş UI | `cd web && npm install && npm run dev` → http://localhost:5173 |
+| **Vatandaş UI** | [https://arnavutkoy-dijital.pages.dev](https://arnavutkoy-dijital.pages.dev) |
+| **API Health** | [https://arnavutkoy-digital-services-platform.onrender.com/health](https://arnavutkoy-digital-services-platform.onrender.com/health) |
+| **API Swagger** | [https://arnavutkoy-digital-services-platform.onrender.com/swagger](https://arnavutkoy-digital-services-platform.onrender.com/swagger) |
 
-### Demo hesaplar
+> Render free tier’da API ~15 dk hareketsizlikten sonra uykuya geçebilir; ilk istek 30–60 sn sürebilir.
+
+### Demo hesaplar (seed)
 
 | Rol | E-posta | Şifre |
 |---|---|---|
@@ -90,50 +35,206 @@ docker compose up --build -d
 | Görevli | `gorevli@demo.arnavutkoy.local` | `Demo!Officer123` |
 | Yönetici | `yonetici@demo.arnavutkoy.local` | `Demo!Admin123` |
 
-Ortam değişkenleri → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
-Portföy demo turu → [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md).
-Vatandaş arayüzü → [`web/README.md`](web/README.md).
+---
+
+## Proje amacı
+
+Kamu kurumuna yakışan, güvenilir ve modern bir dijital belediye deneyimini mühendislik disipliniyle göstermek:
+
+- Clean Architecture + CQRS ile okunabilir / test edilebilir API
+- JWT kimlik + rol bazlı yetki
+- Gerçekçi vatandaş ve personel akışları (seed demo verisi)
+- Docker ile tekrarlanabilir ortam
+- React SPA ile tutarlı kurumsal UI
+
+---
+
+## Ekran görüntüleri
+
+### Ana sayfa
+
+![Ana sayfa](docs/screenshots/01-ana-sayfa.png)
+
+### Giriş
+
+![Giriş](docs/screenshots/02-giris.png)
+
+### E-Belediye
+
+![E-Belediye](docs/screenshots/03-e-belediye.png)
+
+### Hizmet rehberi
+
+![Hizmet rehberi](docs/screenshots/04-hizmet-rehberi.png)
+
+### Ulaşım ağı
+
+![Ulaşım ağı](docs/screenshots/05-ulasim-agi.png)
+
+### Hatlar
+
+![Hatlar](docs/screenshots/06-hatlar.png)
+
+### Haberler
+
+![Haberler](docs/screenshots/07-haberler.png)
+
+### Duyurular
+
+![Duyurular](docs/screenshots/08-duyurular.png)
+
+### Vatandaş paneli
+
+![Vatandaş paneli](docs/screenshots/09-panel.png)
+
+### Borçlarım
+
+![Borçlarım](docs/screenshots/10-borclar.png)
+
+### İletişim
+
+![İletişim](docs/screenshots/11-iletisim.png)
+
+---
+
+## Özellikler
+
+### Dijital belediye hizmetleri
+
+- E-Belediye işlem merkezi (arama, kategori, takip kodu)
+- Dijital vezne (demo ödeme masası)
+- Borç sorgulama / ödeme akışı (emlak, su)
+- Belge başvurusu ve başvuru takibi (`BV-` / `SP-` / `NK-`)
+- Nikah randevusu, imar durumu & harç hesabı, spor tesisi randevusu
+- Hizmet rehberi (keşif / yönlendirme)
+- Sosyal yardım ve talep / öneri kayıtları
+- İletişim merkezi (niyet seçimi, form, SSS, demo konum)
+
+### Ulaşım
+
+- Ulaşım ağı merkezi (rota arama, harita, önemli uçlar)
+- Otobüs hat kataloğu (filtre, mahalle, güzergâh uçları)
+- Hat detay sayfaları
+- Ulaşım kartı (bakiye / hareket — giriş gerekir)
+- Biniş simülasyonu (demo tarife)
+- Leaflet harita katmanı
+
+### İlçe bilgi sistemi
+
+- Haberler, duyurular, etkinlikler, faaliyetler
+- Kültür & sanat mekânları
+- Muhtarlıklar dizini
+- Birimler (İK dizini)
+- Kurumsal sayfa ve başkan mesajı
+
+### Hesap ve operasyon
+
+- Kayıt / giriş / şifremi unuttum (demo)
+- Vatandaş paneli (borç, talep, kart, randevu özeti)
+- Personel: hizmet masası, duyuru yönetimi, hat / birim / coğrafya yönetimi
+- Rol bazlı yetki (Citizen / Officer / Administrator)
+
+---
+
+## Teknoloji yığını
+
+| Alan | Seçim |
+|---|---|
+| Backend | ASP.NET Core 8 Web API |
+| Mimari | Clean Architecture + CQRS (MediatR) |
+| Veri | Entity Framework Core 8 + PostgreSQL |
+| Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
+| Validasyon | FluentValidation |
+| Log | Serilog (konsol + opsiyonel Seq) |
+| Frontend | Vite 7 + React 19 + TypeScript |
+| Routing | React Router 7 |
+| Harita | Leaflet |
+| Stil | Sayfa bazlı özel CSS (Tailwind yok) |
+| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers |
+| Ops | Docker Compose, GitHub Actions CI, Swagger, health checks |
+
+---
+
+## Mimari
+
+```text
+src/
+├── ArnavutkoyBelediyesi.Domain          # Entity, kurallar, domain event
+├── ArnavutkoyBelediyesi.Application     # CQRS handlers, DTO, FluentValidation
+├── ArnavutkoyBelediyesi.Persistence     # EF Core, Identity, migration, seed
+├── ArnavutkoyBelediyesi.Infrastructure  # JWT, Identity adaptörü, CurrentUser
+└── ArnavutkoyBelediyesi.Api             # Controllers, middleware, DI, health
+
+tests/
+├── *.Domain.Tests
+├── *.Application.Tests
+├── *.Infrastructure.Tests
+└── *.Api.IntegrationTests
+
+web/                                     # Vite React vatandaş / personel UI
+docker/                                  # Dockerfile + compose
+docs/                                    # Mimari, API, güvenlik, demo turu
+.github/workflows/                       # CI
+```
+
+Bağımlılık yönü: **Api → Application → Domain**; Persistence / Infrastructure Application arayüzlerini uygular.
+
+Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+---
+
+## Hızlı başlangıç
+
+### Docker (API + PostgreSQL)
 
 ```bash
-dotnet test ArnavutkoyBelediyesi.slnx   # Docker Desktop gerekir (Testcontainers)
+cd docker
+cp .env.example .env
+docker compose up --build -d
 ```
+
+| Kaynak | Adres |
+|---|---|
+| Swagger | http://localhost:8080/swagger |
+| Health | http://localhost:8080/health |
+
+### Vatandaş UI
+
+```bash
+cd web
+cp .env.example .env   # VITE_API_BASE_URL=http://localhost:8080
+npm install
+npm run dev
+```
+
+Tarayıcı: http://localhost:5173
+
+### Testler
+
+```bash
+dotnet test ArnavutkoyBelediyesi.slnx
+```
+
+> Entegrasyon testleri için Docker Desktop gerekir (Testcontainers).
+
+Ortam değişkenleri ve dağıtım notları → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+
+---
 
 ## Dokümantasyon
 
 | Belge | İçerik |
 |---|---|
-| [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md) | Portföy demo senaryosu (vatandaş / görevli / yönetici) |
-| [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı ve modül envanteri |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, mimari kararlar |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli ve kontroller |
-| [`docs/TESTING.md`](docs/TESTING.md) | Test stratejisi |
+| [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md) | Portföy demo senaryosu |
+| [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar ve CQRS |
 | [`docs/API.md`](docs/API.md) | v1 uç nokta haritası |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker / sırlar / demo hesaplar |
-| [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) | Mühendislik varsayımları |
-| [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md) | Faz 10 doğrulama kaydı |
-| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | Katkı kuralları |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli |
+| [`docs/TESTING.md`](docs/TESTING.md) | Test stratejisi |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker / sırlar / env |
+| [`web/README.md`](web/README.md) | Frontend notları |
 
-## Proje durumu
-
-- [x] Faz 0–8 — Keşif → domain → application → persistence → API → güvenlik → test → Docker/CI
-- [x] Faz 9 — Kapsamlı dokümantasyon
-- [x] Faz 10 — Son kontrol (Definition of Done)
-- [x] Yol haritası R1–R6 + vatandaş web paneli
-- [x] Personel operasyon UI + demo walkthrough
-- [x] E-posta giriş + yoğunlaştırılmış vatandaş UX + README vitrin
-- [x] Hero odaklı modern belediye portal UI (teal/navy + glassmorphism)
-
-DoD doğrulama kaydı: [`docs/DEFINITION_OF_DONE.md`](docs/DEFINITION_OF_DONE.md).
-
-## Çözüm yapısı (özet)
-
-```
-src/Domain | Application | Persistence | Infrastructure | Api
-tests/*.(Domain|Application|Infrastructure|Api.Integration)Tests
-web/      docker/   docs/   .github/workflows/
-```
-
-Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+---
 
 ## Lisans
 
