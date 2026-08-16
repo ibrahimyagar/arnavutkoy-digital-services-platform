@@ -265,25 +265,6 @@ function AnnouncementCard({ entry }: { entry: Bulletin }) {
   )
 }
 
-function BulletinRow({ entry }: { entry: Bulletin }) {
-  const stamp = formatAnnouncementStamp(entry.published)
-
-  return (
-    <Link to={`/duyurular/${entry.item.id}`} className="ann-row">
-      <time className="ann-stamp" dateTime={entry.published.toISOString()}>
-        <b>{stamp.day}</b>
-        <span>{stamp.month}</span>
-      </time>
-      <div className="ann-row-copy">
-        <div className="ann-row-meta">
-          <span className="ann-pill">{entry.category.label}</span>
-        </div>
-        <h3>{entry.item.title}</h3>
-      </div>
-    </Link>
-  )
-}
-
 export function AnnouncementDetailPage() {
   const { id } = useParams()
   const [item, setItem] = useState<Announcement | null>(null)
