@@ -327,6 +327,12 @@ export type BusLineDetails = BusLine & {
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 
+if (import.meta.env.PROD && !API_BASE) {
+  console.error(
+    '[arnavutkoy] VITE_API_BASE_URL missing in production build — API calls will hit the Pages origin and fail.',
+  )
+}
+
 type TokenStore = {
   accessToken: string
   refreshToken: string

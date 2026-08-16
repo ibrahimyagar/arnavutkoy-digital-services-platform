@@ -3,14 +3,22 @@
   --hl-teal-deep: var(--teal-deep);
   --hl-navy: var(--navy);
   position: relative;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   min-height: 100dvh;
-  margin-left: calc(50% - 50vw);
+  margin-left: 0;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
   color: #fff;
   overflow: hidden;
   isolation: isolate;
+}
+
+@supports (width: 100dvw) {
+  .hl-hero {
+    width: 100dvw;
+    margin-left: calc(50% - 50dvw);
+  }
 }
 
 .hl-hero-bg {

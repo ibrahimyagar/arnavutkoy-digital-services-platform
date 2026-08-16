@@ -83,3 +83,27 @@ GitHub Actions (`.github/workflows/ci.yml`):
   veritabanında hash'li tutulduğu için anahtar değişimi onları doğrudan etkilemez, ancak yeni
   access token üretimi yeni anahtarla yapılır.
 - API konteyneri non-root kullanıcı (`uid 10001`) ile çalışır.
+
+## Cloudflare Pages + Render (portföy canlısı)
+
+| Parça | Servis | Not |
+|---|---|---|
+| UI | Cloudflare Pages (`web/` root) | Build: `npm ci && npm run build`, output: `dist` |
+| API | Render Docker | `docker/Dockerfile` |
+| DB | Neon / managed Postgres | `ConnectionStrings__Default` |
+
+### Cloudflare Pages ortam değişkeni (zorunlu)
+
+| Name | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://arnavutkoy-digital-services-platform.onrender.com` (sonda `/` yok) |
+
+Bu değer **build zamanında** gömülür. Değiştirdikten sonra Pages’te **Retry deployment** gerekir.
+
+### Render CORS (zorunlu)
+
+| Key | Value |
+|---|---|
+| `Cors__AllowedOrigins__0` | `https://arnavutkoy-dijital.pages.dev` |
+
+SPA deep-link için `web/public/_redirects` (`/* → /index.html 200`) repoda mevcuttur.
