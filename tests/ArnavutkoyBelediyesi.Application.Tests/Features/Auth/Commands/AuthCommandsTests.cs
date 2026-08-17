@@ -30,6 +30,16 @@ public sealed class RegisterCitizenCommandValidatorTests
         result.ShouldNotHaveAnyValidationErrors();
     }
 
+    [Fact]
+    public void Validate_WithPaddedEmail_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { Email = "  ahmet@test.local  " };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
+    }
+
     [Theory]
     [InlineData("not-an-email")]
     [InlineData("")]
@@ -172,6 +182,32 @@ public sealed class RegisterCitizenCommandHandlerTests
             CancellationToken.None);
 
         result.Should().Be(expected);
+    }
+}
+
+public sealed class LoginCommandValidatorTests
+{
+    private readonly LoginCommandValidator _validator = new();
+
+    [Theory]
+    [InlineData("ahmet@test.local")]
+    [InlineData("AHMET@test.local")]
+    [InlineData("  ahmet@test.local  ")]
+    public void Validate_WithUsableEmail_ShouldNotHaveError(string email)
+    {
+        var result = _validator.TestValidate(new LoginCommand(email, "Sifre123"));
+
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("not-an-email")]
+    public void Validate_WithInvalidEmail_ShouldHaveError(string email)
+    {
+        var result = _validator.TestValidate(new LoginCommand(email, "Sifre123"));
+
+        result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 }
 

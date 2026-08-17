@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { RequestStatusTimeline } from '../components/RequestStatusTimeline'
+import { BusyButton } from '../components/ui/BusyButton'
 import { apiFetch, type RequestCategory } from '../lib/api'
 import { isStaff } from '../lib/roles'
 import {
@@ -120,7 +121,7 @@ function RequestDetailContent() {
 
   async function onReply(event: FormEvent) {
     event.preventDefault()
-    if (!id) return
+    if (!id || busy) return
     setBusy(true)
     setError(null)
     setInfo(null)
@@ -414,9 +415,9 @@ function RequestDetailContent() {
                   {reply.length}/2000
                 </p>
               </div>
-              <button className="btn btn-primary" type="submit" disabled={busy}>
-                {busy ? 'Gönderiliyor…' : 'Gönder'}
-              </button>
+              <BusyButton busy={busy} busyLabel="Gönderiliyor…">
+                Gönder
+              </BusyButton>
             </form>
           ) : (
             <div className="notice">Bu talep kapatılmış; yeni mesaj eklenemez.</div>

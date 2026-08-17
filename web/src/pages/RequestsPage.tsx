@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PageHeader } from '../components/ui/PageChrome'
+import { BusyButton } from '../components/ui/BusyButton'
 import {
   apiFetch,
   type CitizenRequestSummary,
@@ -69,6 +70,7 @@ function RequestsContent() {
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     const listPath = staff ? '/api/v1/citizen-requests' : '/api/v1/citizen-requests/mine'
@@ -82,9 +84,11 @@ function RequestsContent() {
   }, [staff])
 
   useEffect(() => {
-    void load().catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : 'Talepler yüklenemedi.')
-    })
+    void load()
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : 'Talepler yüklenemedi.')
+      })
+      .finally(() => setLoading(false))
   }, [load])
 
   const categoryMap = useMemo(
@@ -112,6 +116,7 @@ function RequestsContent() {
 
   async function onCreate(event: FormEvent) {
     event.preventDefault()
+    if (busy) return
     setBusy(true)
     setError(null)
     setInfo(null)
@@ -227,9 +232,9 @@ function RequestsContent() {
                 {message.length}/2000
               </p>
             </div>
-            <button className="btn btn-primary" type="submit" disabled={busy || !categoryId}>
-              {busy ? 'Gönderiliyor…' : 'Gönder'}
-            </button>
+            <BusyButton busy={busy} disabled={!categoryId} busyLabel="Gönderiliyor…">
+              Gönder
+            </BusyButton>
           </form>
         ) : null}
 
@@ -282,6 +287,16 @@ function RequestsContent() {
                 </tr>
               </thead>
               <tbody>
+                {loading ? (
+                  Array.from({ length: 4 }, (_, index) => (
+                    <tr key={index} aria-hidden>
+                      <td colSpan={4}>
+                        <span className="skeleton-line skeleton-line--xl" />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <>
                 {items.map((item) => (
                   <tr key={item.id}>
                     <td>
@@ -305,6 +320,8 @@ function RequestsContent() {
                     </td>
                   </tr>
                 ) : null}
+                  </>
+                )}
               </tbody>
             </table>
           </div>

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using ArnavutkoyBelediyesi.Application.Common.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ArnavutkoyBelediyesi.Api.Configuration;
@@ -48,6 +49,27 @@ public static class AuthenticationExtensions
                     ClockSkew = TimeSpan.FromSeconds(30),
                     NameClaimType = ClaimTypes.NameIdentifier,
                     RoleClaimType = ClaimTypes.Role,
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null)
+                        {
+                            context.NoResult();
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null)
+                        {
+                            context.HandleResponse();
+                        }
+
+                        return Task.CompletedTask;
+                    },
                 };
             });
 

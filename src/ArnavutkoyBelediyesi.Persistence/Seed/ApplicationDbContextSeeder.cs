@@ -107,7 +107,7 @@ public static class ApplicationDbContextSeeder
         string password,
         string role)
     {
-        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var normalizedEmail = EmailNormalizer.Normalize(email);
         var existing =
             await userManager.FindByEmailAsync(normalizedEmail).ConfigureAwait(false)
             ?? await userManager.FindByNameAsync(normalizedEmail).ConfigureAwait(false)

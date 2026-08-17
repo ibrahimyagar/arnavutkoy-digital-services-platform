@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
+import { BusyButton } from './ui/BusyButton'
 
 export type CardPaymentValues = {
   cardHolderName: string
@@ -43,6 +44,7 @@ export function CardPaymentForm({ submitLabel, busy, busyLabel, onSubmit, extraF
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (busy) return
     setLocalError(null)
     const digits = values.cardNumber.replace(/\s/g, '')
     if (digits.length < 15) {
@@ -117,9 +119,9 @@ export function CardPaymentForm({ submitLabel, busy, busyLabel, onSubmit, extraF
           />
         </div>
       </div>
-      <button className="btn btn-primary" type="submit" disabled={busy}>
-        {busy ? (busyLabel ?? 'İşleniyor…') : submitLabel}
-      </button>
+      <BusyButton busy={Boolean(busy)} busyLabel={busyLabel ?? 'İşleniyor…'}>
+        {submitLabel}
+      </BusyButton>
     </form>
   )
 }

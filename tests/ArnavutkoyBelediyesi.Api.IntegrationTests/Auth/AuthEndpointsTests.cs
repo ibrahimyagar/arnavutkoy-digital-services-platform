@@ -167,6 +167,138 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Login_WithUppercaseEmail_AfterRegister_ShouldSucceed()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, email, password);
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
+        {
+            email = email.ToUpperInvariant(),
+            password,
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Login_WithPaddedEmail_AfterRegister_ShouldSucceed()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, email, password);
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
+        {
+            email = $"  {email}  ",
+            password,
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Login_WithTurkishDottedI_ShouldMatchAsciiEmail()
+    {
+        var client = factory.CreateClient();
+        var token = Guid.NewGuid().ToString("N");
+        var registerEmail = $"\u0130nfo.{token}@test.arnavutkoy.local";
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, registerEmail, password);
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
+        {
+            email = $"info.{token}@test.arnavutkoy.local",
+            password,
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Login_WrongPasswordThenCorrectPassword_ShouldSucceed()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, email, password);
+
+        var wrong = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "YanlisSifre1" });
+        wrong.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var right = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
+        right.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Login_AfterLogout_ShouldSucceedWithSameCredentials()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, email, password);
+        var auth = await AuthHelper.LoginAsync(client, email, password);
+
+        var logout = await client.PostAsJsonAsync("/api/v1/auth/logout", new { refreshToken = auth.RefreshToken });
+        logout.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var again = await AuthHelper.LoginAsync(client, email, password);
+        again.AccessToken.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task Login_WithInvalidBearerToken_ShouldStillAuthenticate()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await RegisterCitizenAsync(client, email, password);
+
+        AuthHelper.AttachBearerToken(client, "not.a.valid.jwt");
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task Register_WithDuplicateEmailDifferentCase_ShouldReturn400()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        await RegisterCitizenAsync(client, email, "GucluSifre1");
+
+        var second = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = email.ToUpperInvariant(),
+            fullName = "Mükerrer Vatandaş 2",
+            phoneNumber = "+905551112244",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password = "GucluSifre1",
+        });
+
+        second.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    private static async Task RegisterCitizenAsync(HttpClient client, string email, string password)
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            fullName = "Test Vatandaş",
+            phoneNumber = "+905551112233",
+            nationalId = AuthHelper.GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password,
+        });
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
     public async Task Login_WithWrongPassword_ShouldReturn400()
     {
         var client = factory.CreateClient();

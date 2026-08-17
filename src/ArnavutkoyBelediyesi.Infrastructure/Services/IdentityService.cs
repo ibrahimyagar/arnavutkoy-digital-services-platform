@@ -20,7 +20,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
         string password,
         CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var normalizedEmail = EmailNormalizer.Normalize(email);
         var normalizedNationalId = string.IsNullOrWhiteSpace(nationalId) ? null : nationalId.Trim();
         var normalizedPhone = PhoneNumberNormalizer.Normalize(phoneNumber);
         var normalizedGender = string.IsNullOrWhiteSpace(gender) ? string.Empty : gender.Trim().ToUpperInvariant();
@@ -56,7 +56,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             CreatedAtUtc = DateTime.UtcNow,
         };
 
-        var createResult = await userManager.CreateAsync(user, password).ConfigureAwait(false);
+        var createResult = await userManager.CreateAsync(user, password.Trim()).ConfigureAwait(false);
         if (!createResult.Succeeded)
         {
             return Result<Guid>.Failure(createResult.Errors.Select(error => error.Description).ToArray());
@@ -76,7 +76,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
         string password,
         CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var normalizedEmail = EmailNormalizer.Normalize(email);
         var user = await userManager.FindByEmailAsync(normalizedEmail).ConfigureAwait(false)
             ?? await userManager.FindByNameAsync(normalizedEmail).ConfigureAwait(false);
 
@@ -91,7 +91,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
                 "Çok fazla başarısız giriş denemesi nedeniyle hesabınız geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.");
         }
 
-        var passwordValid = await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+        var passwordValid = await VerifyPasswordAsync(user, password).ConfigureAwait(false);
         if (!passwordValid)
         {
             await userManager.AccessFailedAsync(user).ConfigureAwait(false);
@@ -116,11 +116,33 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             return Result.Failure("Kullanıcı bulunamadı.");
         }
 
-        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword).ConfigureAwait(false);
+        var trimmedNew = newPassword.Trim();
+        var result = await userManager.ChangePasswordAsync(user, currentPassword, trimmedNew).ConfigureAwait(false);
+        if (!result.Succeeded)
+        {
+            var trimmedCurrent = currentPassword.Trim();
+            if (!string.Equals(currentPassword, trimmedCurrent, StringComparison.Ordinal) && trimmedCurrent.Length > 0)
+            {
+                result = await userManager.ChangePasswordAsync(user, trimmedCurrent, trimmedNew).ConfigureAwait(false);
+            }
+        }
 
         return result.Succeeded
             ? Result.Success()
             : Result.Failure(result.Errors.Select(error => error.Description).ToArray());
+    }
+
+    private async Task<bool> VerifyPasswordAsync(ApplicationUser user, string password)
+    {
+        if (await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false))
+        {
+            return true;
+        }
+
+        var trimmed = password.Trim();
+        return trimmed.Length > 0
+            && !string.Equals(password, trimmed, StringComparison.Ordinal)
+            && await userManager.CheckPasswordAsync(user, trimmed).ConfigureAwait(false);
     }
 
     public async Task<Result<AuthenticatedUser>> GetUserAsync(Guid userId, CancellationToken cancellationToken = default)

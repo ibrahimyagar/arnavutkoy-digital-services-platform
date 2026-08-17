@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ContactMap } from '../components/contact/ContactMap'
+import { BusyButton } from '../components/ui/BusyButton'
 import { PublicPage } from '../components/ui/PublicPage'
 import { useAuth } from '../auth/AuthContext'
 import {
@@ -114,6 +115,7 @@ export function ContactPage() {
   }
 
   async function send() {
+    if (busy) return
     setError(null)
     if (!validate()) return
     setBusy(true)
@@ -401,9 +403,9 @@ export function ContactPage() {
                     />
                     {fieldErrors.body ? <p className="cm-err">{fieldErrors.body}</p> : null}
                   </div>
-                  <button className="btn btn-primary" type="submit" disabled={busy}>
-                    {busy ? 'Mesajınız gönderiliyor…' : 'Gönder'}
-                  </button>
+                  <BusyButton busy={busy} busyLabel="Mesajınız gönderiliyor…">
+                    Gönder
+                  </BusyButton>
                 </form>
               </>
             )}

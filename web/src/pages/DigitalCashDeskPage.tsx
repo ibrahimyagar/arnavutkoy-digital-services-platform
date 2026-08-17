@@ -110,7 +110,12 @@ function CashDeskContent() {
           </button>
         </div>
       ) : null}
-      {loading ? <p className="tx-muted">Vezne yükleniyor…</p> : null}
+      {loading ? (
+        <div className="stack" aria-busy="true" aria-label="Vezne yükleniyor">
+          <span className="skeleton-line skeleton-line--xl" />
+          <span className="skeleton-line skeleton-line--lg" />
+        </div>
+      ) : null}
 
       <div className="tx-ruler" aria-label="Vezne özeti">
         <p>

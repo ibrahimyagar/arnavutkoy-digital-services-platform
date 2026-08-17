@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PageHeader } from '../components/ui/PageChrome'
+import { BusyButton } from '../components/ui/BusyButton'
 import { apiFetch, type UserProfile } from '../lib/api'
 import {
   DEFAULT_NOTIFY_PREFS,
@@ -143,7 +144,11 @@ function SettingsContent() {
       <section id="profil" className="panel stack" style={{ scrollMarginTop: '5.5rem' }}>
         <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Profil</h2>
         {!profile ? (
-          <p className="muted">Yükleniyor…</p>
+          <div className="stack" aria-busy="true" aria-label="Profil yükleniyor">
+            <span className="skeleton-line skeleton-line--lg" />
+            <span className="skeleton-line skeleton-line--xl" />
+            <span className="skeleton-line skeleton-line--sm" />
+          </div>
         ) : (
           <dl className="profile-grid">
             <div>
@@ -200,9 +205,9 @@ function SettingsContent() {
             placeholder="05xxxxxxxxx"
           />
         </div>
-        <button className="btn btn-primary" type="submit" disabled={phoneBusy}>
-          {phoneBusy ? 'Kaydediliyor…' : 'Telefonu kaydet'}
-        </button>
+        <BusyButton busy={phoneBusy} busyLabel="Kaydediliyor…">
+          Telefonu kaydet
+        </BusyButton>
       </form>
 
       <form id="parola" className="panel stack" style={{ scrollMarginTop: '5.5rem' }} onSubmit={(e) => void changePassword(e)}>
@@ -245,9 +250,9 @@ function SettingsContent() {
         <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
           En az 8 karakter; en az bir harf ve bir rakam. Eski parola doğrulanır (referanstaki açıktan daha güvenli).
         </p>
-        <button className="btn btn-primary" type="submit" disabled={passwordBusy}>
-          {passwordBusy ? 'Kaydediliyor…' : 'Parolayı güncelle'}
-        </button>
+        <BusyButton busy={passwordBusy} busyLabel="Kaydediliyor…">
+          Parolayı güncelle
+        </BusyButton>
       </form>
 
       <section id="bildirimler" className="panel stack" style={{ scrollMarginTop: '5.5rem' }}>

@@ -6,6 +6,7 @@ using ArnavutkoyBelediyesi.Api.Middleware;
 using ArnavutkoyBelediyesi.Application;
 using ArnavutkoyBelediyesi.Infrastructure;
 using ArnavutkoyBelediyesi.Persistence;
+using Microsoft.AspNetCore.HttpOverrides;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -22,6 +23,12 @@ try
         .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddProblemDetails();
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.KnownNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
     builder.Services.AddAuthorization();
     builder.Services.AddJwtAuthentication(builder.Configuration);
     builder.Services.AddApiRateLimiting();
@@ -63,6 +70,7 @@ try
 
     app.UseApiSerilogRequestLogging();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
+    app.UseForwardedHeaders();
 
     // Bu proje bir portföy/demo çalışması olduğundan Swagger, canlı ortamda da bilinçli olarak
     // açık bırakılabilir (varsayılan: true) ancak "Swagger:Enabled=false" ortam değişkeniyle

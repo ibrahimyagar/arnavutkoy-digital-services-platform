@@ -20,6 +20,11 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
             .IsUnique()
             .HasFilter("\"NationalId\" IS NOT NULL");
 
+        builder.HasIndex(x => x.NormalizedEmail)
+            .IsUnique()
+            .HasFilter("\"NormalizedEmail\" IS NOT NULL")
+            .HasDatabaseName("EmailIndex");
+
         builder.Property(x => x.Gender)
             .IsRequired()
             .HasMaxLength(1);

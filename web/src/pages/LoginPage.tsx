@@ -8,6 +8,7 @@ import {
   loadRememberedEmail,
   saveRememberedEmail,
 } from '../components/auth/AuthShell'
+import { BusyButton } from '../components/ui/BusyButton'
 import { safeReturnPath } from '../lib/returnUrl'
 
 export function LoginPage() {
@@ -32,7 +33,7 @@ export function LoginPage() {
     setBusy(true)
     setError(null)
     try {
-      await login(email.trim(), password)
+      await login(email, password)
       saveRememberedEmail(email.trim(), remember)
       navigate(next, { replace: true })
     } catch (err) {
@@ -63,8 +64,9 @@ export function LoginPage() {
         </p>
       ) : null}
 
-      <form className="ax-form" onSubmit={(event) => void onSubmit(event)} noValidate>
-        <div className="field">
+      <form className="ax-form" onSubmit={(event) => void onSubmit(event)} noValidate aria-busy={busy}>
+        <fieldset disabled={busy}>
+          <div className="field">
           <label htmlFor="ax-email">E-posta</label>
           <input
             id="ax-email"
@@ -100,9 +102,10 @@ export function LoginPage() {
           </label>
           <Link to="/sifremi-unuttum">Şifremi unuttum</Link>
         </div>
-        <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Giriş yapılıyor…' : 'Giriş yap'}
-        </button>
+          <BusyButton busy={busy} busyLabel="Giriş yapılıyor…">
+            Giriş yap
+          </BusyButton>
+        </fieldset>
       </form>
     </AuthShell>
   )

@@ -503,13 +503,13 @@
 }
 
 .shell-route-enter {
-  animation: shell-route-enter 180ms ease-out;
+  animation: shell-route-enter 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes shell-route-enter {
   from {
-    opacity: 0.01;
-    transform: translate3d(0, 6px, 0);
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
   }
   to {
     opacity: 1;

@@ -20,8 +20,11 @@ public sealed class RegisterCitizenCommandValidator : AbstractValidator<Register
     public RegisterCitizenCommandValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress()
+            .Cascade(CascadeMode.Stop)
+            .Must(email => !string.IsNullOrWhiteSpace(email))
+            .WithMessage("E-posta zorunludur.")
+            .Must(EmailNormalizer.IsValid)
+            .WithMessage("Geçerli bir e-posta girilmelidir.")
             .MaximumLength(256);
 
         RuleFor(x => x.FullName).NotEmpty().MaximumLength(150);

@@ -2,6 +2,7 @@ using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Common.Models;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Services;
+using ArnavutkoyBelediyesi.Domain.Common;
 using FluentValidation;
 using MediatR;
 
@@ -16,7 +17,12 @@ public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     public LoginCommandValidator()
     {
-        RuleFor(x => x.Email).NotEmpty().EmailAddress();
+        RuleFor(x => x.Email)
+            .Cascade(CascadeMode.Stop)
+            .Must(email => !string.IsNullOrWhiteSpace(email))
+            .WithMessage("E-posta zorunludur.")
+            .Must(EmailNormalizer.IsValid)
+            .WithMessage("Geçerli bir e-posta girilmelidir.");
         RuleFor(x => x.Password).NotEmpty();
     }
 }

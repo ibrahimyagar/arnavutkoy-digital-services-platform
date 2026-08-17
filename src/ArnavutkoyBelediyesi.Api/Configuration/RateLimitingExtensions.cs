@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace ArnavutkoyBelediyesi.Api.Configuration;
@@ -20,6 +21,18 @@ public static class RateLimitingExtensions
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.OnRejected = async (context, cancellationToken) =>
+            {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                await context.HttpContext.Response.WriteAsJsonAsync(
+                    new ProblemDetails
+                    {
+                        Status = StatusCodes.Status429TooManyRequests,
+                        Title = "Çok fazla deneme",
+                        Detail = "Kısa süre sonra tekrar deneyin.",
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            };
 
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
                 RateLimitPartition.GetFixedWindowLimiter(
@@ -37,7 +50,7 @@ public static class RateLimitingExtensions
                     _ => new FixedWindowRateLimiterOptions
                     {
                         Window = TimeSpan.FromMinutes(1),
-                        PermitLimit = 10,
+                        PermitLimit = 30,
                         QueueLimit = 0,
                     }));
         });

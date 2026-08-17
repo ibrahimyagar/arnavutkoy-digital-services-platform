@@ -126,14 +126,39 @@ img {
   transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(10, 31, 46, 0.1);
 }
 
-.btn:active {
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+.btn:disabled,
+.btn.is-busy {
+  opacity: 0.74;
+  cursor: progress;
   transform: none;
   box-shadow: none;
+  pointer-events: none;
+}
+
+.btn-spinner {
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-primary {

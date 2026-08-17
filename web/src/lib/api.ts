@@ -392,7 +392,28 @@ export function clearSession() {
   removeStorage(STORAGE_KEY)
 }
 
+function isAnonymousAuthPath(path: string) {
+  return (
+    path === '/api/v1/auth/login' ||
+    path === '/api/v1/auth/register' ||
+    path === '/api/v1/auth/refresh'
+  )
+}
+
+export function normalizeEmail(email: string) {
+  return email
+    .replace(/[\u200B\uFEFF]/g, '')
+    .replace(/\u00A0/g, ' ')
+    .trim()
+    .replace(/\u0130/g, 'i')
+    .replace(/\u0131/g, 'i')
+    .toLocaleLowerCase('en-US')
+}
+
 async function readError(response: Response): Promise<string> {
+  if (response.status === 429) {
+    return 'Kısa süre sonra tekrar deneyin.'
+  }
   try {
     const body = (await response.json()) as { detail?: string; title?: string }
     return body.detail || body.title || `İstek başarısız (${response.status})`
@@ -432,15 +453,16 @@ export async function apiFetch<T>(
   }
 
   const session = loadSession()
-  if (session?.accessToken) {
+  const skipBearer = isAnonymousAuthPath(path)
+  if (!skipBearer && session?.accessToken) {
     headers.set('Authorization', `Bearer ${session.accessToken}`)
-  } else if (authRequired) {
+  } else if (authRequired && !session?.accessToken) {
     throw new Error('Oturum gerekli.')
   }
 
   let response = await fetch(`${API_BASE}${path}`, { ...options, headers })
 
-  if (response.status === 401 && session?.refreshToken) {
+  if (response.status === 401 && !skipBearer && session?.refreshToken) {
     const nextToken = await refreshAccessToken()
     if (nextToken) {
       headers.set('Authorization', `Bearer ${nextToken}`)
@@ -462,8 +484,11 @@ export async function apiFetch<T>(
 export async function login(email: string, password: string) {
   const auth = await apiFetch<AuthResult>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email: normalizeEmail(email), password: password.trim() }),
   })
+  if (!auth?.accessToken || !auth.refreshToken) {
+    throw new Error('Giriş yanıtı eksik. Lütfen tekrar deneyin.')
+  }
   saveSession(auth)
   return auth
 }

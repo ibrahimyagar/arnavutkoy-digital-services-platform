@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { AuthShell } from '../components/auth/AuthShell'
+import { BusyButton } from '../components/ui/BusyButton'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -30,7 +31,7 @@ export function ForgotPasswordPage() {
     >
       {sent ? (
         <div className="ax-form">
-          <p className="ax-hint is-ok" role="status">
+          <p className="ax-ok" role="status">
             Talebiniz alındı. Bu portföy demosunda e-posta altyapısı yoktur; giriş
             yapabiliyorsanız paneldeki <strong>Ayarlar → Şifre değiştir</strong> adımını kullanın.
           </p>
@@ -51,9 +52,9 @@ export function ForgotPasswordPage() {
               required
             />
           </div>
-          <button className="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? 'Gönderiliyor…' : 'Şifre sıfırlama bağlantısı gönder'}
-          </button>
+          <BusyButton busy={busy} busyLabel="Gönderiliyor…">
+            Şifre sıfırlama bağlantısı gönder
+          </BusyButton>
         </form>
       )}
     </AuthShell>

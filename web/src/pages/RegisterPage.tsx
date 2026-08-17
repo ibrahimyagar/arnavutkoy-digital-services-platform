@@ -8,7 +8,8 @@ import {
   passwordStrengthOk,
   passwordStrengthScore,
 } from '../components/auth/AuthShell'
-import { apiFetch } from '../lib/api'
+import { BusyButton } from '../components/ui/BusyButton'
+import { apiFetch, normalizeEmail } from '../lib/api'
 import { EMAIL_VERIFICATION } from '../lib/emailVerification'
 import { safeReturnPath } from '../lib/returnUrl'
 
@@ -168,10 +169,10 @@ export function RegisterPage() {
     if (birthDate && ageFromIso(birthDate) < 18) {
       nextErrors.birthDate = 'Girildiyse 18 yaşında olmalısınız.'
     }
-    if (!passwordStrengthOk(password)) {
+    if (!passwordStrengthOk(password.trim())) {
       nextErrors.password = 'En az 8 karakter, büyük/küçük harf ve rakam.'
     }
-    if (password !== confirmPassword) nextErrors.confirm = 'Şifreler eşleşmiyor.'
+    if (password.trim() !== confirmPassword.trim()) nextErrors.confirm = 'Şifreler eşleşmiyor.'
     if (!acceptedTerms) nextErrors.terms = 'Bilgilendirmeyi kabul etmelisiniz.'
     return nextErrors
   }
@@ -205,19 +206,20 @@ export function RegisterPage() {
     setBusy(true)
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim()
+      const normalizedEmail = normalizeEmail(email)
       await apiFetch('/api/v1/auth/register', {
         method: 'POST',
         body: JSON.stringify({
-          email: email.trim(),
+          email: normalizedEmail,
           fullName,
           phoneNumber: phoneDigits(phoneNumber),
           nationalId: nationalId.trim() || null,
           birthDate: birthDate || null,
           gender: gender || null,
-          password,
+          password: password.trim(),
         }),
       })
-      await login(email.trim(), password)
+      await login(normalizedEmail, password.trim())
       navigate(next, { replace: true })
     } catch (err) {
       setError(friendlyRegisterError(err instanceof Error ? err.message : null))
@@ -443,9 +445,9 @@ export function RegisterPage() {
         </label>
         <FieldError id="ax-terms-err" message={fieldErrors.terms} />
 
-        <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Hesap oluşturuluyor…' : 'Hesap oluştur'}
-        </button>
+        <BusyButton busy={busy} busyLabel="Hesap oluşturuluyor…">
+          Hesap oluştur
+        </BusyButton>
       </form>
     </AuthShell>
   )

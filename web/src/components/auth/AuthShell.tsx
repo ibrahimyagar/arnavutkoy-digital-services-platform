@@ -80,22 +80,26 @@ export function friendlyAuthError(message: string | null | undefined) {
   if (!message) return 'İşlem tamamlanamadı. Lütfen tekrar deneyin.'
   const lower = message.toLocaleLowerCase('tr-TR')
   if (
-    lower.includes('password') ||
-    lower.includes('parola') ||
-    lower.includes('şifre') ||
-    lower.includes('unauthorized') ||
-    lower.includes('401') ||
-    lower.includes('invalid') ||
-    lower.includes('hatalı') ||
-    lower.includes('yanlış') ||
-    lower.includes('credentials')
+    lower.includes('429') ||
+    lower.includes('too many') ||
+    lower.includes('çok fazla deneme') ||
+    lower.includes('kısa süre sonra')
   ) {
-    return 'E-posta veya şifre hatalı. Bilgilerinizi kontrol ederek tekrar deneyin.'
+    return 'Çok fazla deneme yaptınız. Lütfen bir dakika sonra tekrar deneyin.'
   }
   if (lower.includes('lock') || lower.includes('kilit')) {
     return 'Hesabınız geçici olarak kilitlendi. Kısa süre sonra tekrar deneyin.'
   }
-  if (lower.includes('email') || lower.includes('e-posta') || lower.includes('already')) {
+  if (
+    lower.includes('parola hatalı') ||
+    lower.includes('e-posta veya parola') ||
+    lower.includes('e-posta veya şifre') ||
+    lower.includes('unauthorized') ||
+    lower.includes('401')
+  ) {
+    return 'E-posta veya şifre hatalı. Bilgilerinizi kontrol ederek tekrar deneyin.'
+  }
+  if (lower.includes('already') || lower.includes('zaten bir hesap')) {
     return message.length > 180 ? 'Kayıt tamamlanamadı. Bilgilerinizi kontrol edin.' : message
   }
   if (message.length > 180 || lower.includes('exception') || lower.includes('stack')) {

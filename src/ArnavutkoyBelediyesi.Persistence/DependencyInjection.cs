@@ -44,8 +44,9 @@ public static class DependencyInjection
             {
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
                 options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedEmail = false;
 
                 // Kaba kuvvet (brute-force) girişimlerine karşı hesap kilitleme; referans projede
                 // bu koruma bulunmuyordu (bkz. ASSUMPTIONS.md).
@@ -56,6 +57,8 @@ public static class DependencyInjection
             .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddSingleton<ILookupNormalizer, IdentityLookupNormalizer>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

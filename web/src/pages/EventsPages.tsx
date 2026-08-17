@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { PublicPage, PublicRelated } from '../components/ui/PublicPage'
+import { BusyButton } from '../components/ui/BusyButton'
 import {
   apiFetch,
   type EventRegistration,
@@ -368,7 +369,7 @@ export function EventsDetailPage() {
       : null
 
   async function onRegister() {
-    if (!item) return
+    if (!item || busy) return
     if (!isAuthenticated) {
       navigate(loginPath(location.pathname))
       return
@@ -391,7 +392,7 @@ export function EventsDetailPage() {
   }
 
   async function onCancel() {
-    if (!item) return
+    if (!item || busy) return
     if (!confirmCancel) {
       setConfirmCancel(true)
       return
@@ -593,9 +594,15 @@ export function EventsDetailPage() {
                 {status?.isRegistered ? (
                   <>
                     <p className="ev-registered">Bu etkinlik, Kayıtlarım listesinde görünür.</p>
-                    <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void onCancel()}>
-                      {confirmCancel ? (busy ? 'İptal ediliyor…' : 'İptali onayla') : 'Kaydı iptal et'}
-                    </button>
+                    <BusyButton
+                      type="button"
+                      className="btn btn-ghost"
+                      busy={busy}
+                      busyLabel="İptal ediliyor…"
+                      onClick={() => void onCancel()}
+                    >
+                      {confirmCancel ? 'İptali onayla' : 'Kaydı iptal et'}
+                    </BusyButton>
                     {confirmCancel ? (
                       <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setConfirmCancel(false)}>
                         Vazgeç
@@ -603,9 +610,9 @@ export function EventsDetailPage() {
                     ) : null}
                   </>
                 ) : (
-                  <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void onRegister()}>
-                    {busy ? 'Kaydediliyor…' : isAuthenticated ? 'Kayıt ol' : 'Giriş yapıp kayıt ol'}
-                  </button>
+                  <BusyButton type="button" busy={busy} busyLabel="Kaydediliyor…" onClick={() => void onRegister()}>
+                    {isAuthenticated ? 'Kayıt ol' : 'Giriş yapıp kayıt ol'}
+                  </BusyButton>
                 )}
                 <div className="evd-btn-row">
                   <button type="button" className="btn btn-ghost" onClick={onCalendar}>
@@ -841,13 +848,19 @@ export function MyEventsPage() {
                   Takvime ekle
                 </button>
                 {row.status === 'Registered' ? (
-                  <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void onCancel(row)}>
-                    {busy ? 'İptal ediliyor…' : 'Kaydı iptal et'}
-                  </button>
+                  <BusyButton
+                    type="button"
+                    className="btn btn-ghost"
+                    busy={busy}
+                    busyLabel="İptal ediliyor…"
+                    onClick={() => void onCancel(row)}
+                  >
+                    Kaydı iptal et
+                  </BusyButton>
                 ) : (
-                  <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void onRegister(row)}>
-                    {busy ? 'Kaydediliyor…' : 'Yeniden kayıt ol'}
-                  </button>
+                  <BusyButton type="button" busy={busy} busyLabel="Kaydediliyor…" onClick={() => void onRegister(row)}>
+                    Yeniden kayıt ol
+                  </BusyButton>
                 )}
               </div>
             </article>
