@@ -30,12 +30,18 @@ function requireProductionApiBase(): Plugin {
 export default defineConfig({
   plugins: [react(), requireProductionApiBase()],
   server: {
+    host: true,
     port: 5173,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       },
     },
+  },
+  preview: {
+    host: true,
+    port: 4173,
   },
 })

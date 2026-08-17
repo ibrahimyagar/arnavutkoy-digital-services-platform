@@ -187,7 +187,7 @@ export function HomeHeroLanding({ isAuthenticated }: HomeHeroLandingProps) {
       <div className="hl-body">
         <div className="hl-copy">
           <p className="hl-kicker">Hadımköy&apos;den Durusu&apos;ya</p>
-          <h1>
+          <h1 lang="tr">
             <span className="hl-title">ARNAVUTKÖY</span>
             <span className="hl-script">Seninle Güzel</span>
           </h1>

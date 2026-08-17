@@ -565,7 +565,7 @@ body.shell-menu-lock {
 @media (max-width: 980px) {
   .shell-user,
   .shell-account-name,
-  .shell-btn-register {
+  .shell-header .btn.shell-btn-register {
     display: none;
   }
 

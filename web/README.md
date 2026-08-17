@@ -12,14 +12,14 @@ npm install
 npm run dev
 ```
 
-Tarayıcı: `http://localhost:5173`
+Tarayıcı: `http://localhost:5173` — `npm run dev` ağı da dinler; telefondan `http://<PC-LAN-IP>:5173`.
 
 Node.js **20.19+** (veya 22.12+ / 24 LTS) önerilir; Vite 7 bunu bekler. `web/.nvmrc` dosyası `24.19.0` işaret eder.
 
-Vite, `/api` isteklerini `localhost:8080`'e proxy eder. Doğrudan API adresi için `.env`:
+Vite, `/api` isteklerini `localhost:8080`'e proxy eder. Yerelde `VITE_API_BASE_URL` boş kalsın; aksi halde telefon API'yi kendi localhost'una ister. Üretim için HTTPS adres:
 
 ```
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=https://arnavutkoy-digital-services-platform.onrender.com
 ```
 
 ## Demo giriş (e-posta)

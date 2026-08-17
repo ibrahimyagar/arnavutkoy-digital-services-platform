@@ -343,8 +343,32 @@ type TokenStore = {
 
 const STORAGE_KEY = 'arnavutkoy.auth'
 
+function readStorage(key: string) {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function writeStorage(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    /* Safari private / blocked storage */
+  }
+}
+
+function removeStorage(key: string) {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadSession(): TokenStore | null {
-  const raw = localStorage.getItem(STORAGE_KEY)
+  const raw = readStorage(STORAGE_KEY)
   if (!raw) return null
   try {
     return JSON.parse(raw) as TokenStore
@@ -361,11 +385,11 @@ export function saveSession(auth: AuthResult) {
     userId: auth.userId,
     roles: auth.roles,
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+  writeStorage(STORAGE_KEY, JSON.stringify(payload))
 }
 
 export function clearSession() {
-  localStorage.removeItem(STORAGE_KEY)
+  removeStorage(STORAGE_KEY)
 }
 
 async function readError(response: Response): Promise<string> {

@@ -218,13 +218,17 @@ function nearestDue(items: Debt[]) {
 function readLastSeen(userId: string) {
   const storeKey = `${LAST_SEEN_KEY}.${userId}`
   const sessionKey = `${LAST_SEEN_KEY}.session.${userId}`
-  const previousRaw = localStorage.getItem(storeKey)
-  if (!sessionStorage.getItem(sessionKey)) {
-    sessionStorage.setItem(sessionKey, '1')
-    localStorage.setItem(storeKey, new Date().toISOString())
+  try {
+    const previousRaw = localStorage.getItem(storeKey)
+    if (!sessionStorage.getItem(sessionKey)) {
+      sessionStorage.setItem(sessionKey, '1')
+      localStorage.setItem(storeKey, new Date().toISOString())
+    }
+    const previous = previousRaw ? new Date(previousRaw) : null
+    return previous && !Number.isNaN(+previous) ? previous : null
+  } catch {
+    return null
   }
-  const previous = previousRaw ? new Date(previousRaw) : null
-  return previous && !Number.isNaN(+previous) ? previous : null
 }
 
 function readFavs(userId: string) {

@@ -50,12 +50,14 @@
 
 html {
   scrollbar-gutter: stable;
+  overflow-x: hidden;
 }
 
 html,
 body,
 #root {
   min-height: 100%;
+  max-width: 100%;
 }
 
 body {

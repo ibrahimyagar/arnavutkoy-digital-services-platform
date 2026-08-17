@@ -82,6 +82,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_API_BASE_URL: https://arnavutkoy-digital-services-platform.onrender.com
         run: npm run build
 
   docker-image:
