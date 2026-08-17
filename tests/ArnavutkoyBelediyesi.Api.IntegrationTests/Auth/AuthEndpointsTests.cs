@@ -29,6 +29,84 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Register_WithoutNationalId_ShouldReturn201()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = AuthHelper.GenerateUniqueEmail(),
+            fullName = "Kimliksiz Vatandaş",
+            phoneNumber = "+905551112233",
+            nationalId = (string?)null,
+            birthDate = "1995-06-15",
+            gender = "E",
+            password = "GucluSifre1",
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task Register_TwoAccountsWithoutNationalId_ShouldBothSucceed()
+    {
+        var client = factory.CreateClient();
+
+        var first = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = AuthHelper.GenerateUniqueEmail(),
+            fullName = "Birinci Vatandaş",
+            phoneNumber = "+905551112233",
+            birthDate = "1995-06-15",
+            password = "GucluSifre1",
+        });
+        first.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var second = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = AuthHelper.GenerateUniqueEmail(),
+            fullName = "İkinci Vatandaş",
+            phoneNumber = "+905551112244",
+            birthDate = "1994-03-12",
+            password = "GucluSifre1",
+        });
+        second.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task Register_WithoutBirthDate_ShouldReturn201()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = AuthHelper.GenerateUniqueEmail(),
+            fullName = "Doğum Tarihi Yok",
+            phoneNumber = "0555 111 22 33",
+            password = "GucluSifre1",
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task Register_WithUnder18BirthDate_ShouldReturn400()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email = AuthHelper.GenerateUniqueEmail(),
+            fullName = "On Yedi Yas",
+            phoneNumber = "+905551112233",
+            birthDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-17)).ToString("yyyy-MM-dd"),
+            password = "GucluSifre1",
+        });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task Register_WithDuplicateEmail_ShouldReturn400()
     {
         var client = factory.CreateClient();

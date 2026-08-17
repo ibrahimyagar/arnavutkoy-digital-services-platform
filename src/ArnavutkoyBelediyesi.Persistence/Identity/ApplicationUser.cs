@@ -9,8 +9,8 @@ public sealed class ApplicationUser : IdentityUser<Guid>
 {
     public string FullName { get; set; } = string.Empty;
 
-    /// <summary>T.C. Kimlik No (profil; kurgusal/demo).</summary>
-    public string NationalId { get; set; } = string.Empty;
+    /// <summary>T.C. Kimlik No (opsiyonel profil alanı; kurgusal/demo).</summary>
+    public string? NationalId { get; set; }
 
     /// <summary>Doğum tarihi (UTC günü olarak saklanır).</summary>
     public DateOnly? BirthDate { get; set; }

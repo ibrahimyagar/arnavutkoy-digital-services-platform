@@ -14,14 +14,16 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
         string email,
         string fullName,
         string phoneNumber,
-        string nationalId,
-        DateOnly birthDate,
+        string? nationalId,
+        DateOnly? birthDate,
         string gender,
         string password,
         CancellationToken cancellationToken = default)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
-        var normalizedGender = gender.Trim().ToUpperInvariant();
+        var normalizedNationalId = string.IsNullOrWhiteSpace(nationalId) ? null : nationalId.Trim();
+        var normalizedPhone = PhoneNumberNormalizer.Normalize(phoneNumber);
+        var normalizedGender = string.IsNullOrWhiteSpace(gender) ? string.Empty : gender.Trim().ToUpperInvariant();
 
         var existingByEmail = await userManager.FindByEmailAsync(normalizedEmail).ConfigureAwait(false);
         if (existingByEmail is not null)
@@ -29,12 +31,15 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             return Result<Guid>.Failure("Bu e-posta adresi ile zaten bir hesap bulunmaktadır.");
         }
 
-        var existingByNationalId = await userManager.Users
-            .AnyAsync(u => u.NationalId == nationalId, cancellationToken)
-            .ConfigureAwait(false);
-        if (existingByNationalId)
+        if (normalizedNationalId is not null)
         {
-            return Result<Guid>.Failure("Bu T.C. Kimlik Numarası ile zaten bir hesap bulunmaktadır.");
+            var existingByNationalId = await userManager.Users
+                .AnyAsync(u => u.NationalId == normalizedNationalId, cancellationToken)
+                .ConfigureAwait(false);
+            if (existingByNationalId)
+            {
+                return Result<Guid>.Failure("Bu T.C. Kimlik Numarası ile zaten bir hesap bulunmaktadır.");
+            }
         }
 
         var user = new ApplicationUser
@@ -42,9 +47,9 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             Id = Guid.NewGuid(),
             UserName = normalizedEmail,
             Email = normalizedEmail,
-            PhoneNumber = phoneNumber,
+            PhoneNumber = normalizedPhone,
             FullName = fullName,
-            NationalId = nationalId,
+            NationalId = normalizedNationalId,
             BirthDate = birthDate,
             Gender = normalizedGender,
             EmailConfirmed = true,
@@ -163,7 +168,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             return Result.Failure("Kullanıcı bulunamadı.");
         }
 
-        user.PhoneNumber = phoneNumber.Trim();
+        user.PhoneNumber = PhoneNumberNormalizer.Normalize(phoneNumber);
         var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
 
         return result.Succeeded

@@ -42,6 +42,26 @@ public sealed class RegisterCitizenCommandValidatorTests
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
+    [Fact]
+    public void Validate_WithEmptyNationalId_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { NationalId = "" };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.NationalId);
+    }
+
+    [Fact]
+    public void Validate_WithNullNationalId_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { NationalId = null };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.NationalId);
+    }
+
     [Theory]
     [InlineData("12345678901")]
     [InlineData("123")]
@@ -76,6 +96,47 @@ public sealed class RegisterCitizenCommandValidatorTests
         var result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.PhoneNumber);
+    }
+
+    [Fact]
+    public void Validate_WithEmptyGender_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { Gender = "" };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.Gender);
+    }
+
+    [Fact]
+    public void Validate_WithNullBirthDate_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { BirthDate = null };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.BirthDate);
+    }
+
+    [Fact]
+    public void Validate_WithUnder18BirthDate_ShouldHaveError()
+    {
+        var under18 = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-17));
+        var command = ValidCommand() with { BirthDate = under18 };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.BirthDate);
+    }
+
+    [Fact]
+    public void Validate_WithPhoneContainingSpaces_ShouldNotHaveError()
+    {
+        var command = ValidCommand() with { PhoneNumber = "0555 111 22 33" };
+
+        var result = _validator.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
     }
 }
 

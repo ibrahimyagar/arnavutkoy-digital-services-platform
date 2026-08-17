@@ -12,7 +12,7 @@ export type UserProfile = {
   userId: string
   fullName: string
   email: string
-  nationalId: string
+  nationalId: string | null
   phoneNumber: string
   birthDate: string | null
   gender: string

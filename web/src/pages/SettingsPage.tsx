@@ -156,7 +156,7 @@ function SettingsContent() {
             </div>
             <div>
               <dt>T.C. kimlik no</dt>
-              <dd>{profile.nationalId}</dd>
+              <dd>{profile.nationalId || 'Belirtilmedi'}</dd>
             </div>
             <div>
               <dt>Doğum tarihi</dt>

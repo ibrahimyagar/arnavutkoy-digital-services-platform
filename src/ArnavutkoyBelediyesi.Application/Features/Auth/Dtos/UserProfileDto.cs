@@ -4,7 +4,7 @@ public sealed record UserProfileDto(
     Guid UserId,
     string FullName,
     string Email,
-    string NationalId,
+    string? NationalId,
     string PhoneNumber,
     DateOnly? BirthDate,
     string Gender,

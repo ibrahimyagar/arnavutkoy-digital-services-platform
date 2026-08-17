@@ -9,8 +9,8 @@ public interface IIdentityService
         string email,
         string fullName,
         string phoneNumber,
-        string nationalId,
-        DateOnly birthDate,
+        string? nationalId,
+        DateOnly? birthDate,
         string gender,
         string password,
         CancellationToken cancellationToken = default);

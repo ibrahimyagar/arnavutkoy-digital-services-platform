@@ -10,8 +10,8 @@ public sealed record RegisterCitizenCommand(
     string Email,
     string FullName,
     string PhoneNumber,
-    string NationalId,
-    DateOnly BirthDate,
+    string? NationalId,
+    DateOnly? BirthDate,
     string Gender,
     string Password) : IRequest<Result<Guid>>;
 
@@ -28,27 +28,26 @@ public sealed class RegisterCitizenCommandValidator : AbstractValidator<Register
 
         RuleFor(x => x.PhoneNumber)
             .NotEmpty()
-            .Matches(@"^\+?\d{10,15}$")
+            .Must(PhoneNumberNormalizer.IsPlausible)
             .WithMessage("Geçerli bir telefon numarası girilmelidir.");
 
         RuleFor(x => x.NationalId)
-            .NotEmpty()
-            .Must(TurkishNationalIdValidator.IsValid)
+            .Must(id => string.IsNullOrWhiteSpace(id) || TurkishNationalIdValidator.IsValid(id))
             .WithMessage("Geçerli bir T.C. Kimlik Numarası girilmelidir.");
 
         RuleFor(x => x.BirthDate)
-            .Must(BeAtLeast18)
-            .WithMessage("Kayıt için 18 yaşında olmalısınız.");
+            .Must(date => date is null || BeAtLeast18(date.Value))
+            .WithMessage("Doğum tarihi girildiyse 18 yaşında olmalısınız.");
 
         RuleFor(x => x.Gender)
-            .NotEmpty()
-            .Must(g => g is "E" or "K" or "e" or "k")
+            .Must(g => string.IsNullOrWhiteSpace(g) || g is "E" or "K" or "e" or "k")
             .WithMessage("Cinsiyet E veya K olmalıdır.");
 
         RuleFor(x => x.Password)
             .NotEmpty()
             .MinimumLength(8)
-            .Matches("[A-Za-z]").WithMessage("Parola en az bir harf içermelidir.")
+            .Matches("[A-ZÇĞİÖŞÜ]").WithMessage("Parola en az bir büyük harf içermelidir.")
+            .Matches("[a-zçğıöşü]").WithMessage("Parola en az bir küçük harf içermelidir.")
             .Matches(@"\d").WithMessage("Parola en az bir rakam içermelidir.");
     }
 

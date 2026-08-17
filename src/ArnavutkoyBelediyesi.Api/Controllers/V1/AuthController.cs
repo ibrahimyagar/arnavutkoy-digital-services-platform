@@ -35,7 +35,7 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
             request.PhoneNumber,
             request.NationalId,
             request.BirthDate,
-            request.Gender,
+            request.Gender ?? string.Empty,
             request.Password);
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 

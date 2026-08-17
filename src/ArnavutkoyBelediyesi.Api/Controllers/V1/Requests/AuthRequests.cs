@@ -4,9 +4,9 @@ public sealed record RegisterRequest(
     string Email,
     string FullName,
     string PhoneNumber,
-    string NationalId,
-    DateOnly BirthDate,
-    string Gender,
+    string? NationalId,
+    DateOnly? BirthDate,
+    string? Gender,
     string Password);
 
 public sealed record LoginRequest(string Email, string Password);

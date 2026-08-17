@@ -13,11 +13,12 @@ public sealed class ApplicationUserConfiguration : IEntityTypeConfiguration<Appl
             .HasMaxLength(150);
 
         builder.Property(x => x.NationalId)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(11);
 
         builder.HasIndex(x => x.NationalId)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"NationalId\" IS NOT NULL");
 
         builder.Property(x => x.Gender)
             .IsRequired()

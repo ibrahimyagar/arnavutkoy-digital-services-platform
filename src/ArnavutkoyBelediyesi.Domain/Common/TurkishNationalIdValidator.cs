@@ -1,11 +1,8 @@
 namespace ArnavutkoyBelediyesi.Domain.Common;
 
 /// <summary>
-/// T.C. Kimlik Numarası'nın resmî sağlama (checksum) algoritmasını uygular. Bu proje giriş
-/// kullanıcı adı olarak T.C. Kimlik Numarası kullandığından (bkz. ASSUMPTIONS.md → A6), kayıt
-/// sırasında biçimsel geçerliliğin sunucu tarafında da doğrulanması gerekir; yalnızca istemci
-/// tarafı doğrulamasına güvenmek, referans projedeki eksik sunucu tarafı validasyonu sorununun
-/// bir başka örneği olurdu.
+/// T.C. Kimlik Numarası'nın resmî sağlama (checksum) algoritmasını uygular.
+/// Kimlik numarası kayıtta isteğe bağlıdır; girildiyse biçim sunucuda da doğrulanır.
 /// </summary>
 public static class TurkishNationalIdValidator
 {

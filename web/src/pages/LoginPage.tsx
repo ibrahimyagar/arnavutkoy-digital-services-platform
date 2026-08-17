@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import {
   AuthShell,
+  PasswordRevealButton,
   friendlyAuthError,
   loadRememberedEmail,
   saveRememberedEmail,
@@ -85,13 +86,7 @@ export function LoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               required
             />
-            <button
-              type="button"
-              aria-label={showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
-              onClick={() => setShowPassword((value) => !value)}
-            >
-              {showPassword ? 'Gizle' : 'Göster'}
-            </button>
+            <PasswordRevealButton shown={showPassword} onToggle={() => setShowPassword((value) => !value)} />
           </div>
         </div>
         <div className="ax-row">
