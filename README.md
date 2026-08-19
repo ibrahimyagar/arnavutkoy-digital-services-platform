@@ -1,191 +1,92 @@
 # Arnavutköy Dijital Hizmetler
 
-Modern bir belediye dijital hizmet platformunun **sıfırdan** tasarlanmış portföy uygulaması. Vatandaş portalı, e-belediye işlemleri, ulaşım rehberi ve personel operasyonlarını tek üründe birleştirir.
+Kamu dijital hizmet akışlarını modelleyen monorepo: vatandaş portalı, e-belediye modülleri, ulaşım bilgi sistemi ve personel operasyon ekranları.
 
-> **Bağımsız portföy / demo çalışmasıdır.** Resmi bir belediye kurumunu temsil etmez. Tüm vatandaş, personel ve işlem verileri kurgusaldır.
+**Canlı:** [Web arayüzü](https://arnavutkoy-dijital.pages.dev) · [API Swagger](https://arnavutkoy-digital-services-platform.onrender.com/swagger) · [Health](https://arnavutkoy-digital-services-platform.onrender.com/health)
 
 <p align="center">
-  <img src="docs/arnavutkoy-showcase.png" alt="Arnavutköy Dijital Hizmetler — ana sayfa" width="960" />
+  <a href="https://arnavutkoy-dijital.pages.dev"><img src="https://img.shields.io/badge/UI-Cloudflare%20Pages-F38020?style=flat-square" alt="UI" /></a>
+  <a href="https://arnavutkoy-digital-services-platform.onrender.com/swagger"><img src="https://img.shields.io/badge/API-Swagger-85EA2D?style=flat-square" alt="Swagger" /></a>
+  <img src="https://img.shields.io/badge/.NET-8-512BD4?style=flat-square&logo=dotnet" alt=".NET 8" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT" />
 </p>
 
 <p align="center">
-  <a href="https://arnavutkoy-dijital.pages.dev"><img src="https://img.shields.io/badge/Live%20Demo-Cloudflare%20Pages-F38020?style=flat-square" alt="Live Demo" /></a>
-  <img src="https://img.shields.io/badge/.NET-8%20LTS-512BD4?style=flat-square&logo=dotnet" alt=".NET 8" />
-  <img src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=flat-square&logo=postgresql" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react" alt="React TypeScript" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
-  <img src="https://img.shields.io/badge/Status-Portfolio%20Demo-0E7C7B?style=flat-square" alt="Portfolio Demo" />
+  <img src="docs/arnavutkoy-showcase.png" alt="Ana sayfa" width="900" />
 </p>
 
-## Canlı demo
+> Bağımsız bir yazılım projesidir; resmi belediye kurumunu temsil etmez. Coğrafi, vatandaş ve işlem verileri seed ile oluşturulmuş örnek kayıtlardır.
 
-| | |
+## Proje hakkında
+
+Belediye dijital kanallarında tekrar eden ihtiyaçları — kimlik doğrulama, başvuru takibi, borç/ödeme, duyuru yönetimi, coğrafi veri, ulaşım bilgisi — tek bir tutarlı sistemde toplamak için geliştirildi. Amaç, katmanları net ayrılmış, test edilebilir ve genişletilebilir bir referans uygulama sunmaktır.
+
+**Roller:** `Citizen` (vatandaş), `Officer` (görevli), `Administrator` (yönetici). Kimlik doğrulama e-posta + parola; oturum JWT access/refresh token çifti ile yönetilir (SPA, `localStorage`).
+
+| Katman | Tercih | Gerekçe |
+|---|---|---|
+| Backend | ASP.NET Core 8, Clean Architecture, CQRS | İş kurallarını API'den ayırmak; handler/validator testlerini kolaylaştırmak |
+| Veri | EF Core 8 + PostgreSQL | Migration tabanlı şema; Identity ile kullanıcı yönetimi |
+| API sözleşmesi | MediatR, FluentValidation, ProblemDetails | Tek giriş noktası, tutarlı hata gövdeleri (RFC 7807) |
+| Frontend | Vite 7, React 19, TypeScript | Hızlı dev döngüsü; tip güvenliği; sayfa bazlı CSS (framework bağımlılığı yok) |
+| Dağıtım | Docker Compose (lokal), Cloudflare Pages + Render (canlı) | UI/API ayrımı; tekrarlanabilir ortam |
+
+Bağımlılık yönü: `Api → Application → Domain`. `Persistence` ve `Infrastructure`, Application arayüzlerini uygular. Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## Canlı ortam ve test hesapları
+
+| Bileşen | URL |
 |---|---|
-| **Vatandaş UI** | [https://arnavutkoy-dijital.pages.dev](https://arnavutkoy-dijital.pages.dev) |
-| **API Health** | [https://arnavutkoy-digital-services-platform.onrender.com/health](https://arnavutkoy-digital-services-platform.onrender.com/health) |
-| **API Swagger** | [https://arnavutkoy-digital-services-platform.onrender.com/swagger](https://arnavutkoy-digital-services-platform.onrender.com/swagger) |
+| Web | https://arnavutkoy-dijital.pages.dev |
+| Swagger | https://arnavutkoy-digital-services-platform.onrender.com/swagger |
+| Health | https://arnavutkoy-digital-services-platform.onrender.com/health |
 
-> Render free tier’da API ~15 dk hareketsizlikten sonra uykuya geçebilir; ilk istek 30–60 sn sürebilir.
+Render free tier'da API hareketsizlik sonrası uyku moduna geçer; soğuk başlangıç 30–60 saniye sürebilir.
 
-### Demo hesaplar (seed)
+Seed ile oluşturulan hesaplar:
 
-| Rol | E-posta | Şifre |
+| Rol | E-posta | Parola |
 |---|---|---|
 | Vatandaş | `vatandas@demo.arnavutkoy.local` | `Demo!Citizen123` |
 | Görevli | `gorevli@demo.arnavutkoy.local` | `Demo!Officer123` |
 | Yönetici | `yonetici@demo.arnavutkoy.local` | `Demo!Admin123` |
 
----
-
-## Proje amacı
-
-Kamu kurumuna yakışan, güvenilir ve modern bir dijital belediye deneyimini mühendislik disipliniyle göstermek:
-
-- Clean Architecture + CQRS ile okunabilir / test edilebilir API
-- JWT kimlik + rol bazlı yetki
-- Gerçekçi vatandaş ve personel akışları (seed demo verisi)
-- Docker ile tekrarlanabilir ortam
-- React SPA ile tutarlı kurumsal UI
-
----
-
-## Ekran görüntüleri
-
-### Ana sayfa
-
-![Ana sayfa](docs/screenshots/01-ana-sayfa.png)
-
-### Giriş
-
-![Giriş](docs/screenshots/02-giris.png)
-
-### E-Belediye
-
-![E-Belediye](docs/screenshots/03-e-belediye.png)
-
-### Hizmet rehberi
-
-![Hizmet rehberi](docs/screenshots/04-hizmet-rehberi.png)
-
-### Ulaşım ağı
-
-![Ulaşım ağı](docs/screenshots/05-ulasim-agi.png)
-
-### Hatlar
-
-![Hatlar](docs/screenshots/06-hatlar.png)
-
-### Haberler
-
-![Haberler](docs/screenshots/07-haberler.png)
-
-### Duyurular
-
-![Duyurular](docs/screenshots/08-duyurular.png)
-
-### Vatandaş paneli
-
-![Vatandaş paneli](docs/screenshots/09-panel.png)
-
-### Borçlarım
-
-![Borçlarım](docs/screenshots/10-borclar.png)
-
-### İletişim
-
-![İletişim](docs/screenshots/11-iletisim.png)
-
----
+Senaryo adımları: [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md)
 
 ## Özellikler
 
-### Dijital belediye hizmetleri
+**Vatandaş / e-hizmet** — E-Belediye merkezi, hizmet rehberi, dijital vezne, borç sorgulama/ödeme (emlak, su), belge başvurusu, nikah randevusu, imar sorgusu, spor tesisi randevusu, sosyal yardım, talep/öneri, iletişim formu, hesap yönetimi.
 
-- E-Belediye işlem merkezi (arama, kategori, takip kodu)
-- Dijital vezne (demo ödeme masası)
-- Borç sorgulama / ödeme akışı (emlak, su)
-- Belge başvurusu ve başvuru takibi (`BV-` / `SP-` / `NK-`)
-- Nikah randevusu, imar durumu & harç hesabı, spor tesisi randevusu
-- Hizmet rehberi (keşif / yönlendirme)
-- Sosyal yardım ve talep / öneri kayıtları
-- İletişim merkezi (niyet seçimi, form, SSS, demo konum)
+**Ulaşım** — Hat kataloğu, güzergâh/sefer, Leaflet harita, ulaşım kartı ve biniş kaydı.
 
-### Ulaşım
+**Kurumsal içerik** — Haber, duyuru, etkinlik, kültür-sanat, muhtarlık ve birim dizini.
 
-- Ulaşım ağı merkezi (rota arama, harita, önemli uçlar)
-- Otobüs hat kataloğu (filtre, mahalle, güzergâh uçları)
-- Hat detay sayfaları
-- Ulaşım kartı (bakiye / hareket — giriş gerekir)
-- Biniş simülasyonu (demo tarife)
-- Leaflet harita katmanı
-
-### İlçe bilgi sistemi
-
-- Haberler, duyurular, etkinlikler, faaliyetler
-- Kültür & sanat mekânları
-- Muhtarlıklar dizini
-- Birimler (İK dizini)
-- Kurumsal sayfa ve başkan mesajı
-
-### Hesap ve operasyon
-
-- Kayıt / giriş / şifremi unuttum (demo)
-- Vatandaş paneli (borç, talep, kart, randevu özeti)
-- Personel: hizmet masası, duyuru yönetimi, hat / birim / coğrafya yönetimi
-- Rol bazlı yetki (Citizen / Officer / Administrator)
-
----
-
-## Teknoloji yığını
-
-| Alan | Seçim |
-|---|---|
-| Backend | ASP.NET Core 8 Web API |
-| Mimari | Clean Architecture + CQRS (MediatR) |
-| Veri | Entity Framework Core 8 + PostgreSQL |
-| Kimlik | ASP.NET Core Identity + JWT (access + refresh rotation) |
-| Validasyon | FluentValidation |
-| Log | Serilog (konsol + opsiyonel Seq) |
-| Frontend | Vite 7 + React 19 + TypeScript |
-| Routing | React Router 7 |
-| Harita | Leaflet |
-| Stil | Sayfa bazlı özel CSS (Tailwind yok) |
-| Test | xUnit, FluentAssertions, NSubstitute, Testcontainers |
-| Ops | Docker Compose, GitHub Actions CI, Swagger, health checks |
-
----
+**Personel** — Görevli: talep masası, sosyal yardım, duyuru, borç kesme. Yönetici: coğrafya, hat ve birim yönetimi.
 
 ## Mimari
 
 ```text
 src/
-├── ArnavutkoyBelediyesi.Domain          # Entity, kurallar, domain event
-├── ArnavutkoyBelediyesi.Application     # CQRS handlers, DTO, FluentValidation
-├── ArnavutkoyBelediyesi.Persistence     # EF Core, Identity, migration, seed
-├── ArnavutkoyBelediyesi.Infrastructure  # JWT, Identity adaptörü, CurrentUser
-└── ArnavutkoyBelediyesi.Api             # Controllers, middleware, DI, health
+├── ArnavutkoyBelediyesi.Domain
+├── ArnavutkoyBelediyesi.Application
+├── ArnavutkoyBelediyesi.Persistence
+├── ArnavutkoyBelediyesi.Infrastructure
+└── ArnavutkoyBelediyesi.Api
 
-tests/
-├── *.Domain.Tests
-├── *.Application.Tests
-├── *.Infrastructure.Tests
-└── *.Api.IntegrationTests
-
-web/                                     # Vite React vatandaş / personel UI
-docker/                                  # Dockerfile + compose
-docs/                                    # Mimari, API, güvenlik, demo turu
-.github/workflows/                       # CI
+tests/          # Domain, Application, Infrastructure, Api.IntegrationTests
+web/            # React SPA
+docker/         # Dockerfile, Compose
+docs/           # Mimari, API, güvenlik, dağıtım
+.github/        # CI workflow
 ```
 
-Bağımlılık yönü: **Api → Application → Domain**; Persistence / Infrastructure Application arayüzlerini uygular.
+## Kurulum
 
-Ayrıntı: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+**Gereksinimler:** Docker Desktop (Compose v2), Node.js ≥ 20.19 (`web/.nvmrc`: 24.19.0), .NET 8 SDK *(test / konteynersiz geliştirme)*.
 
----
-
-## Hızlı başlangıç
-
-### Docker (API + PostgreSQL)
+### API + PostgreSQL
 
 ```bash
 cd docker
@@ -193,21 +94,26 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
-| Kaynak | Adres |
+| Uç nokta | Lokal adres |
 |---|---|
 | Swagger | http://localhost:8080/swagger |
-| Health | http://localhost:8080/health |
+| Liveness | http://localhost:8080/health |
+| Readiness | http://localhost:8080/health/ready |
 
-### Vatandaş UI
+Migration'lar API ayağa kalkarken uygulanır. `Development` ortamında demo seed arka planda çalışır; `Production`'da kapalıdır (`appsettings.Production.json`).
+
+### Web arayüzü
 
 ```bash
 cd web
-cp .env.example .env   # VITE_API_BASE_URL=http://localhost:8080
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-Tarayıcı: http://localhost:5173
+http://localhost:5173 — LAN testi: `http://<makine-ip>:5173`
+
+Yerelde `VITE_API_BASE_URL` **boş** kalmalı; Vite `/api` isteklerini `localhost:8080`'e proxy eder. Production build için HTTPS API adresi zorunludur.
 
 ### Testler
 
@@ -215,27 +121,64 @@ Tarayıcı: http://localhost:5173
 dotnet test ArnavutkoyBelediyesi.slnx
 ```
 
-> Entegrasyon testleri için Docker Desktop gerekir (Testcontainers).
+Entegrasyon testleri Testcontainers kullanır; Docker Desktop açık olmalıdır.
 
-Ortam değişkenleri ve dağıtım notları → [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+## Ortam değişkenleri
 
----
+Lokal Docker (`docker/.env`):
+
+| Değişken | Açıklama |
+|---|---|
+| `POSTGRES_PASSWORD` | PostgreSQL parolası (zorunlu) |
+| `JWT_SIGNING_KEY` | JWT imza anahtarı, min. 32 karakter |
+| `DATABASE_SEED_ON_STARTUP` | Demo seed (`true` / `false`) |
+| `API_PORT` | API portu (varsayılan `8080`) |
+
+Web (`web/.env`):
+
+| Değişken | Lokal | Production |
+|---|---|---|
+| `VITE_API_BASE_URL` | Boş (proxy) | `https://arnavutkoy-digital-services-platform.onrender.com` |
+
+Canlı dağıtım (CORS, Pages build, Render): [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
+
+## API
+
+Taban yol: `/api/v1`. Tam sözleşme Swagger'da; özet harita [`docs/API.md`](docs/API.md).
+
+| Grup | Örnek uç noktalar |
+|---|---|
+| Auth | `POST /auth/register`, `/login`, `/refresh`, `/logout` |
+| Talepler | `GET/POST /citizen-requests`, mesaj ve durum geçişleri |
+| Borçlar | `GET /debts/mine`, `POST /debts/{id}/payments` |
+| Portal | `GET /portal/announcements`, `/portal/events`, `/portal/contents` |
+| Coğrafya | `GET /districts`, `/neighborhoods`, `/streets` |
+
+## Ekran görüntüleri
+
+<p align="center">
+  <img src="docs/screenshots/01-ana-sayfa.png" alt="Ana sayfa" width="45%" />
+  <img src="docs/screenshots/03-e-belediye.png" alt="E-Belediye" width="45%" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/09-panel.png" alt="Vatandaş paneli" width="45%" />
+  <img src="docs/screenshots/05-ulasim-agi.png" alt="Ulaşım ağı" width="45%" />
+</p>
+
+Diğer ekranlar: [`docs/screenshots/`](docs/screenshots/) (giriş, hatlar, haberler, duyurular, borçlar, iletişim).
 
 ## Dokümantasyon
 
 | Belge | İçerik |
 |---|---|
-| [`docs/DEMO_WALKTHROUGH.md`](docs/DEMO_WALKTHROUGH.md) | Portföy demo senaryosu |
-| [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar ve CQRS |
-| [`docs/API.md`](docs/API.md) | v1 uç nokta haritası |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Tehdit modeli |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Katmanlar, CQRS, bağımlılık kuralları |
+| [`docs/API.md`](docs/API.md) | REST v1 haritası |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Kimlik, token, tehdit modeli |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker, Cloudflare Pages, Render |
 | [`docs/TESTING.md`](docs/TESTING.md) | Test stratejisi |
-| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Docker / sırlar / env |
+| [`docs/PRD.md`](docs/PRD.md) | Ürün kapsamı |
 | [`web/README.md`](web/README.md) | Frontend notları |
-
----
 
 ## Lisans
 
-[MIT](LICENSE) — Copyright (c) 2026 ibrahimyagar.
+[MIT](LICENSE) — Copyright © 2026 [ibrahimyagar](https://github.com/ibrahimyagar).
