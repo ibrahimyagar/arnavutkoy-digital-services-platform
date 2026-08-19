@@ -4,11 +4,10 @@ Bu depo bağımsız bir portföy/demo çalışmasıdır. Yine de dış katkı ka
 
 ## Kurallar
 
-1. **AI/araç adı commit mesajına yazılmaz** (`Co-authored-by: Cursor` vb. yok).
-2. Conventional Commits tercih edilir: `feat:`, `fix:`, `test:`, `docs:`, `ci:`.
-3. PR açmadan önce: `dotnet build` ve `dotnet test` yeşil olmalı (Docker gerekli).
-4. Yeni özellik Clean Architecture sınırlarını bozmamalı: Domain ← Application ← Api/Infra/Persistence.
-5. Kullanıcı kimliği istemciden alınmamalı; JWT'den türetilmeli.
+1. Conventional Commits tercih edilir: `feat:`, `fix:`, `test:`, `docs:`, `ci:`.
+2. PR açmadan önce: `dotnet build` ve `dotnet test` yeşil olmalı (Docker gerekli).
+3. Yeni özellik Clean Architecture sınırlarını bozmamalı: Domain ← Application ← Api/Infra/Persistence.
+4. Kullanıcı kimliği istemciden alınmamalı; JWT'den türetilmeli.
 
 ## Yerel kurulum
 
