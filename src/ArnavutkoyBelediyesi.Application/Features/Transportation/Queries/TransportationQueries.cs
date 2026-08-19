@@ -148,3 +148,50 @@ public sealed class GetBusLineByIdQueryHandler(IUnitOfWork unitOfWork)
             departures));
     }
 }
+
+public sealed record SearchBusStopsQuery(string Query, int Limit = 20) : IRequest<Result<IReadOnlyCollection<BusStopSearchResultDto>>>;
+
+public sealed class SearchBusStopsQueryValidator : AbstractValidator<SearchBusStopsQuery>
+{
+    public SearchBusStopsQueryValidator()
+    {
+        RuleFor(x => x.Query).NotEmpty().MinimumLength(2);
+        RuleFor(x => x.Limit).InclusiveBetween(1, 50);
+    }
+}
+
+public sealed class SearchBusStopsQueryHandler(IUnitOfWork unitOfWork)
+    : IRequestHandler<SearchBusStopsQuery, Result<IReadOnlyCollection<BusStopSearchResultDto>>>
+{
+    public async Task<Result<IReadOnlyCollection<BusStopSearchResultDto>>> Handle(
+        SearchBusStopsQuery request,
+        CancellationToken cancellationToken)
+    {
+        var needle = request.Query.Trim();
+        var normalized = needle.ToUpperInvariant();
+
+        var results = await unitOfWork.Repository<BusLineStop>().Query()
+            .Where(s => s.Name.ToUpper().Contains(normalized))
+            .Join(
+                unitOfWork.Repository<BusLine>().Query(),
+                stop => stop.BusLineId,
+                line => line.Id,
+                (stop, line) => new { stop, line })
+            .Where(x => x.line.IsActive)
+            .OrderBy(x => x.stop.Name)
+            .ThenBy(x => x.line.Code)
+            .Take(request.Limit)
+            .Select(x => new BusStopSearchResultDto(
+                x.stop.Id,
+                x.line.Id,
+                x.line.Code,
+                x.line.Name,
+                x.stop.Sequence,
+                x.stop.Name,
+                x.line.IsActive))
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return Result<IReadOnlyCollection<BusStopSearchResultDto>>.Success(results);
+    }
+}

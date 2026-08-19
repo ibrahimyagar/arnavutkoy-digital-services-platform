@@ -30,6 +30,14 @@ public sealed class BusLinesController(ISender sender) : ApiControllerBase
         return HandleResult(result);
     }
 
+    [HttpGet("stops/search")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchStops([FromQuery] string q, [FromQuery] int limit = 20, CancellationToken cancellationToken = default)
+    {
+        var result = await sender.Send(new SearchBusStopsQuery(q, limit), cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
     [HttpPost]
     [Authorize(Roles = Roles.Administrator)]
     public async Task<IActionResult> Create([FromBody] CreateBusLineRequest request, CancellationToken cancellationToken)

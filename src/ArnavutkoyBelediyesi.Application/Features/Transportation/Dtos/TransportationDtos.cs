@@ -18,6 +18,15 @@ public sealed record BusLineDetailsDto(
     IReadOnlyCollection<BusLineStopDto> Stops,
     IReadOnlyCollection<BusLineDepartureDto> Departures);
 
+public sealed record BusStopSearchResultDto(
+    Guid StopId,
+    Guid BusLineId,
+    string BusLineCode,
+    string BusLineName,
+    int Sequence,
+    string StopName,
+    bool LineIsActive);
+
 public sealed record BoardingRecordDto(
     Guid Id,
     Guid TransportCardId,

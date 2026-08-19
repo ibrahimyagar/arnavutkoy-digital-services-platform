@@ -16,7 +16,7 @@ import { loginPath } from '../lib/returnUrl'
 import './bus-lines.css'
 
 const NOTICE =
-  'Bu proje portföy demosudur. Canlı İETT / İBB API yoktur. Hat adları resmi RouteDetail sayfalarıyla yoklanmıştır; sefer saati ve İstanbulkart tutarı bu sitede tutulmaz.'
+  'Demo ulaşım bilgilendirme modülü — Ağustos 2026 tarifesi. Canlı İETT/İBB API yoktur; sefer saatleri gerçekçi örnek veridir.'
 
 export function TransportNetworkPage() {
   const navigate = useNavigate()

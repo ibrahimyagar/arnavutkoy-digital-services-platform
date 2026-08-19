@@ -324,6 +324,16 @@ export type BusLineDetails = BusLine & {
   departures: BusLineDeparture[]
 }
 
+export type BusStopSearchResult = {
+  stopId: string
+  busLineId: string
+  busLineCode: string
+  busLineName: string
+  sequence: number
+  stopName: string
+  lineIsActive: boolean
+}
+
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 

@@ -5,7 +5,7 @@ export const IETT_ROUTE = (code: string) =>
 
 export const IETT_TARIFF = 'https://iett.istanbul/icerik/IETT-Toplu-Ulasim-ucret-Tarifesi'
 
-export const CATALOG_LIST_DATE = '24 Ocak 2021'
+export const CATALOG_LIST_DATE = 'Ağustos 2026'
 export const CATALOG_CHECKED = 'Ağustos 2026'
 
 export type LineKind = 'Normal' | 'Besleme' | 'Ekspres'

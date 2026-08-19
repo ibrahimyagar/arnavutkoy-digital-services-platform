@@ -916,7 +916,7 @@ public static class ApplicationDbContextSeeder
         {
             fromTo,
             "Kaynak: İETT / Arnavutköy Belediyesi",
-            "Liste: 24 Ocak 2021",
+            "Liste: Ağustos 2026 (demo tarife)",
             $"Mahalle: {neighborhoods}",
         };
         if (!string.IsNullOrWhiteSpace(kind))
@@ -1037,10 +1037,14 @@ public static class ApplicationDbContextSeeder
                 continue;
             }
 
-            var stops = draft.Stops
+            var stopNames = BusLineCatalogSeed.ResolveStops(draft.Code, draft.Stops);
+            var stops = stopNames
                 .Select((name, index) => BusLineStop.Create(line.Id, index + 1, name))
                 .ToArray();
             await context.BusLineStops.AddRangeAsync(stops, cancellationToken).ConfigureAwait(false);
+
+            var departures = BusScheduleSeed.BuildForLine(line.Id, draft.Code);
+            await context.BusLineDepartures.AddRangeAsync(departures, cancellationToken).ConfigureAwait(false);
         }
 
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

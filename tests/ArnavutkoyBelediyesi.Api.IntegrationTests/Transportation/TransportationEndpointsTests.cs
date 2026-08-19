@@ -87,10 +87,23 @@ public sealed class TransportationEndpointsTests(ApiFactory factory)
         var detail = await (await client.GetAsync($"/api/v1/bus-lines/{line36.Id}"))
             .ReadAsAsync<BusLineDetailsDto>();
 
-        detail!.Stops.Should().HaveCountGreaterThanOrEqualTo(2);
+        detail!.Stops.Should().HaveCountGreaterThanOrEqualTo(4);
         detail.Stops.Select(s => s.Name).Should().Contain(["Taşoluk Peronlar", "Sefaköy Metrobüs"]);
-        // Canlı sefer saati seed edilmez (demo; İETT tarife değildir).
-        detail.Departures.Should().NotBeNull();
+        detail.Departures.Should().NotBeEmpty();
+        detail.Departures.Should().OnlyContain(d => d.DepartureTime != default);
+    }
+
+    [Fact]
+    public async Task SearchBusStops_FindsHadimkoyStops()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/v1/bus-lines/stops/search?q=Hadımköy&limit=10");
+        response.EnsureSuccessStatusCode();
+        var hits = await response.ReadAsAsync<IReadOnlyCollection<BusStopSearchResultDto>>();
+
+        hits.Should().NotBeEmpty();
+        hits.Should().OnlyContain(h => h.StopName.Contains("Hadımköy", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

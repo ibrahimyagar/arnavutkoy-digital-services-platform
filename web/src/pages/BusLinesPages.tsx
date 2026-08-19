@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { PublicPage } from '../components/ui/PublicPage'
+import { BusLineSchedulePanel } from '../components/transport/BusLineSchedulePanel'
 import { TransportContinue, TransportNav } from '../components/transport/TransportChrome'
 import { TransportMap } from '../components/transport/TransportMap'
-import { apiFetch, type BusLine, type BusLineDetails } from '../lib/api'
+import { apiFetch, type BusLine, type BusLineDetails, type BusStopSearchResult } from '../lib/api'
+import { upcomingDepartures } from '../lib/busSchedule'
 import {
   CATALOG_CHECKED,
   CATALOG_LIST_DATE,
@@ -28,7 +30,7 @@ import { loginPath } from '../lib/returnUrl'
 import './bus-lines.css'
 
 const NOTICE =
-  'Bu proje portföy demosudur; canlı İETT / İBB API bağlantısı yoktur. Hat adları Arnavutköy Belediyesi’nin İETT listesi ve İETT RouteDetail sayfalarıyla karşılaştırılmıştır. Hareket saati, tam durak sırası ve güncel ücret bu kayıtta tutulmaz.'
+  'Demo ulaşım bilgilendirme modülü — Ağustos 2026 tarifesi. Canlı İETT/İBB API bağlantısı yoktur; sefer saatleri gerçekçi örnek veridir. Resmi tarife ve anlık konum için İETT kaynaklarını kullanın.'
 
 function SearchIcon() {
   return (
@@ -61,6 +63,8 @@ export function BusLinesPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [reload, setReload] = useState(0)
+  const [stopHits, setStopHits] = useState<BusStopSearchResult[]>([])
+  const [stopLoading, setStopLoading] = useState(false)
 
   const q = params.get('q') ?? params.get('search') ?? ''
   const kind = kindFromParam(params.get('type'))
@@ -102,6 +106,31 @@ export function BusLinesPage() {
     }
   }, [reload, status])
 
+  useEffect(() => {
+    const needle = q.trim()
+    if (needle.length < 2) {
+      setStopHits([])
+      return
+    }
+    let cancelled = false
+    setStopLoading(true)
+    void (async () => {
+      try {
+        const hits = await apiFetch<BusStopSearchResult[]>(
+          `/api/v1/bus-lines/stops/search?q=${encodeURIComponent(needle)}&limit=8`,
+        )
+        if (!cancelled) setStopHits(hits)
+      } catch {
+        if (!cancelled) setStopHits([])
+      } finally {
+        if (!cancelled) setStopLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [q])
+
   const kinds = useMemo(() => presentKinds(items), [items])
   const neighborhoods = useMemo(() => presentNeighborhoods(items), [items])
   const places = useMemo(() => presentPlaces(items), [items])
@@ -130,8 +159,8 @@ export function BusLinesPage() {
         <TransportNav />
         <header className="tx-hero">
           <p className="tx-kicker">Arnavutköy ulaşım rehberi</p>
-          <h1>Hatları, güzergâhları ve durak uçlarını keşfedin.</h1>
-          <p>Gitmek istediğiniz yere giden hattı bulun. Saat ve ücret canlı İETT verisi değildir.</p>
+          <h1>Hatları, güzergâhları ve sefer saatlerini keşfedin.</h1>
+          <p>Gitmek istediğiniz yere giden hattı bulun; durak ve demo tarife saatlerini tek ekranda görün.</p>
           <div className="tx-search">
             <label htmlFor="tx-q">Hat numarası, durak veya mahalle ara</label>
             <div className="tx-search-box">
@@ -152,6 +181,21 @@ export function BusLinesPage() {
               <p className="tx-jump">
                 <Link to={`/hatlar/${exact.id}`}>{exact.code} hattını aç →</Link>
               </p>
+            ) : null}
+            {stopLoading ? <p className="tx-muted">Duraklar aranıyor…</p> : null}
+            {!stopLoading && stopHits.length > 0 ? (
+              <ul className="tx-stop-hits" aria-label="Durak eşleşmeleri">
+                {stopHits.map((hit) => (
+                  <li key={hit.stopId}>
+                    <Link to={`/hatlar/${hit.busLineId}`}>
+                      <strong>{hit.stopName}</strong>
+                      <span>
+                        {hit.busLineCode} · {hit.sequence}. durak
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             ) : null}
           </div>
         </header>
@@ -223,8 +267,7 @@ export function BusLinesPage() {
             </label>
           </form>
           <p className="tx-muted">
-            Sıralama kayıtlı İETT süresine göredir. Sefer sıklığı ve tam durak sayısı bu demoda yoktur; o yüzden
-            “en sık sefer” sıralaması yok.
+            Sıralama kayıtlı İETT süresine göredir. Sefer sıklığı hat detayında demo tarife tablosunda gösterilir.
           </p>
         </section>
 
@@ -306,10 +349,10 @@ export function BusLinesPage() {
                         <strong>{line.name}</strong>
                         <em>{parsed.route || line.routeSummary}</em>
                         <em className="tx-meta">
-                          {parsed.kind ?? 'Bilgi güncelleniyor'}
-                          {parsed.durationMin ? ` · ${parsed.durationMin} dk (İETT)` : ''}
+                          {parsed.kind ?? 'Normal'}
+                          {parsed.durationMin ? ` · ${parsed.durationMin} dk` : ''}
                           {' · '}
-                          {line.isActive ? 'Katalogda' : 'Yayımlanmıyor'}
+                          {line.isActive ? 'Aktif hat' : 'Yayımlanmıyor'}
                         </em>
                       </span>
                       <span className="tx-go">Güzergahı gör</span>
@@ -325,8 +368,8 @@ export function BusLinesPage() {
           <p className="tx-kicker">Kaynak</p>
           <h2>Veri nereden geliyor?</h2>
           <p>
-            Belediye İETT listesi yayımlanma tarihi: {CATALOG_LIST_DATE}. Hat adları {CATALOG_CHECKED} içinde İETT
-            RouteDetail ile yoklandı. Canlı sefer, durak sırası ve tarife bu sitede tutulmaz.
+            Belediye İETT listesi ve demo tarife dönemi: {CATALOG_LIST_DATE}. Hat adları {CATALOG_CHECKED} içinde İETT
+            RouteDetail ile yoklandı. Sefer saatleri demo veridir; canlı konum İETT uygulamasındadır.
           </p>
           <p>
             <a href={IETT_TARIFF} target="_blank" rel="noreferrer">
@@ -369,6 +412,13 @@ export function BusLineDetailPage() {
     }
   }, [id, reload])
 
+  const parsed = detail ? parseLineSummary(detail.routeSummary) : null
+  const stops = detail ? sortedStops(detail.stops) : []
+  const nextDepartures = useMemo(
+    () => (detail ? upcomingDepartures(detail.departures) : []),
+    [detail],
+  )
+
   if (error) {
     return (
       <div className="container page">
@@ -386,7 +436,7 @@ export function BusLineDetailPage() {
     )
   }
 
-  if (!detail) {
+  if (!detail || !parsed) {
     return (
       <div className="container page">
         <p className="muted">Hat yükleniyor…</p>
@@ -394,8 +444,6 @@ export function BusLineDetailPage() {
     )
   }
 
-  const parsed = parseLineSummary(detail.routeSummary)
-  const stops = sortedStops(detail.stops)
   const official = iettHref(detail.code)
   const planTo = parsed.origin && parsed.destination
     ? `/hatlar?from=${encodeURIComponent(parsed.origin)}&to=${encodeURIComponent(parsed.destination)}`
@@ -417,9 +465,11 @@ export function BusLineDetailPage() {
             <div className="txd-meta">
               <span>{parsed.kind ?? 'Tip doğrulanıyor'}</span>
               {parsed.tariff ? <span>{parsed.tariff}</span> : <span>Tarife: İstanbulkart</span>}
-              {parsed.durationMin ? <span>Tek yön {parsed.durationMin} dk (İETT)</span> : null}
-              <span>{detail.isActive ? 'Katalogda' : 'Yayımlanmıyor'}</span>
-              <span>{stops.length} güzergâh ucu</span>
+              {parsed.durationMin ? <span>Tek yön {parsed.durationMin} dk</span> : null}
+              <span>{detail.isActive ? 'Aktif hat' : 'Yayımlanmıyor'}</span>
+              <span>{stops.length} durak</span>
+              {detail.departures.length > 0 ? <span>{detail.departures.length} sefer kaydı</span> : null}
+              {nextDepartures[0] ? <span>Sıradaki: {nextDepartures[0].time}</span> : null}
             </div>
             <div className="tx-cta-row">
               <a className="btn btn-primary" href={official} target="_blank" rel="noreferrer">
@@ -461,7 +511,12 @@ export function BusLineDetailPage() {
           </div>
         </header>
 
-        <ol className="tx-route" aria-label="Güzergâh uçları">
+        <section className="tx-block" aria-labelledby="tx-route-title">
+          <header className="tx-head">
+            <p className="tx-kicker">Güzergâh</p>
+            <h2 id="tx-route-title">Durak sırası</h2>
+          </header>
+          <ol className="tx-route" aria-label="Durak listesi">
           {stops.length === 0 ? (
             <li>
               <span>01</span>
@@ -480,15 +535,18 @@ export function BusLineDetailPage() {
                   <Link to={`/hatlar?q=${encodeURIComponent(stop.name)}`}>
                     <strong>{stop.name}</strong>
                   </Link>
-                  <em>{index === 0 ? 'Başlangıç' : index === stops.length - 1 ? 'Varış' : 'Güzergâh ucu'}</em>
+                  <em>
+                    {index === 0 ? 'Başlangıç durağı' : index === stops.length - 1 ? 'Bitiş durağı' : `${index + 1}. durak`}
+                  </em>
                 </div>
               </li>
             ))
           )}
         </ol>
+        </section>
         <p className="tx-muted">
-          Bu sıra resmi hat adındaki uç noktalardır; ara durakların tam listesi ve harita geometrisi İETT
-          sayfasındadır. Sahte koordinat üretilmez.
+          Durak sırası demo katalog verisidir. Ara durakların tam listesi ve harita geometrisi İETT sayfasında
+          güncellenir.
         </p>
 
         <TransportMap
@@ -497,22 +555,21 @@ export function BusLineDetailPage() {
           destination={parsed.destination}
         />
 
+        <BusLineSchedulePanel departures={detail.departures} lineCode={detail.code} />
+
         <div className="txd-grid">
           <section>
-            <p className="tx-kicker">Saat ve sıklık</p>
-            <h2>Hareket saatleri bu demoda yok.</h2>
+            <p className="tx-kicker">Simülasyon ücreti</p>
+            <h2>Biniş denemesi: {detail.baseFare.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</h2>
             <p>
-              İlk/son sefer ve aralık uydurulmaz. İETT 26 Haziran 2026 duyurusuna göre yaz tarifesi sefer
-              saatlerini değiştirebilir.
+              Kart biniş simülasyonu için demo ücret. Resmi İstanbulkart tarifesi{' '}
+              {parsed.tariff ? parsed.tariff.toLocaleLowerCase('tr-TR') : 'İETT tarifesine'} tabidir.
             </p>
           </section>
           <section>
-            <p className="tx-kicker">Ücret</p>
-            <h2>Hat bazlı fiyat yayımlanmaz.</h2>
-            <p>
-              İETT kaydına göre tarife {parsed.tariff ? parsed.tariff.toLocaleLowerCase('tr-TR') : 'İstanbulkart tarifesi'}{' '}
-              olarak geçer. Simülasyon ücreti kart bakiyesi içindir; resmi tarife değildir.
-            </p>
+            <p className="tx-kicker">Ücret tarifesi</p>
+            <h2>Resmi tarife İETT’te</h2>
+            <p>Güncel tam/kısıtlı bilet ücretleri İETT tarife sayfasından doğrulanmalıdır.</p>
             <p>
               <a href={IETT_TARIFF} target="_blank" rel="noreferrer">
                 İETT ücret tarifesi →
@@ -529,7 +586,7 @@ export function BusLineDetailPage() {
         ) : (
           <aside className="tx-notice">
             <p className="tx-kicker">Duyuru</p>
-            <p>Canlı hat değişikliği bu demoda akmaz. Resmi duyurular İETT kaynaklarından izlenir.</p>
+            <p>Demo tarife Ağustos 2026 dönemini yansıtır. Resmi duyurular İETT kaynaklarından izlenir.</p>
           </aside>
         )}
 
