@@ -33,6 +33,12 @@ namespace ArnavutkoyBelediyesi.Persistence.Migrations
                     "NormalizedEmail" = upper("Email" COLLATE "C"),
                     "NormalizedUserName" = upper("UserName" COLLATE "C")
                 WHERE "Email" IS NOT NULL OR "UserName" IS NOT NULL;
+
+                DELETE FROM "AspNetUsers" a
+                USING "AspNetUsers" b
+                WHERE a."Id" > b."Id"
+                  AND a."NormalizedEmail" IS NOT NULL
+                  AND a."NormalizedEmail" = b."NormalizedEmail";
                 """);
 
             migrationBuilder.CreateIndex(

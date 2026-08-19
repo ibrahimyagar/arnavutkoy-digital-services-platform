@@ -65,6 +65,8 @@ try
     builder.Services.AddApplication(builder.Configuration);
     builder.Services.AddPersistence(builder.Configuration);
     builder.Services.AddInfrastructure();
+    builder.Services.AddSingleton<DatabaseStartupState>();
+    builder.Services.AddHostedService<DatabaseSeedHostedService>();
 
     var app = builder.Build();
 
@@ -120,7 +122,7 @@ try
     app.MapControllers();
     app.MapApiHealthChecks();
 
-    await app.InitializeDatabaseAsync().ConfigureAwait(false);
+    await app.ApplyMigrationsAsync().ConfigureAwait(false);
 
     await app.RunAsync().ConfigureAwait(false);
 }

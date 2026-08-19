@@ -29,7 +29,17 @@ public static class ApplicationDbContextSeeder
         CancellationToken cancellationToken = default)
     {
         await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+        await SeedDataAsync(context, userManager, roleManager, logger, cancellationToken).ConfigureAwait(false);
+    }
 
+    /// <summary>Yalnızca demo verisini yazar; migration çağıran tarafında uygulanmış olmalıdır.</summary>
+    public static async Task SeedDataAsync(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        ILogger logger,
+        CancellationToken cancellationToken = default)
+    {
         await SeedRolesAsync(roleManager).ConfigureAwait(false);
         var citizenUserId = await SeedUsersAsync(userManager, logger).ConfigureAwait(false);
         await SeedGeographyAsync(context, cancellationToken).ConfigureAwait(false);

@@ -1,3 +1,4 @@
+using ArnavutkoyBelediyesi.Api.HealthChecks;
 using ArnavutkoyBelediyesi.Persistence;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -21,14 +22,20 @@ public static class HealthCheckExtensions
                 connectionString,
                 name: "postgresql",
                 failureStatus: HealthStatus.Unhealthy,
-                tags: [ReadyTag]);
+                tags: [ReadyTag])
+            .AddCheck<DatabaseSeedHealthCheck>("database-seed", tags: [ReadyTag]);
 
         return services;
     }
 
     public static WebApplication MapApiHealthChecks(this WebApplication app)
     {
-        app.MapHealthChecks("/health");
+        // Liveness: uygulama ayaktaysa yeterli (Render port taraması / Docker HEALTHCHECK).
+        app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+        {
+            Predicate = _ => false,
+        });
+
         app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains(ReadyTag),
