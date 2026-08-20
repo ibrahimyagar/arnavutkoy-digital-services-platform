@@ -138,6 +138,7 @@ public static class ApplicationDbContextSeeder
                 existing.Gender = gender;
             }
 
+            // Demo hesaplar e-posta doğrulaması gerektiren giriş kuralından muaf tutulur.
             existing.EmailConfirmed = true;
 
             var update = await userManager.UpdateAsync(existing).ConfigureAwait(false);
