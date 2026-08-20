@@ -11,6 +11,10 @@ public sealed record RegisterRequest(
 
 public sealed record LoginRequest(string Email, string Password);
 
+public sealed record VerifyEmailRequest(string Email, string Code);
+
+public sealed record ResendVerificationCodeRequest(string Email);
+
 public sealed record RefreshTokenRequest(string RefreshToken);
 
 public sealed record LogoutRequest(string RefreshToken);

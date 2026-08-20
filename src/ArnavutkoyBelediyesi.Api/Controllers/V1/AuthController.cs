@@ -40,12 +40,49 @@ public sealed class AuthController(ISender sender, ICurrentUserService currentUs
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
         return result.IsSuccess
-            ? Created($"/api/v{HttpContext.GetRequestedApiVersion()}/auth/login", new { id = result.Value })
+            ? Created(
+                $"/api/v{HttpContext.GetRequestedApiVersion()}/auth/verify-email",
+                new { id = result.Value.Id, message = result.Value.Message })
             : HandleResult(result);
     }
 
     /// <summary>
+    /// E-posta doğrulama kodunu doğrular ve hesabı aktif eder.
+    /// </summary>
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request, CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new VerifyEmailCommand(request.Email, request.Code), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Doğrulama kodunu yeniden gönderir (en az 60 saniye aralık).
+    /// </summary>
+    [HttpPost("resend-verification-code")]
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResendVerificationCode(
+        [FromBody] ResendVerificationCodeRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender
+            .Send(new ResendVerificationCodeCommand(request.Email), cancellationToken)
+            .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// E-posta ve parola ile giriş yapar; JWT erişim ve yenileme token'ı döner.
+    /// E-posta doğrulanmamış hesaplar reddedilir (<c>EMAIL_NOT_CONFIRMED</c>).
     /// </summary>
     /// <response code="200">Giriş başarılı.</response>
     /// <response code="400">Kimlik bilgileri hatalı ya da hesap kilitli.</response>
