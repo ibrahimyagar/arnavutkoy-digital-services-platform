@@ -122,6 +122,16 @@ Taban yol: `/api/v1`
 | POST | `/transport-cards/{id}/top-up` | Citizen (sahip) | Bakiye yükle |
 | POST | `/transport-cards/{id}/board` | Citizen (sahip) | Biniş simülasyonu |
 
+## Notifications — `/notifications`
+
+| Metot | Yol | Auth | Açıklama |
+|---|---|---|---|
+| GET | `/notifications/mine` | Bearer | Kendi bildirimlerim (+ yayın duyuruları) |
+| GET | `/notifications` | Officer/Administrator | Tüm bildirimler (channel, status, userId filtre) |
+| POST | `/notifications/test` | Administrator | Demo/test bildirimi tetikle |
+
+Domain olayları: talep çözülme/kapanma, personel talep mesajı, duyuru yayını → `NotificationLog` + `INotificationSender`.
+
 ## Operasyonel
 
 | Metot | Yol | Auth | Açıklama |

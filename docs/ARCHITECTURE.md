@@ -89,8 +89,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
 | SocialAssistance | SocialAssistanceApplication | Sabit alan + JSONB; durum makinesi |
 | Transportation | TransportCard, BusLine, BusLineStop, BusLineDeparture, BoardingRecord | Bakiye, hat, durak, saat, biniş |
+| Notifications | NotificationLog | Domain event → kanal gönderimi (Email/InApp); LoggingNotificationSender |
 
-Yol haritası R1–R6 tamamlandı.
+Yol haritası R1–R6 tamamlandı. Bildirim servisi, mevcut domain event dispatch altyapısı üzerine eklendi.
 
 ## 6. Kalıcılık Desenleri
 
@@ -98,6 +99,8 @@ Yol haritası R1–R6 tamamlandı.
 - **Soft delete:** `AuditableEntity.IsDeleted` + global query filter; sert silme interceptor'da soft'a çevrilir.
 - **Audit:** `CreatedAtUtc` / `UpdatedAtUtc` / `CreatedBy` / `UpdatedBy` interceptor ile doldurulur.
 - **Domain event dispatch:** `SaveChanges` sonrası MediatR `IPublisher` ile yayınlanır.
+  `DomainEventNotification<T>` handler'ları (ör. bildirim servisi) aynı işlem sonrası çalışır;
+  `NotificationLog` ayrı bir `SaveChanges` ile kalıcı hale gelir.
 - **N+1 önleme:** `CitizenRequestRepository.GetByIdWithMessagesAsync` → `Include(Messages)`.
 - **Client-generated Guid + çocuk entity:** Yeni `RequestMessage` kayıtları EF tarafından yanlışlıkla
   `Modified` işaretlenmesin diye `CitizenRequestRepository.Update` bunları `Added` yapar
@@ -159,6 +162,8 @@ Referans PHP e-belediye projesinde gözlemlenen anti-pattern'ler ve bu projedeki
   `/health` gürültüsünü Debug'a düşürür; hassas alanlar şablona alınmaz.
 - **Redis:** Kullanılmayan bağımlılık eklenmedi (`ASSUMPTIONS` A8).
 - **Payment gateway:** Demo kart doğrulama; gerçek PCI kapsamı yok — kart tam numarası/CVV asla persist edilmez.
+- **Notification providers:** İlk sürümde gerçek SMTP/SMS yok; `LoggingNotificationSender` ile kanal soyutlaması hazır.
+  Vade yaklaşan borç (`DebtOverdue`) için zamanlayıcı sonraki iterasyona bırakıldı.
 
 ## 12. İlgili Belgeler
 

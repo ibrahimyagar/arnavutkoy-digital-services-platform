@@ -100,6 +100,13 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 - `TransportCard` — vatandaş kart çıkarır, bakiye yükler, hatta biner (biniş simülasyonu `BoardingRecord`).
 - Yetersiz bakiyede domain exception → Result failure.
 
+### 4.11. Notifications (Bildirim Servisi)
+- `NotificationLog` — kanal (Email, InApp), durum (Pending/Sent/Failed), alıcı, konu/gövde; hassas veri gövdeye yazılmaz.
+- Domain olayları tetikler: talep çözülme/kapanma, personele ait talep mesajı, duyuru yayını.
+- `INotificationSender` ile kanal soyutlanır; ilk sürümde `LoggingNotificationSender` (Serilog simülasyonu).
+- Vatandaş yalnızca kendi bildirimlerini (ve yayın duyuru bildirimlerini) görür; Officer/Administrator tüm kayıtları filtreleyebilir.
+- Vade yaklaşan borç bildirimi (`DebtOverdue`) zamanlayıcı gerektirir; ilk sürümde kapsam dışıdır.
+
 ## 5. Referans Projeden Öğrenilen ve Bilinçli Olarak Düzeltilen Noktalar
 
 > Detaylı güvenlik/mimari analiz için bkz. `ARCHITECTURE.md` → "Referans Projeden Öğrenilen Dersler" bölümü. Özet:
