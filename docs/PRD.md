@@ -50,7 +50,11 @@ Kalite ve mimari tutarlılığı ödünlemeden, ilk sürümde **derinlemesine ve
 ## 4. Faz 1 Kapsamındaki Modüllerin Detaylı Gereksinimleri
 
 ### 4.1. Identity
-- Vatandaş kendi T.C. kimlik numarası (11 hane, algoritmik doğrulama) ve telefon numarasıyla kayıt olur.
+- Vatandaş e-posta, parola, telefon (ve isteğe bağlı TCKN / doğum tarihi / cinsiyet) ile kayıt olur.
+- Kayıt sonrası hesap `EmailConfirmed = false` oluşturulur; 6 haneli doğrulama kodu e-posta ile gönderilir.
+- Kod doğrulanmadan giriş reddedilir (`EMAIL_NOT_CONFIRMED`); `/verify-email` ve `/resend-verification-code` ile tamamlanır.
+- Demo hesaplar seed'de doğrulanmış kabul edilir (canlı demo bozulmaz).
+- Giriş e-posta + parola ile yapılır; JWT access + refresh (rotasyon) üretilir.
 - Roller: `Citizen`, `Officer`, `Administrator`.
 - JWT access token (kısa ömürlü) + refresh token (rotasyonlu, veritabanında saklanan hash).
 - Şifre asla düz metin veya özel algoritmayla saklanmaz; ASP.NET Core Identity'nin `PasswordHasher`'ı kullanılır.

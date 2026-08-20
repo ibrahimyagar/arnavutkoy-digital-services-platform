@@ -9,11 +9,19 @@ Taban yol: `/api/v1`
 
 | Metot | Yol | Auth | Açıklama |
 |---|---|---|---|
-| POST | `/register` | Anonim | Vatandaş kaydı |
-| POST | `/login` | Anonim | Access + refresh token |
+| POST | `/register` | Anonim | Vatandaş kaydı (`EmailConfirmed=false`); yanıt `{ id, message }` — e-posta doğrulama kodu gönderilir |
+| POST | `/verify-email` | Anonim | `{ email, code }` — 6 haneli kod ile hesabı doğrular |
+| POST | `/resend-verification-code` | Anonim | `{ email }` — yeni kod (min. 60 sn aralık; e-posta enumeration sızdırmaz) |
+| POST | `/login` | Anonim | Access + refresh token; **doğrulanmamış hesap → `EMAIL_NOT_CONFIRMED`** |
 | POST | `/refresh` | Anonim | Token rotation |
 | POST | `/logout` | Anonim | Refresh revoke |
 | POST | `/change-password` | Bearer | Parola değiştir |
+
+**Davranış notları**
+
+- Kayıt sonrası hemen login yapılamaz; önce `/verify-email` gerekir.
+- Demo seed hesapları (`vatandas@…`, `gorevli@…`, `yonetici@…`) `EmailConfirmed=true` ile gelir.
+- Kod düz metin olarak API yanıtında asla dönmez; yalnızca e-posta kanalına (SMTP veya log fallback) gider.
 
 ## Citizen Requests — `/citizen-requests`
 

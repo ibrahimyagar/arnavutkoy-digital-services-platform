@@ -21,13 +21,17 @@ göstermektir.
 |---|---|
 | Parola hash | ASP.NET Core Identity `PasswordHasher` (özel algoritma yok) |
 | Giriş kimliği | E-posta (`Email`/`UserName`); TCKN profil alanı |
+| E-posta doğrulama | Kayıt sonrası 6 haneli kod (RNG); **SHA-256 hash** DB'de; 10 dk TTL; max 5 deneme; resend cooldown 60 sn |
+| Doğrulanmamış giriş | `EMAIL_NOT_CONFIRMED` — genel "şifre hatalı" mesajından ayrı |
 | Access token | Kısa ömürlü JWT (varsayılan 15 dk) |
 | Refresh token | Rastgele; **yalnızca SHA-256 hash** DB'de; rotation; revoke |
 | Replay | Kullanılmış refresh token yeniden kullanılamaz |
 | Lockout | 5 başarısız deneme → 15 dk kilit |
-| Rate limit | `/auth/*` uçlarında IP bazlı (Testing ortamında kapalı) |
+| Rate limit | `/auth/*` uçlarında IP bazlı (Testing ortamında kapalı); verify/resend dahil |
 | JWT anahtarı | ≥ 256 bit; eksik/kısa ise **fail-fast** startup crash |
-| Sırlar | `appsettings.json`'da boş; user-secrets / env |
+| Sırlar | `appsettings.json`'da boş; user-secrets / env (`Smtp:*`, `Jwt:*`) |
+| SMTP | `Host`+`FromAddress` doluysa MailKit; aksi halde `LoggingEmailSender` |
+| Enumeration | Resend: hesap yok/var aynı başarı yanıtı |
 
 ## 3. Yetkilendirme
 
@@ -80,5 +84,7 @@ tokenizasyonu kullanılmalıdır.
 - JWT setup: `Api/Configuration/AuthenticationExtensions.cs`
 - Ownership: `Api/Controllers/V1/*Controller.cs` (`IsOwnerOrStaff`)
 - Refresh rotation: `Application/Features/Auth/Commands`
+- E-posta doğrulama: `Domain/Identity/EmailVerificationCode.cs`, `Application/Features/Auth/*`
+- SMTP: `Infrastructure/Services/SmtpEmailSender.cs` / `LoggingEmailSender.cs`
 - Kart maskeleme: `Domain/Payments/Payment.cs`
 - Exception middleware: `Api/Middleware/ExceptionHandlingMiddleware.cs`

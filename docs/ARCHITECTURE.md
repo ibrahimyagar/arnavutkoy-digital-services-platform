@@ -48,7 +48,7 @@ kalıcılık ve HTTP detayları arayüzler (`IUnitOfWork`, `IIdentityService`, �
 | **Domain** | Aggregate root'lar, invariant'lar, domain event'ler, TCKN doğrulama | EF, HTTP, DI, JWT |
 | **Application** | Command/Query handler, validator, Result, pipeline behavior | DbContext, Controller |
 | **Persistence** | `ApplicationDbContext`, Fluent API config, migration, soft-delete/audit interceptor, seed | İş kuralı, HTTP |
-| **Infrastructure** | JWT üretimi, Identity adaptörü, `ICurrentUserService` | Domain kuralı |
+| **Infrastructure** | JWT üretimi, Identity adaptörü, `ICurrentUserService`, SMTP/`IEmailSender` | Domain kuralı |
 | **Api** | Routing, authZ, ProblemDetails, rate limit, CORS, health, startup seed çağrısı | İş kuralı |
 
 ### Identity entity yerleşimi
@@ -79,7 +79,7 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 
 | Context | Aggregate / kavram | Önemli domain kuralları |
 |---|---|---|
-| Identity | Kullanıcı, rol, refresh token | TCKN checksum; refresh token hash + rotasyon; lockout |
+| Identity | Kullanıcı, rol, refresh token, e-posta doğrulama kodu | TCKN checksum; refresh token hash + rotasyon; lockout; 6 haneli e-posta kodu (hash, TTL, deneme limiti) |
 | Geography | District → Neighborhood → Street | Salt okunur referans; yazma yalnızca Administrator |
 | Announcements | Announcement | Draft → Published → Archived; taslak anonime kapalı |
 | CitizenRequests | CitizenRequest + RequestMessage | Pending → UnderReview → Resolved/Closed; Closed'a mesaj yok |
@@ -162,7 +162,7 @@ Referans PHP e-belediye projesinde gözlemlenen anti-pattern'ler ve bu projedeki
   `/health` gürültüsünü Debug'a düşürür; hassas alanlar şablona alınmaz.
 - **Redis:** Kullanılmayan bağımlılık eklenmedi (`ASSUMPTIONS` A8).
 - **Payment gateway:** Demo kart doğrulama; gerçek PCI kapsamı yok — kart tam numarası/CVV asla persist edilmez.
-- **Notification providers:** İlk sürümde gerçek SMTP/SMS yok; `LoggingNotificationSender` ile kanal soyutlaması hazır.
+- **Notification providers:** In-app/domain bildirimleri `INotificationSender` + `LoggingNotificationSender`. Kimlik e-posta doğrulaması ayrı `IEmailSender` (SMTP veya log fallback) kullanır; SMTP sırları user-secrets/env.
   Vade yaklaşan borç (`DebtOverdue`) için zamanlayıcı sonraki iterasyona bırakıldı.
 
 ## 12. İlgili Belgeler
