@@ -1,3 +1,4 @@
+using ArnavutkoyBelediyesi.Domain.Announcements.Events;
 using ArnavutkoyBelediyesi.Domain.Common;
 
 namespace ArnavutkoyBelediyesi.Domain.Announcements;
@@ -86,6 +87,7 @@ public sealed class Announcement : AuditableEntity
 
         Status = AnnouncementStatus.Published;
         PublishStartUtc = nowUtc;
+        RaiseDomainEvent(new AnnouncementPublishedDomainEvent(Id, Title));
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Common.Models;
+using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 using ArnavutkoyBelediyesi.Domain.Common;
 using FluentValidation;
 using MediatR;
@@ -13,7 +14,7 @@ public sealed record RegisterCitizenCommand(
     string? NationalId,
     DateOnly? BirthDate,
     string Gender,
-    string Password) : IRequest<Result<Guid>>;
+    string Password) : IRequest<Result<RegisterCitizenResultDto>>;
 
 public sealed class RegisterCitizenCommandValidator : AbstractValidator<RegisterCitizenCommand>
 {
@@ -67,17 +68,40 @@ public sealed class RegisterCitizenCommandValidator : AbstractValidator<Register
     }
 }
 
-public sealed class RegisterCitizenCommandHandler(IIdentityService identityService)
-    : IRequestHandler<RegisterCitizenCommand, Result<Guid>>
+public sealed class RegisterCitizenCommandHandler(
+    IIdentityService identityService,
+    IEmailVerificationIssuer verificationIssuer)
+    : IRequestHandler<RegisterCitizenCommand, Result<RegisterCitizenResultDto>>
 {
-    public Task<Result<Guid>> Handle(RegisterCitizenCommand request, CancellationToken cancellationToken) =>
-        identityService.CreateCitizenAsync(
-            request.Email,
-            request.FullName,
-            request.PhoneNumber,
-            request.NationalId,
-            request.BirthDate,
-            request.Gender,
-            request.Password,
-            cancellationToken);
+    public async Task<Result<RegisterCitizenResultDto>> Handle(
+        RegisterCitizenCommand request,
+        CancellationToken cancellationToken)
+    {
+        var createResult = await identityService.CreateCitizenAsync(
+                request.Email,
+                request.FullName,
+                request.PhoneNumber,
+                request.NationalId,
+                request.BirthDate,
+                request.Gender,
+                request.Password,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!createResult.IsSuccess)
+        {
+            return Result<RegisterCitizenResultDto>.Failure(createResult.Errors);
+        }
+
+        var account = await identityService.FindByEmailAsync(request.Email, cancellationToken).ConfigureAwait(false);
+        var email = account?.Email ?? EmailNormalizer.Normalize(request.Email);
+        var fullName = account?.FullName ?? request.FullName.Trim();
+
+        await verificationIssuer
+            .IssueAndSendAsync(createResult.Value, email, fullName, cancellationToken)
+            .ConfigureAwait(false);
+
+        return Result<RegisterCitizenResultDto>.Success(
+            new RegisterCitizenResultDto(createResult.Value, EmailVerificationMessages.RegisterSuccess));
+    }
 }

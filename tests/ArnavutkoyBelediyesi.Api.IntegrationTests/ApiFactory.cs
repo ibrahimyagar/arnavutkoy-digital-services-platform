@@ -1,3 +1,5 @@
+using ArnavutkoyBelediyesi.Api.IntegrationTests.Common;
+using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Persistence;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using ArnavutkoyBelediyesi.Persistence.Seed;
@@ -6,60 +8,53 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Testcontainers.PostgreSql;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
 
 namespace ArnavutkoyBelediyesi.Api.IntegrationTests;
 
 /// <summary>
-/// Uygulamanın tamamını (API + Application + Infrastructure + Persistence), gerçek bir
-/// PostgreSQL container'ına karşı uçtan uca test etmek için <see cref="WebApplicationFactory{TEntryPoint}"/>.
-/// Referans projedeki "yalnızca manuel/tarayıcı testleri yapıldı" pratiğinin düzeltilmiş hâli olarak,
-/// tüm kritik akışlar (kimlik doğrulama, yetkilendirme, iş kuralları) otomatik olarak doğrulanır.
+/// Ortak Testcontainers + WebApplicationFactory altyapısı.
+/// Seed kapsamı <see cref="SeedModules"/> ile belirlenir; üretim seed davranışı değişmez.
 /// </summary>
-public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public abstract class ApiFactoryBase : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
-        .WithDatabase("arnavutkoy_api_test")
-        .WithUsername("test_user")
-        .WithPassword("test_password")
-        .Build();
+    private readonly PostgreSqlContainer _container;
 
-    /// <summary>
-    /// Seed edilen kurgusal demo kullanıcıların T.C. Kimlik Numaraları ve parolaları.
-    /// Bkz. <see cref="ApplicationDbContextSeeder"/>.
-    /// </summary>
-    public static class DemoUsers
+    protected ApiFactoryBase(string databaseName)
     {
-        public const string CitizenEmail = "vatandas@demo.arnavutkoy.local";
-        public const string CitizenPassword = "Demo!Citizen123";
-        public const string OfficerEmail = "gorevli@demo.arnavutkoy.local";
-        public const string OfficerPassword = "Demo!Officer123";
-        public const string AdministratorEmail = "yonetici@demo.arnavutkoy.local";
-        public const string AdministratorPassword = "Demo!Admin123";
-
-        // Geriye dönük alias — eski test sabit adları
-        public const string CitizenNationalId = CitizenEmail;
-        public const string OfficerNationalId = OfficerEmail;
-        public const string AdministratorNationalId = AdministratorEmail;
+        _container = new PostgreSqlBuilder()
+            .WithImage("postgres:16-alpine")
+            .WithDatabase(databaseName)
+            .WithUsername("test_user")
+            .WithPassword("test_password")
+            .Build();
     }
+
+    /// <summary>Bu fabrika örneğinin seed edeceği demo veri modülleri.</summary>
+    protected abstract DatabaseSeedModules SeedModules { get; }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
         builder.ConfigureLogging(logging => logging.ClearProviders());
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IEmailSender>();
+            services.AddSingleton<IEmailSender, CapturingEmailSender>();
+        });
     }
 
     async Task IAsyncLifetime.InitializeAsync()
     {
         await _container.StartAsync();
 
-        // Program.cs, JWT imzalama anahtarını ve bağlantı dizesini "builder.Build()" çağrısından
-        // ÖNCE (fail-fast doğrulaması sırasında) okur. WebApplicationFactory'nin ConfigureWebHost/
-        // ConfigureAppConfiguration kancaları ise yalnızca "Build()" anında devreye girer; bu nedenle
-        // bu değerler, IConfiguration'ın en baştan (ConfigurationManager oluşturulurken) okuduğu
-        // ortam değişkenleri üzerinden verilmelidir.
+        // Program.cs bağlantı dizesini Build öncesi ortam değişkeninden okur.
+        // Koleksiyonlar seri çalışır (DisableTestParallelization); yine de her fabrika
+        // kendi container bağlantısını set edip hemen Services'i oluşturur.
         Environment.SetEnvironmentVariable("ConnectionStrings__Default", _container.GetConnectionString());
         Environment.SetEnvironmentVariable("Jwt__Issuer", "arnavutkoy-api-tests");
         Environment.SetEnvironmentVariable("Jwt__Audience", "arnavutkoy-api-tests-audience");
@@ -78,7 +73,12 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         var roleManager = provider.GetRequiredService<RoleManager<ApplicationRole>>();
         var logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(ApplicationDbContextSeeder));
 
-        await ApplicationDbContextSeeder.SeedAsync(context, userManager, roleManager, logger);
+        await ApplicationDbContextSeeder.SeedAsync(
+            context,
+            userManager,
+            roleManager,
+            logger,
+            SeedModules);
     }
 
     async Task IAsyncLifetime.DisposeAsync()
@@ -88,8 +88,52 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     }
 }
 
+/// <summary>Tam demo seed — Announcements, Transportation, Portal vb. dahil.</summary>
+public sealed class ApiFactory : ApiFactoryBase
+{
+    public ApiFactory() : base("arnavutkoy_api_test")
+    {
+    }
+
+    protected override DatabaseSeedModules SeedModules => DatabaseSeedModules.All;
+
+    /// <summary>
+    /// Seed edilen kurgusal demo kullanıcıların e-posta ve parolaları.
+    /// Bkz. <see cref="ApplicationDbContextSeeder"/>.
+    /// </summary>
+    public static class DemoUsers
+    {
+        public const string CitizenEmail = "vatandas@demo.arnavutkoy.local";
+        public const string CitizenPassword = "Demo!Citizen123";
+        public const string OfficerEmail = "gorevli@demo.arnavutkoy.local";
+        public const string OfficerPassword = "Demo!Officer123";
+        public const string AdministratorEmail = "yonetici@demo.arnavutkoy.local";
+        public const string AdministratorPassword = "Demo!Admin123";
+
+        public const string CitizenNationalId = CitizenEmail;
+        public const string OfficerNationalId = OfficerEmail;
+        public const string AdministratorNationalId = AdministratorEmail;
+    }
+}
+
+/// <summary>Yalnızca Identity (roller + demo kullanıcılar) — Auth uç nokta testleri için.</summary>
+public sealed class AuthApiFactory : ApiFactoryBase
+{
+    public AuthApiFactory() : base("arnavutkoy_auth_test")
+    {
+    }
+
+    protected override DatabaseSeedModules SeedModules => DatabaseSeedModules.IdentityOnly;
+}
+
 [CollectionDefinition(Name)]
 public sealed class ApiCollection : ICollectionFixture<ApiFactory>
 {
     public const string Name = "API Entegrasyon Testleri";
+}
+
+[CollectionDefinition(Name)]
+public sealed class AuthApiCollection : ICollectionFixture<AuthApiFactory>
+{
+    public const string Name = "Auth API Entegrasyon Testleri";
 }

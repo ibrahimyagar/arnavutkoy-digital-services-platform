@@ -94,16 +94,16 @@ public sealed class TransportationEndpointsTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task SearchBusStops_FindsHadimkoyStops()
+    public async Task SearchBusStops_FindsPeronStops()
     {
         var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/v1/bus-lines/stops/search?q=Hadımköy&limit=10");
+        var response = await client.GetAsync("/api/v1/bus-lines/stops/search?q=Peron&limit=10");
         response.EnsureSuccessStatusCode();
         var hits = await response.ReadAsAsync<IReadOnlyCollection<BusStopSearchResultDto>>();
 
         hits.Should().NotBeEmpty();
-        hits.Should().OnlyContain(h => h.StopName.Contains("Hadımköy", StringComparison.OrdinalIgnoreCase));
+        hits.Should().OnlyContain(h => h.StopName.Contains("Peron", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

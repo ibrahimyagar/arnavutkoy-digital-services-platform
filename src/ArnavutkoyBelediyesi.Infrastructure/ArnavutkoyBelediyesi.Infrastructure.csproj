@@ -12,8 +12,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.13.0">
+      <!-- GHSA-9j88-vvj5-vhgr: STARTTLS downgrade; prod'da TLS zorunlu / güvenilir SMTP kullanılmalı -->
+      <NoWarn>NU1902</NoWarn>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
   </ItemGroup>
 

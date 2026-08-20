@@ -48,7 +48,7 @@ kalıcılık ve HTTP detayları arayüzler (`IUnitOfWork`, `IIdentityService`, �
 | **Domain** | Aggregate root'lar, invariant'lar, domain event'ler, TCKN doğrulama | EF, HTTP, DI, JWT |
 | **Application** | Command/Query handler, validator, Result, pipeline behavior | DbContext, Controller |
 | **Persistence** | `ApplicationDbContext`, Fluent API config, migration, soft-delete/audit interceptor, seed | İş kuralı, HTTP |
-| **Infrastructure** | JWT üretimi, Identity adaptörü, `ICurrentUserService` | Domain kuralı |
+| **Infrastructure** | JWT üretimi, Identity adaptörü, `ICurrentUserService`, SMTP/`IEmailSender` | Domain kuralı |
 | **Api** | Routing, authZ, ProblemDetails, rate limit, CORS, health, startup seed çağrısı | İş kuralı |
 
 ### Identity entity yerleşimi
@@ -79,7 +79,7 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 
 | Context | Aggregate / kavram | Önemli domain kuralları |
 |---|---|---|
-| Identity | Kullanıcı, rol, refresh token | TCKN checksum; refresh token hash + rotasyon; lockout |
+| Identity | Kullanıcı, rol, refresh token, e-posta doğrulama kodu | TCKN checksum; refresh token hash + rotasyon; lockout; 6 haneli e-posta kodu (hash, TTL, deneme limiti) |
 | Geography | District → Neighborhood → Street | Salt okunur referans; yazma yalnızca Administrator |
 | Announcements | Announcement | Draft → Published → Archived; taslak anonime kapalı |
 | CitizenRequests | CitizenRequest + RequestMessage | Pending → UnderReview → Resolved/Closed; Closed'a mesaj yok |
@@ -89,8 +89,9 @@ Controller'lar `HandleResult` ile Result → HTTP (200/201/204/400 ProblemDetail
 | Hr | Department + StaffMember | Halka açık dizin; Identity'den ayrı |
 | SocialAssistance | SocialAssistanceApplication | Sabit alan + JSONB; durum makinesi |
 | Transportation | TransportCard, BusLine, BusLineStop, BusLineDeparture, BoardingRecord | Bakiye, hat, durak, saat, biniş |
+| Notifications | NotificationLog | Domain event → kanal gönderimi (Email/InApp); LoggingNotificationSender |
 
-Yol haritası R1–R6 tamamlandı.
+Yol haritası R1–R6 tamamlandı. Bildirim servisi, mevcut domain event dispatch altyapısı üzerine eklendi.
 
 ## 6. Kalıcılık Desenleri
 
@@ -98,6 +99,8 @@ Yol haritası R1–R6 tamamlandı.
 - **Soft delete:** `AuditableEntity.IsDeleted` + global query filter; sert silme interceptor'da soft'a çevrilir.
 - **Audit:** `CreatedAtUtc` / `UpdatedAtUtc` / `CreatedBy` / `UpdatedBy` interceptor ile doldurulur.
 - **Domain event dispatch:** `SaveChanges` sonrası MediatR `IPublisher` ile yayınlanır.
+  `DomainEventNotification<T>` handler'ları (ör. bildirim servisi) aynı işlem sonrası çalışır;
+  `NotificationLog` ayrı bir `SaveChanges` ile kalıcı hale gelir.
 - **N+1 önleme:** `CitizenRequestRepository.GetByIdWithMessagesAsync` → `Include(Messages)`.
 - **Client-generated Guid + çocuk entity:** Yeni `RequestMessage` kayıtları EF tarafından yanlışlıkla
   `Modified` işaretlenmesin diye `CitizenRequestRepository.Update` bunları `Added` yapar
@@ -159,6 +162,8 @@ Referans PHP e-belediye projesinde gözlemlenen anti-pattern'ler ve bu projedeki
   `/health` gürültüsünü Debug'a düşürür; hassas alanlar şablona alınmaz.
 - **Redis:** Kullanılmayan bağımlılık eklenmedi (`ASSUMPTIONS` A8).
 - **Payment gateway:** Demo kart doğrulama; gerçek PCI kapsamı yok — kart tam numarası/CVV asla persist edilmez.
+- **Notification providers:** In-app/domain bildirimleri `INotificationSender` + `LoggingNotificationSender`. Kimlik e-posta doğrulaması ayrı `IEmailSender` (SMTP veya log fallback) kullanır; SMTP sırları user-secrets/env.
+  Vade yaklaşan borç (`DebtOverdue`) için zamanlayıcı sonraki iterasyona bırakıldı.
 
 ## 12. İlgili Belgeler
 

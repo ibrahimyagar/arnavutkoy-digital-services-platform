@@ -64,7 +64,7 @@ try
 
     builder.Services.AddApplication(builder.Configuration);
     builder.Services.AddPersistence(builder.Configuration);
-    builder.Services.AddInfrastructure();
+    builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddSingleton<DatabaseStartupState>();
     builder.Services.AddHostedService<DatabaseSeedHostedService>();
 

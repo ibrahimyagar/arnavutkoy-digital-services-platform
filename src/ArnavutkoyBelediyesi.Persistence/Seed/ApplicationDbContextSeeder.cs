@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArnavutkoyBelediyesi.Domain.Announcements;
 using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.Common;
@@ -28,8 +29,27 @@ public static class ApplicationDbContextSeeder
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
+        await SeedAsync(
+                context,
+                userManager,
+                roleManager,
+                logger,
+                DatabaseSeedModules.All,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public static async Task SeedAsync(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        ILogger logger,
+        DatabaseSeedModules modules,
+        CancellationToken cancellationToken = default)
+    {
         await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-        await SeedDataAsync(context, userManager, roleManager, logger, cancellationToken).ConfigureAwait(false);
+        await SeedDataAsync(context, userManager, roleManager, logger, modules, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>Yalnızca demo verisini yazar; migration çağıran tarafında uygulanmış olmalıdır.</summary>
@@ -38,18 +58,102 @@ public static class ApplicationDbContextSeeder
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
         ILogger logger,
+        CancellationToken cancellationToken = default) =>
+        await SeedDataAsync(
+                context,
+                userManager,
+                roleManager,
+                logger,
+                DatabaseSeedModules.All,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+    /// <summary>
+    /// Seçilen modülleri seed eder. Varsayılan <see cref="DatabaseSeedModules.All"/> üretim davranışıdır.
+    /// </summary>
+    public static async Task SeedDataAsync(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        ILogger logger,
+        DatabaseSeedModules modules,
         CancellationToken cancellationToken = default)
     {
-        await SeedRolesAsync(roleManager).ConfigureAwait(false);
-        var citizenUserId = await SeedUsersAsync(userManager, logger).ConfigureAwait(false);
-        await SeedGeographyAsync(context, cancellationToken).ConfigureAwait(false);
-        await SeedRequestCategoriesAsync(context, cancellationToken).ConfigureAwait(false);
-        await SeedAnnouncementsAsync(context, cancellationToken).ConfigureAwait(false);
-        await SeedHrAsync(context, cancellationToken).ConfigureAwait(false);
-        await SeedTransportationAsync(context, cancellationToken).ConfigureAwait(false);
-        await SeedCitizenDemoAssetsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
-        await SeedDebtsAsync(context, citizenUserId, cancellationToken).ConfigureAwait(false);
-        await SeedPortalAndEServicesAsync(context, cancellationToken).ConfigureAwait(false);
+        var total = Stopwatch.StartNew();
+        Guid citizenUserId = Guid.Empty;
+
+        if (modules.HasFlag(DatabaseSeedModules.Identity))
+        {
+            await RunStepAsync(logger, "Identity", async () =>
+            {
+                await SeedRolesAsync(roleManager).ConfigureAwait(false);
+                citizenUserId = await SeedUsersAsync(userManager, logger).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.Geography))
+        {
+            await RunStepAsync(logger, "Geography", () => SeedGeographyAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.RequestCategories))
+        {
+            await RunStepAsync(logger, "RequestCategories", () => SeedRequestCategoriesAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.Announcements))
+        {
+            await RunStepAsync(logger, "Announcements", () => SeedAnnouncementsAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.Hr))
+        {
+            await RunStepAsync(logger, "Hr", () => SeedHrAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.Transportation))
+        {
+            await RunStepAsync(logger, "Transportation", () => SeedTransportationAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.CitizenDemoAssets))
+        {
+            await RunStepAsync(
+                    logger,
+                    "CitizenDemoAssets",
+                    () => SeedCitizenDemoAssetsAsync(context, citizenUserId, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.Debts))
+        {
+            await RunStepAsync(logger, "Debts", () => SeedDebtsAsync(context, citizenUserId, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        if (modules.HasFlag(DatabaseSeedModules.PortalAndEServices))
+        {
+            await RunStepAsync(
+                    logger,
+                    "PortalAndEServices",
+                    () => SeedPortalAndEServicesAsync(context, cancellationToken))
+                .ConfigureAwait(false);
+        }
+
+        logger.LogInformation("Demo seed tamamlandı. Modules={Modules}, TotalMs={ElapsedMs}", modules, total.ElapsedMilliseconds);
+    }
+
+    private static async Task RunStepAsync(ILogger logger, string step, Func<Task> action)
+    {
+        var sw = Stopwatch.StartNew();
+        logger.LogInformation("Demo seed adımı başlıyor: {Step}", step);
+        await action().ConfigureAwait(false);
+        logger.LogInformation("Demo seed adımı bitti: {Step}, ElapsedMs={ElapsedMs}", step, sw.ElapsedMilliseconds);
     }
 
     private static async Task SeedRolesAsync(RoleManager<ApplicationRole> roleManager)
@@ -138,6 +242,7 @@ public static class ApplicationDbContextSeeder
                 existing.Gender = gender;
             }
 
+            // Demo hesaplar e-posta doğrulaması gerektiren giriş kuralından muaf tutulur.
             existing.EmailConfirmed = true;
 
             var update = await userManager.UpdateAsync(existing).ConfigureAwait(false);

@@ -3,6 +3,8 @@ using ArnavutkoyBelediyesi.Domain.CitizenRequests;
 using ArnavutkoyBelediyesi.Domain.EServices;
 using ArnavutkoyBelediyesi.Domain.Geography;
 using ArnavutkoyBelediyesi.Domain.Hr;
+using ArnavutkoyBelediyesi.Domain.Identity;
+using ArnavutkoyBelediyesi.Domain.Notifications;
 using ArnavutkoyBelediyesi.Domain.Payments;
 using ArnavutkoyBelediyesi.Domain.Portal;
 using ArnavutkoyBelediyesi.Domain.Properties;
@@ -84,6 +86,10 @@ public sealed class ApplicationDbContext : IdentityDbContext<ApplicationUser, Ap
     public DbSet<ZoningParcel> ZoningParcels => Set<ZoningParcel>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+
+    public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -6,6 +6,7 @@ namespace ArnavutkoyBelediyesi.Api.IntegrationTests.Common;
 
 /// <summary>
 /// Test auth yardımcıları — giriş kimliği e-postadır.
+/// Kayıt sonrası e-posta doğrulama zorunludur; login öncesi kod doğrulanır.
 /// </summary>
 public static class AuthHelper
 {
@@ -36,26 +37,53 @@ public static class AuthHelper
     public static string GenerateUniqueEmail(string prefix = "citizen") =>
         $"{prefix}.{Guid.NewGuid():N}@test.arnavutkoy.local";
 
+    public static async Task RegisterCitizenAsync(
+        HttpClient client,
+        string email,
+        string password,
+        string fullName = "Test Vatandaş")
+    {
+        var registerResponse = await client.PostAsJsonAsync("/api/v1/auth/register", new
+        {
+            email,
+            fullName,
+            phoneNumber = "+905551112233",
+            nationalId = GenerateValidNationalId(),
+            birthDate = "1995-06-15",
+            gender = "E",
+            password,
+        });
+        registerResponse.EnsureSuccessStatusCode();
+    }
+
+    public static async Task VerifyEmailAsync(HttpClient client, string email)
+    {
+        if (!CapturingEmailSender.TryGetCode(email, out var code))
+        {
+            throw new InvalidOperationException($"Doğrulama kodu yakalanamadı: {email}");
+        }
+
+        var verifyResponse = await client.PostAsJsonAsync("/api/v1/auth/verify-email", new { email, code });
+        verifyResponse.EnsureSuccessStatusCode();
+    }
+
+    public static async Task RegisterAndVerifyCitizenAsync(
+        HttpClient client,
+        string email,
+        string password,
+        string fullName = "Test Vatandaş")
+    {
+        await RegisterCitizenAsync(client, email, password, fullName);
+        await VerifyEmailAsync(client, email);
+    }
+
     public static async Task<AuthResultDto> RegisterAndLoginCitizenAsync(
         HttpClient client,
         string fullName = "Test Vatandaş",
         string password = "Test1234")
     {
         var email = GenerateUniqueEmail();
-        var nationalId = GenerateValidNationalId();
-
-        var registerResponse = await client.PostAsJsonAsync("/api/v1/auth/register", new
-        {
-            email,
-            fullName,
-            phoneNumber = "+905551112233",
-            nationalId,
-            birthDate = "1995-06-15",
-            gender = "E",
-            password,
-        });
-        registerResponse.EnsureSuccessStatusCode();
-
+        await RegisterAndVerifyCitizenAsync(client, email, password, fullName);
         return await LoginAsync(client, email, password);
     }
 

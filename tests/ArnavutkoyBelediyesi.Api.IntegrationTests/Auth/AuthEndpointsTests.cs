@@ -6,8 +6,8 @@ using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 
 namespace ArnavutkoyBelediyesi.Api.IntegrationTests.Auth;
 
-[Collection(ApiCollection.Name)]
-public sealed class AuthEndpointsTests(ApiFactory factory)
+[Collection(AuthApiCollection.Name)]
+public sealed class AuthEndpointsTests(AuthApiFactory factory)
 {
     [Fact]
     public async Task Register_WithValidData_ShouldReturn201AndCreateAccount()
@@ -172,7 +172,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, email, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
@@ -189,7 +189,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, email, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
@@ -207,7 +207,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var token = Guid.NewGuid().ToString("N");
         var registerEmail = $"\u0130nfo.{token}@test.arnavutkoy.local";
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, registerEmail, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, registerEmail, password);
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
@@ -224,7 +224,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, email, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
 
         var wrong = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "YanlisSifre1" });
         wrong.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -239,7 +239,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, email, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
         var auth = await AuthHelper.LoginAsync(client, email, password);
 
         var logout = await client.PostAsJsonAsync("/api/v1/auth/logout", new { refreshToken = auth.RefreshToken });
@@ -255,7 +255,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
         const string password = "GucluSifre1";
-        await RegisterCitizenAsync(client, email, password);
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
 
         AuthHelper.AttachBearerToken(client, "not.a.valid.jwt");
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
@@ -267,7 +267,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     {
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
-        await RegisterCitizenAsync(client, email, "GucluSifre1");
+        await AuthHelper.RegisterCitizenAsync(client, email, "GucluSifre1");
 
         var second = await client.PostAsJsonAsync("/api/v1/auth/register", new
         {
@@ -283,19 +283,65 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
         second.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    private static async Task RegisterCitizenAsync(HttpClient client, string email, string password)
+    [Fact]
+    public async Task Login_BeforeEmailVerification_ShouldReturnEmailNotConfirmed()
     {
-        var response = await client.PostAsJsonAsync("/api/v1/auth/register", new
-        {
-            email,
-            fullName = "Test Vatandaş",
-            phoneNumber = "+905551112233",
-            nationalId = AuthHelper.GenerateValidNationalId(),
-            birthDate = "1995-06-15",
-            gender = "E",
-            password,
-        });
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await AuthHelper.RegisterCitizenAsync(client, email, password);
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("EMAIL_NOT_CONFIRMED");
+    }
+
+    [Fact]
+    public async Task VerifyEmail_WithCapturedCode_ShouldAllowLogin()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        const string password = "GucluSifre1";
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, password);
+
+        var login = await AuthHelper.LoginAsync(client, email, password);
+        login.AccessToken.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task VerifyEmail_WithWrongCode_ShouldReturn400()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        await AuthHelper.RegisterCitizenAsync(client, email, "GucluSifre1");
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/verify-email", new { email, code = "000000" });
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ResendVerificationCode_ForUnknownEmail_ShouldReturnSuccessWithoutLeaking()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync(
+            "/api/v1/auth/resend-verification-code",
+            new { email = AuthHelper.GenerateUniqueEmail("missing") });
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+    }
+
+    [Fact]
+    public async Task ResendVerificationCode_Immediately_ShouldReturn400()
+    {
+        var client = factory.CreateClient();
+        var email = AuthHelper.GenerateUniqueEmail();
+        await AuthHelper.RegisterCitizenAsync(client, email, "GucluSifre1");
+
+        var response = await client.PostAsJsonAsync("/api/v1/auth/resend-verification-code", new { email });
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -303,16 +349,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     {
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
-        await client.PostAsJsonAsync("/api/v1/auth/register", new
-        {
-            email,
-            fullName = "Test Vatandaş",
-            phoneNumber = "+905551112233",
-            nationalId = AuthHelper.GenerateValidNationalId(),
-            birthDate = "1995-06-15",
-            gender = "E",
-            password = "GucluSifre1",
-        });
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, "GucluSifre1");
 
         var response = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "YanlisSifre1" });
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -376,16 +413,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     {
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
-        await client.PostAsJsonAsync("/api/v1/auth/register", new
-        {
-            email,
-            fullName = "Parola Test",
-            phoneNumber = "+905551112233",
-            nationalId = AuthHelper.GenerateValidNationalId(),
-            birthDate = "1995-06-15",
-            gender = "E",
-            password = "EskiSifre1",
-        });
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, "EskiSifre1", "Parola Test");
 
         var auth = await AuthHelper.LoginAsync(client, email, "EskiSifre1");
         AuthHelper.AttachBearerToken(client, auth.AccessToken);
@@ -409,16 +437,7 @@ public sealed class AuthEndpointsTests(ApiFactory factory)
     {
         var client = factory.CreateClient();
         var email = AuthHelper.GenerateUniqueEmail();
-        await client.PostAsJsonAsync("/api/v1/auth/register", new
-        {
-            email,
-            fullName = "Profil Test",
-            phoneNumber = "+905551112233",
-            nationalId = AuthHelper.GenerateValidNationalId(),
-            birthDate = "1995-06-15",
-            gender = "E",
-            password = "GucluSifre1",
-        });
+        await AuthHelper.RegisterAndVerifyCitizenAsync(client, email, "GucluSifre1", "Profil Test");
         var auth = await AuthHelper.LoginAsync(client, email, "GucluSifre1");
         AuthHelper.AttachBearerToken(client, auth.AccessToken);
 
