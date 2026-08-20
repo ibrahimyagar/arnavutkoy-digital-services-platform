@@ -1,6 +1,7 @@
 using System.Reflection;
 using ArnavutkoyBelediyesi.Application.Common.Behaviors;
 using ArnavutkoyBelediyesi.Application.Common.Options;
+using ArnavutkoyBelediyesi.Application.Features.Auth;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Services;
 using FluentValidation;
 using MediatR;
@@ -38,6 +39,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
         services.AddScoped<AuthTokenIssuer>();
+        services.AddScoped<IEmailVerificationIssuer, EmailVerificationIssuer>();
 
         return services;
     }

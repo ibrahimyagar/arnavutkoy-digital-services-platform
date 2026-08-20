@@ -1,5 +1,6 @@
 using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Common.Models;
+using ArnavutkoyBelediyesi.Application.Features.Auth;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 using ArnavutkoyBelediyesi.Domain.Common;
 using ArnavutkoyBelediyesi.Persistence.Identity;
@@ -52,7 +53,7 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             NationalId = normalizedNationalId,
             BirthDate = birthDate,
             Gender = normalizedGender,
-            EmailConfirmed = true,
+            EmailConfirmed = false,
             CreatedAtUtc = DateTime.UtcNow,
         };
 
@@ -98,10 +99,53 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             return Result<AuthenticatedUser>.Failure("E-posta veya parola hatalı.");
         }
 
+        if (!user.EmailConfirmed)
+        {
+            return Result<AuthenticatedUser>.Failure(EmailVerificationMessages.NotConfirmedDetail);
+        }
+
         await userManager.ResetAccessFailedCountAsync(user).ConfigureAwait(false);
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
         return Result<AuthenticatedUser>.Success(new AuthenticatedUser(user.Id, user.FullName, roles.ToArray()));
+    }
+
+    public async Task<EmailAccountLookup?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = EmailNormalizer.Normalize(email);
+        var user = await userManager.FindByEmailAsync(normalizedEmail).ConfigureAwait(false)
+            ?? await userManager.FindByNameAsync(normalizedEmail).ConfigureAwait(false);
+
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new EmailAccountLookup(
+            user.Id,
+            user.Email ?? normalizedEmail,
+            user.FullName,
+            user.EmailConfirmed);
+    }
+
+    public async Task<Result> ConfirmEmailAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+        if (user is null)
+        {
+            return Result.Failure("Kullanıcı bulunamadı.");
+        }
+
+        if (user.EmailConfirmed)
+        {
+            return Result.Success();
+        }
+
+        user.EmailConfirmed = true;
+        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
+        return result.Succeeded
+            ? Result.Success()
+            : Result.Failure(result.Errors.Select(error => error.Description).ToArray());
     }
 
     public async Task<Result> ChangePasswordAsync(
