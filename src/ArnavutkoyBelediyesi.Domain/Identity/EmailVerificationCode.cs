@@ -13,7 +13,7 @@ public sealed class EmailVerificationCode : AuditableEntity
     public const int CodeLength = 6;
     public const int DefaultMaxAttempts = 5;
     public static readonly TimeSpan DefaultLifetimeToLive = TimeSpan.FromMinutes(10);
-    public static readonly TimeSpan ResendCooldownoldown = TimeSpan.FromSeconds(60);
+    public static readonly TimeSpan ResendCooldown = TimeSpan.FromSeconds(60);
 
     private EmailVerificationCode()
     {
