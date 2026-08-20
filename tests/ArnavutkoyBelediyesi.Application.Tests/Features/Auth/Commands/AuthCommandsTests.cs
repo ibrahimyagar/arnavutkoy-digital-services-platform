@@ -1,6 +1,7 @@
 using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Application.Common.Models;
 using ArnavutkoyBelediyesi.Application.Common.Options;
+using ArnavutkoyBelediyesi.Application.Features.Auth;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Commands;
 using ArnavutkoyBelediyesi.Application.Features.Auth.Services;
 using FluentValidation.TestHelper;
@@ -153,10 +154,11 @@ public sealed class RegisterCitizenCommandValidatorTests
 public sealed class RegisterCitizenCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_ShouldDelegateToIdentityService()
+    public async Task Handle_ShouldCreateAccountIssueCodeAndReturnMessage()
     {
         var identityService = Substitute.For<IIdentityService>();
-        var expected = Result<Guid>.Success(Guid.NewGuid());
+        var verificationIssuer = Substitute.For<IEmailVerificationIssuer>();
+        var userId = Guid.NewGuid();
         identityService
             .CreateCitizenAsync(
                 "ahmet@test.local",
@@ -167,8 +169,12 @@ public sealed class RegisterCitizenCommandHandlerTests
                 "E",
                 "Sifre123",
                 Arg.Any<CancellationToken>())
-            .Returns(expected);
-        var handler = new RegisterCitizenCommandHandler(identityService);
+            .Returns(Result<Guid>.Success(userId));
+        identityService
+            .FindByEmailAsync("ahmet@test.local", Arg.Any<CancellationToken>())
+            .Returns(new EmailAccountLookup(userId, "ahmet@test.local", "Ahmet Yılmaz", false));
+
+        var handler = new RegisterCitizenCommandHandler(identityService, verificationIssuer);
 
         var result = await handler.Handle(
             new RegisterCitizenCommand(
@@ -181,7 +187,14 @@ public sealed class RegisterCitizenCommandHandlerTests
                 "Sifre123"),
             CancellationToken.None);
 
-        result.Should().Be(expected);
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(userId);
+        result.Value.Message.Should().Contain("doğrulama");
+        await verificationIssuer.Received(1).IssueAndSendAsync(
+            userId,
+            "ahmet@test.local",
+            "Ahmet Yılmaz",
+            Arg.Any<CancellationToken>());
     }
 }
 

@@ -1,3 +1,5 @@
+using ArnavutkoyBelediyesi.Api.IntegrationTests.Common;
+using ArnavutkoyBelediyesi.Application.Common.Interfaces;
 using ArnavutkoyBelediyesi.Persistence;
 using ArnavutkoyBelediyesi.Persistence.Identity;
 using ArnavutkoyBelediyesi.Persistence.Seed;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Testcontainers.PostgreSql;
 
@@ -49,6 +52,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
         builder.UseEnvironment("Testing");
         builder.ConfigureLogging(logging => logging.ClearProviders());
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IEmailSender>();
+            services.AddSingleton<IEmailSender, CapturingEmailSender>();
+        });
     }
 
     async Task IAsyncLifetime.InitializeAsync()
