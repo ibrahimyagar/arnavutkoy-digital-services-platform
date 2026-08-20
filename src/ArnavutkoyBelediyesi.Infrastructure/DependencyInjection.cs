@@ -1,6 +1,8 @@
 using ArnavutkoyBelediyesi.Application.Common.Interfaces;
+using ArnavutkoyBelediyesi.Domain.Notifications;
 using ArnavutkoyBelediyesi.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ArnavutkoyBelediyesi.Infrastructure;
 
@@ -23,6 +25,25 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddNotificationSenders();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Bildirim kanalı göndericilerini kaydeder. İleride SMS/Push implementasyonları aynı arayüze eklenebilir.
+    /// </summary>
+    public static IServiceCollection AddNotificationSenders(this IServiceCollection services)
+    {
+        services.AddSingleton<INotificationSender>(sp =>
+            new LoggingNotificationSender(
+                sp.GetRequiredService<ILogger<LoggingNotificationSender>>(),
+                NotificationChannel.Email));
+
+        services.AddSingleton<INotificationSender>(sp =>
+            new LoggingNotificationSender(
+                sp.GetRequiredService<ILogger<LoggingNotificationSender>>(),
+                NotificationChannel.InApp));
 
         return services;
     }
