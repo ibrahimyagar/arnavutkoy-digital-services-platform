@@ -6,8 +6,8 @@ using ArnavutkoyBelediyesi.Application.Features.Auth.Dtos;
 
 namespace ArnavutkoyBelediyesi.Api.IntegrationTests.Auth;
 
-[Collection(ApiCollection.Name)]
-public sealed class AuthEndpointsTests(ApiFactory factory)
+[Collection(AuthApiCollection.Name)]
+public sealed class AuthEndpointsTests(AuthApiFactory factory)
 {
     [Fact]
     public async Task Register_WithValidData_ShouldReturn201AndCreateAccount()

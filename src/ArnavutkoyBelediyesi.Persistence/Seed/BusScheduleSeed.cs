@@ -73,14 +73,31 @@ internal static class BusScheduleSeed
         TimeOnly last,
         int intervalMinutes)
     {
-        if (intervalMinutes < 1)
+        if (intervalMinutes < 1 || first > last)
         {
             yield break;
         }
 
-        for (var time = first; time <= last; time = time.AddMinutes(intervalMinutes))
+        // TimeOnly.AddMinutes gece yarısını aşınca MinValue'ya sarılır; naif `time <= last`
+        // döngüsü sonsuza gider. Bu yüzden sarılmayı açıkça kesiyoruz.
+        var time = first;
+        while (true)
         {
             yield return BusLineDeparture.Create(busLineId, day, time, string.Empty);
+
+            var nextTicks = time.Ticks + TimeSpan.FromMinutes(intervalMinutes).Ticks;
+            if (nextTicks > TimeOnly.MaxValue.Ticks)
+            {
+                yield break;
+            }
+
+            var next = TimeOnly.FromTimeSpan(TimeSpan.FromTicks(nextTicks));
+            if (next > last)
+            {
+                yield break;
+            }
+
+            time = next;
         }
     }
 }
