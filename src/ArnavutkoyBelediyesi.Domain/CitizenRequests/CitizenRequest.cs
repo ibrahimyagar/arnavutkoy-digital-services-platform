@@ -86,7 +86,11 @@ public sealed class CitizenRequest : AuditableEntity
             throw new ArgumentException("Mesaj içeriği boş olamaz.", nameof(message));
         }
 
-        _messages.Add(new RequestMessage(Id, senderUserId, senderType, message.Trim()));
+        var trimmed = message.Trim();
+        _messages.Add(new RequestMessage(Id, senderUserId, senderType, trimmed));
+
+        var preview = trimmed.Length <= 200 ? trimmed : trimmed[..200];
+        RaiseDomainEvent(new RequestMessageAddedDomainEvent(Id, CitizenUserId, senderUserId, senderType, preview));
     }
 
     /// <summary>
@@ -114,6 +118,7 @@ public sealed class CitizenRequest : AuditableEntity
 
         Status = RequestStatus.Resolved;
         ResolvedAtUtc = resolvedAtUtc;
+        RaiseDomainEvent(new CitizenRequestResolvedDomainEvent(Id, CitizenUserId, Status));
     }
 
     /// <summary>
@@ -127,5 +132,6 @@ public sealed class CitizenRequest : AuditableEntity
         }
 
         Status = RequestStatus.Closed;
+        RaiseDomainEvent(new CitizenRequestResolvedDomainEvent(Id, CitizenUserId, Status));
     }
 }
